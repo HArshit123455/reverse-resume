@@ -21,7 +21,11 @@ export async function POST(req: Request) {
     return NextResponse.json({ error: "unauthorized" }, { status: 401 });
   }
 
-  const body = Body.parse(await req.json());
+  const parsed = Body.safeParse(await req.json());
+  if (!parsed.success) {
+    return NextResponse.json({ error: "invalid request body" }, { status: 400 });
+  }
+  const body = parsed.data;
   const database = db();
 
   try {
@@ -36,7 +40,7 @@ export async function POST(req: Request) {
     const result = await ingestMdxDir(database, join(process.cwd(), "content/snippets"), "snippet");
     return NextResponse.json({ source: "snippets", ...result });
   } catch (e) {
-    const msg = e instanceof Error ? e.message : String(e);
-    return NextResponse.json({ error: msg }, { status: 500 });
+    console.error("[ingest]", e);
+    return NextResponse.json({ error: "ingest failed" }, { status: 500 });
   }
 }
