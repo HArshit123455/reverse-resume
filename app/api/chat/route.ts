@@ -80,7 +80,7 @@ export async function POST(req: Request) {
       }
 
       const abortController = new AbortController();
-      req.signal.addEventListener("abort", () => abortController.abort());
+      req.signal.addEventListener("abort", () => abortController.abort(), { once: true });
 
       for await (const event of generate(database, {
         history: body.data.messages,
@@ -92,11 +92,10 @@ export async function POST(req: Request) {
       send({ type: "done" });
       close();
     } catch (e) {
-      const msg = e instanceof Error ? e.message : "Unknown error";
       send({ type: "error", message: "I'm having trouble responding right now — please try again in a minute." });
       send({ type: "done" });
       close();
-      console.error("[chat]", msg);
+      console.error("[chat]", e);
     }
   })();
 
