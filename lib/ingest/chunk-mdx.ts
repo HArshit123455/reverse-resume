@@ -15,8 +15,10 @@ export function chunkMdx(raw: string, filePath: string): MdxChunk[] {
   const lines = body.split("\n");
   const sections: { heading?: string; lines: string[] }[] = [{ lines: [] }];
 
+  let inFence = false;
   for (const line of lines) {
-    const h2Match = line.match(/^##\s+(.+)$/);
+    if (line.startsWith("```") || line.startsWith("~~~")) inFence = !inFence;
+    const h2Match = !inFence ? line.match(/^##\s+(.+)$/) : null;
     if (h2Match) {
       sections.push({ heading: h2Match[1].trim(), lines: [] });
     } else {

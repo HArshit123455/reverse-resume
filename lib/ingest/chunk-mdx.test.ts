@@ -46,4 +46,24 @@ describe("chunkMdx", () => {
     expect(result[0].metadata.role).toBe("Software Developer");
     expect(result[0].metadata.themes).toEqual(["backend", "scaling"]);
   });
+
+  it("ignores ## inside fenced code blocks", () => {
+    const fenced = `---
+title: T
+---
+
+## Real Heading
+
+\`\`\`diff
+## fake heading inside fence
+- removed
+\`\`\`
+
+After fence body.
+`;
+    const result = chunkMdx(fenced, "experience/fence.mdx");
+    const headings = result.map((c) => c.metadata.heading).filter(Boolean);
+    expect(headings).toEqual(["Real Heading"]);
+    expect(result.find((c) => c.metadata.heading === "Real Heading")!.content).toContain("fake heading inside fence");
+  });
 });
