@@ -1,0 +1,14 @@
+node_modules/
+.next/
+.vercel/
+.env
+.env.local
+.env*.local
+*.log
+.pnpm-debug.log*
+.DS_Store
+playwright-report/
+test-results/
+coverage/
+dist/
+.turbo/
