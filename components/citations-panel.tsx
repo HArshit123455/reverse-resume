@@ -68,6 +68,7 @@ export function CitationsPanel({ cards }: { cards: CitationCard[] }) {
                 next.has(card.n) ? next.delete(card.n) : next.add(card.n);
                 return next;
               })}
+              aria-label={isOpen ? `Hide excerpt for citation ${card.n}` : `Show excerpt for citation ${card.n}`}
               className="mt-2 text-xs text-blue-600 hover:underline"
             >
               {isOpen ? "Hide excerpt" : "Show excerpt"}

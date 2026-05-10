@@ -9,9 +9,13 @@ export function CodeBlock({ code, language }: { code: string; language?: string 
   useEffect(() => {
     let cancelled = false;
     (async () => {
-      const { codeToHtml } = await import("shiki");
-      const result = await codeToHtml(code, { lang: language ?? "text", theme: "github-light" });
-      if (!cancelled) setHtml(result);
+      try {
+        const { codeToHtml } = await import("shiki");
+        const result = await codeToHtml(code, { lang: language ?? "text", theme: "github-light" });
+        if (!cancelled) setHtml(result);
+      } catch {
+        if (!cancelled) setHtml("");
+      }
     })();
     return () => { cancelled = true; };
   }, [code, language]);
