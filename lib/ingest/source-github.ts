@@ -1,4 +1,5 @@
 import { Octokit } from "@octokit/rest";
+import { sql } from "drizzle-orm";
 import { chunkCode } from "./chunk-code";
 import { upsertDocuments } from "./upsert";
 import { embed, voyageCostCents } from "@/lib/clients/voyage";
@@ -87,23 +88,39 @@ export async function ingestRepo(
     }
   }
 
+  // Pre-filter: skip chunks whose content_hash already exists in documents.
+  // This is what makes re-runs cost ~zero — we don't pay Voyage for unchanged content.
+  let preSkipped = 0;
+  let newChunks = allChunks;
+  if (allChunks.length > 0) {
+    const hashes = allChunks.map((c) => c.row.contentHash);
+    const existingRows = await db.execute<{ content_hash: string }>(sql`
+      SELECT content_hash FROM documents WHERE content_hash = ANY(${hashes})
+    `);
+    const existingSet = new Set(existingRows.map((r) => r.content_hash));
+    newChunks = allChunks.filter((c) => !existingSet.has(c.row.contentHash));
+    preSkipped = allChunks.length - newChunks.length;
+  }
+
   const BATCH = 64;
-  for (let i = 0; i < allChunks.length; i += BATCH) {
-    const batch = allChunks.slice(i, i + BATCH);
+  for (let i = 0; i < newChunks.length; i += BATCH) {
+    const batch = newChunks.slice(i, i + BATCH);
     const result = await embed(batch.map((c) => c.row.content), "voyage-code-3");
     batch.forEach((c, j) => {
       c.row.embedding = result.embeddings[j];
     });
-    costCents += voyageCostCents(result.totalTokens, "embed");
+    costCents += voyageCostCents(result.totalTokens, "voyage-code-3");
   }
 
-  await recordSpend(db, costCents);
-  const upsertResult = await upsertDocuments(db, allChunks.map((c) => c.row));
+  if (costCents > 0) await recordSpend(db, costCents);
+  const upsertResult = await upsertDocuments(db, newChunks.map((c) => c.row));
 
   return {
     scanned,
     chunked,
-    ...upsertResult,
+    inserted: upsertResult.inserted,
+    updated: upsertResult.updated,
+    skipped: upsertResult.skipped + preSkipped,
     costCents,
     ms: Date.now() - start,
   };

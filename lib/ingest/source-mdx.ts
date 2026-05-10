@@ -1,5 +1,6 @@
 import { readFile, readdir } from "node:fs/promises";
 import { join, extname } from "node:path";
+import { sql } from "drizzle-orm";
 import { chunkMdx } from "./chunk-mdx";
 import { upsertDocuments } from "./upsert";
 import { embed, voyageCostCents } from "@/lib/clients/voyage";
@@ -61,24 +62,39 @@ export async function ingestMdxDir(
     }
   }
 
+  // Pre-filter: skip chunks whose content_hash already exists. Idempotent re-runs cost ~zero.
+  let preSkipped = 0;
+  let newChunks = allChunks;
+  if (allChunks.length > 0) {
+    const hashes = allChunks.map((c) => c.contentHash);
+    const existingRows = await db.execute<{ content_hash: string }>(sql`
+      SELECT content_hash FROM documents WHERE content_hash = ANY(${hashes})
+    `);
+    const existingSet = new Set(existingRows.map((r) => r.content_hash));
+    newChunks = allChunks.filter((c) => !existingSet.has(c.contentHash));
+    preSkipped = allChunks.length - newChunks.length;
+  }
+
   const BATCH = 64;
   let costCents = 0;
-  for (let i = 0; i < allChunks.length; i += BATCH) {
-    const batch = allChunks.slice(i, i + BATCH);
+  for (let i = 0; i < newChunks.length; i += BATCH) {
+    const batch = newChunks.slice(i, i + BATCH);
     const result = await embed(batch.map((c) => c.content), "voyage-3");
     batch.forEach((c, j) => {
       c.embedding = result.embeddings[j];
     });
-    costCents += voyageCostCents(result.totalTokens, "embed");
+    costCents += voyageCostCents(result.totalTokens, "voyage-3");
   }
 
-  await recordSpend(db, costCents);
-  const upsertResult = await upsertDocuments(db, allChunks);
+  if (costCents > 0) await recordSpend(db, costCents);
+  const upsertResult = await upsertDocuments(db, newChunks);
 
   return {
     scanned,
     chunked,
-    ...upsertResult,
+    inserted: upsertResult.inserted,
+    updated: upsertResult.updated,
+    skipped: upsertResult.skipped + preSkipped,
     costCents,
     ms: Date.now() - start,
   };

@@ -72,12 +72,17 @@ export async function rerank(
   };
 }
 
-const VOYAGE_3_USD_PER_1M = 0.06;
-const RERANK_2_USD_PER_1M = 0.05;
 const USD_TO_INR = 84;
 
-export function voyageCostCents(tokens: number, kind: "embed" | "rerank"): number {
-  const usdPer1M = kind === "embed" ? VOYAGE_3_USD_PER_1M : RERANK_2_USD_PER_1M;
+// USD per 1M tokens — verify against voyageai.com pricing before launch
+const VOYAGE_RATES_USD_PER_1M: Record<string, number> = {
+  "voyage-3": 0.06,
+  "voyage-code-3": 0.18,
+  "rerank-2": 0.05,
+};
+
+export function voyageCostCents(tokens: number, model: string): number {
+  const usdPer1M = VOYAGE_RATES_USD_PER_1M[model] ?? VOYAGE_RATES_USD_PER_1M["voyage-3"];
   const inrCost = (tokens / 1_000_000) * usdPer1M * USD_TO_INR;
   return Math.ceil(inrCost * 100);
 }
