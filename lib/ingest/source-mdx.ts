@@ -28,8 +28,10 @@ export async function ingestMdxDir(
   sourceType: MdxSourceType
 ): Promise<IngestMdxResult> {
   const start = Date.now();
-  const entries = await readdir(dir);
-  const mdxFiles = entries.filter((e) => extname(e) === ".mdx" || extname(e) === ".md");
+  const entries = await readdir(dir, { withFileTypes: true });
+  const mdxFiles = entries
+    .filter((e) => e.isFile() && (extname(e.name) === ".mdx" || extname(e.name) === ".md"))
+    .map((e) => e.name);
 
   const allChunks: NewDocument[] = [];
   let scanned = 0;
