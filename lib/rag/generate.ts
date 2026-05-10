@@ -49,7 +49,7 @@ export async function* generate(
       max_tokens: 1024,
       system: [
         { type: "text", text: SYSTEM_PROMPT, cache_control: { type: "ephemeral" } },
-        { type: "text", text: renderChunksAsContext(chunks), cache_control: { type: "ephemeral" } },
+        { type: "text", text: renderChunksAsContext(chunks) },
       ],
       messages: history.map((t) => ({ role: t.role, content: t.content })),
     },
@@ -67,6 +67,8 @@ export async function* generate(
 
   // Record spend after stream completes.
   // PromptCachingBetaUsage has cache_read_input_tokens and cache_creation_input_tokens (nullable).
+  // If the stream throws mid-iteration, finalMessage() never runs and no spend is
+  // recorded — partial generations are not billed. This is intentional.
   const finalMessage = await stream.finalMessage();
   const cost = anthropicCostCents(SONNET_MODEL, {
     inputTokens: finalMessage.usage.input_tokens,
