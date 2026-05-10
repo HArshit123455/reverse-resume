@@ -13,3 +13,4 @@ coverage/
 dist/
 .turbo/
 .claude/
+*.tsbuildinfo
