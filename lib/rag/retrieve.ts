@@ -38,10 +38,14 @@ export async function retrieve(
   let costCents = 0;
   try {
     const embedResult = await embed([query], "voyage-3");
+    if (!embedResult.embeddings.length) {
+      console.error("[retrieve] embed failed; falling back to BM25: empty embeddings array");
+      return await retrieveBm25(db, query, topK);
+    }
     embedding = embedResult.embeddings[0];
     costCents += voyageCostCents(embedResult.totalTokens, "voyage-3");
-  } catch (e) {
-    // Fallback to BM25-style search via to_tsvector if embed fails
+  } catch (err) {
+    console.error("[retrieve] embed failed; falling back to BM25:", err);
     return await retrieveBm25(db, query, topK);
   }
 
@@ -87,11 +91,11 @@ export async function retrieve(
     const rerankResult = await rerank(query, initial.map((c) => c.content), topK);
     costCents += voyageCostCents(rerankResult.totalTokens, "rerank-2");
     await recordSpend(db, costCents);
-    return rerankResult.results.map((r) => ({
-      ...initial[r.index],
-      rerankScore: r.relevanceScore,
-    }));
-  } catch {
+    return rerankResult.results
+      .filter((r) => r.index >= 0 && r.index < initial.length)
+      .map((r) => ({ ...initial[r.index], rerankScore: r.relevanceScore }));
+  } catch (err) {
+    console.error("[retrieve] rerank failed; using cosine top-K:", err);
     await recordSpend(db, costCents);
     return initial.slice(0, topK);
   }
