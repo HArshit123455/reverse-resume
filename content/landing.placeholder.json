@@ -1,0 +1,11 @@
+{
+  "headline": "Ask my work anything.",
+  "subheadline": "Every answer cites real code, real PRs, real production experience.",
+  "demoPrompts": [
+    "Have you actually built production rate limiting?",
+    "Show me your most complex Postgres query",
+    "How do you handle the outbox pattern?",
+    "Walk me through your most interesting TypeScript module",
+    "What did you ship in the last month?"
+  ]
+}
