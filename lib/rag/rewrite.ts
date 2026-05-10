@@ -21,8 +21,10 @@ export async function rewriteQuery(db: AnyDb, history: ChatTurn[]): Promise<stri
   const last = history[history.length - 1];
   if (!last || last.role !== "user") return "";
 
+  const trimmed = last.content.trim();
+
   // Short-circuit: if there's no prior context, don't even call the LLM.
-  if (history.length === 1 && last.content.length < 80) return last.content;
+  if (history.length === 1 && trimmed.length < 80) return trimmed;
 
   const res = await anthropic().messages.create({
     model: HAIKU_MODEL,
@@ -43,5 +45,5 @@ export async function rewriteQuery(db: AnyDb, history: ChatTurn[]): Promise<stri
     .join("")
     .trim();
 
-  return text || last.content;
+  return text || trimmed;
 }
