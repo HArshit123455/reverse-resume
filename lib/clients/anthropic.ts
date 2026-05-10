@@ -42,10 +42,11 @@ export function anthropicCostCents(model: keyof typeof PRICING, usage: UsageBrea
   const p = PRICING[model];
   const cached = usage.cacheReadInputTokens ?? 0;
   const cacheWrite = usage.cacheCreationInputTokens ?? 0;
-  const uncached = Math.max(0, usage.inputTokens - cached - cacheWrite);
 
+  // Anthropic's `input_tokens` already excludes cache reads and cache writes —
+  // they're sibling counts, not subsets. Sum additively.
   const usd =
-    (uncached / 1_000_000) * p.inputPer1M +
+    (usage.inputTokens / 1_000_000) * p.inputPer1M +
     (cached / 1_000_000) * p.cachedInputPer1M +
     (cacheWrite / 1_000_000) * p.cacheWritePer1M +
     (usage.outputTokens / 1_000_000) * p.outputPer1M;
