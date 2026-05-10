@@ -4,6 +4,7 @@ import * as schema from "./schema";
 
 let _client: ReturnType<typeof postgres> | undefined;
 let _db: ReturnType<typeof drizzle<typeof schema>> | undefined;
+let _closing: Promise<void> | undefined;
 
 export function db() {
   if (!_db) {
@@ -16,9 +17,13 @@ export function db() {
 }
 
 export async function closeDb(): Promise<void> {
-  if (_client) {
-    await _client.end();
-    _client = undefined;
-    _db = undefined;
-  }
+  if (_closing) return _closing;
+  if (!_client) return;
+  const client = _client;
+  _client = undefined;
+  _db = undefined;
+  _closing = client.end().finally(() => {
+    _closing = undefined;
+  });
+  return _closing;
 }
