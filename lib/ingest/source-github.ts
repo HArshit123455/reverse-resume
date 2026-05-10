@@ -59,8 +59,10 @@ export async function ingestRepo(
     if (!lang) continue;
     if (SKIP_PATH_SUBSTRINGS.some((s) => `/${entry.path}`.includes(s))) continue;
 
+    if (!entry.sha) continue;
     scanned++;
-    const blob = await oct.git.getBlob({ owner, repo, file_sha: entry.sha! });
+    const blob = await oct.git.getBlob({ owner, repo, file_sha: entry.sha });
+    if (blob.data.encoding === "none") continue; // blob too large for API; skip rather than crash
     const source = Buffer.from(blob.data.content, blob.data.encoding as BufferEncoding).toString("utf-8");
 
     const chunks = chunkCode(source, entry.path, lang);
