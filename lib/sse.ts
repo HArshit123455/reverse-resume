@@ -24,7 +24,11 @@ export function makeSseStream(): {
   return {
     stream,
     send(event) {
-      controller.enqueue(encodeSse(event));
+      try {
+        controller.enqueue(encodeSse(event));
+      } catch {
+        // stream already closed (e.g. client disconnect)
+      }
     },
     close() {
       controller.close();
