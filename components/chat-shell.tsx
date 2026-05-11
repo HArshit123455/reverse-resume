@@ -22,6 +22,7 @@ export function ChatShell({ demoPrompts }: { demoPrompts: string[] }) {
     setInput("");
     setBusy(true);
     setStatusBanner(null);
+    setCitations([]);
 
     const ac = new AbortController();
     abortRef.current = ac;
