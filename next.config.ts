@@ -4,8 +4,8 @@ const config: NextConfig = {
   experimental: {
     serverActions: { bodySizeLimit: "2mb" },
   },
-  // Allow MDX files via webpack loader; configured in Phase 5
   pageExtensions: ["ts", "tsx"],
+  serverExternalPackages: ["tree-sitter", "tree-sitter-typescript"],
 };
 
 export default config;
