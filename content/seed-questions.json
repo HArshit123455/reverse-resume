@@ -1,0 +1,63 @@
+[
+  {
+    "id": "rate-limit",
+    "question": "Have you actually built production rate limiting?",
+    "must_cite_at_least_one_of": [
+      "snippets/postgres-token-bucket.mdx",
+      "experience/zykrr.mdx#rate-limiting"
+    ]
+  },
+  {
+    "id": "outbox",
+    "question": "How do you handle the outbox pattern at scale?",
+    "must_cite_at_least_one_of": [
+      "snippets/outbox-pattern.mdx",
+      "experience/zykrr.mdx#outbox"
+    ]
+  },
+  {
+    "id": "partitioning",
+    "question": "Show me a real Postgres partitioning strategy",
+    "must_cite_at_least_one_of": [
+      "snippets/partitioning-strategy.mdx",
+      "experience/zykrr.mdx#partitioning"
+    ]
+  },
+  {
+    "id": "mcp",
+    "question": "Have you built anything with MCP?",
+    "must_cite_at_least_one_of": [
+      "github/job-mcp/src/index.ts",
+      "snippets/mcp-server-bootstrap.mdx"
+    ]
+  },
+  {
+    "id": "adaptive-search",
+    "question": "How do you design adaptive search with fallback tiers?",
+    "must_cite_at_least_one_of": [
+      "github/job-mcp/src/tools/adaptive-search-jobs.ts",
+      "snippets/adaptive-tiered-search.mdx"
+    ]
+  },
+  {
+    "id": "redis-cache",
+    "question": "Where have you used Redis caching to reduce DB load?",
+    "must_cite_at_least_one_of": [
+      "experience/zykrr.mdx#redis-caching"
+    ]
+  },
+  {
+    "id": "mern",
+    "question": "What's the most complete full-stack project you've built?",
+    "must_cite_at_least_one_of": [
+      "experience/pro-shop.mdx"
+    ]
+  },
+  {
+    "id": "ts-bias",
+    "question": "Why TypeScript and not Python?",
+    "must_cite_at_least_one_of": [
+      "experience/stack-philosophy.mdx"
+    ]
+  }
+]
