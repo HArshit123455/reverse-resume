@@ -1,0 +1,51 @@
+---
+topic: "Two-stage freshness/dedup: signal-based stale rejection, then URL normalization that keeps the best-verified copy"
+source_project: "job-mcp"
+language: "typescript"
+tags: ["filtering", "dedup", "url-normalization", "freshness", "data-quality"]
+---
+
+## Context
+
+The same job leaks into the result set from multiple sources with different tracking params and `www` prefixes — and search snippets often contain stale-marker phrases like "no longer accepting applications" right in the description text. Two filters handle this. `filterStaleResults` does a cheap signal scan to discard obvious dead listings before paying for HTTP probes. `deduplicateByUrl` normalizes URLs (strip `utm_*`, `trk`, trailing slashes, `www.`) and when collisions happen, keeps the copy with the best `freshness_status` rank — `probe_verified` > `verified` > `unverified`.
+
+```ts
+// Signal-based stale filter — runs BEFORE expensive HTTP probes
+const STALE_SIGNALS = ["no longer accepting", "position filled", "expired", "closed",
+  "no longer hiring", "role filled", "this listing has expired", /* ... */];
+
+export function filterStaleResults(results: JobResult[]): JobResult[] {
+  return results.filter(r => {
+    const text = `${r.job_title} ${r.short_description}`.toLowerCase();
+    return !STALE_SIGNALS.some(s => text.includes(s));
+  });
+}
+
+// URL-based dedup that PREFERS the best-verified copy on collision
+function normalizeUrl(url: string): string {
+  const u = new URL(url);
+  ["utm_source", "utm_medium", "utm_campaign", "refId", "trackingId", "trk"]
+    .forEach(p => u.searchParams.delete(p));
+  return `${u.hostname.replace(/^www\./, "")}${u.pathname.replace(/\/+$/, "")}`;
+}
+
+export function deduplicateByUrl(results: JobResult[]): JobResult[] {
+  const seen = new Map<string, JobResult>();
+  const rank: Record<string, number> = { probe_verified: 0, verified: 1, unverified: 2 };
+  for (const job of results) {
+    const key = normalizeUrl(job.job_link);
+    const existing = seen.get(key);
+    // Keep the lower-ranked (= better) freshness_status when keys collide
+    if (!existing || (rank[job.freshness_status] ?? 2) < (rank[existing.freshness_status] ?? 2)) {
+      seen.set(key, job);
+    }
+  }
+  return Array.from(seen.values());
+}
+```
+
+## What this proves
+
+- Cost-tiered filtering — cheap signal scan first, expensive HTTP probe later, so the probe never wastes a request on a job already revealed as dead by its description.
+- Quality-preserving dedup — when the same URL appears multiple times, the merged entry inherits the *best* known freshness state, not whichever happened to land first.
+- URL normalization that's tracking-param aware — without it, `?utm_source=feed` vs `?utm_source=email` register as different jobs and pollute the result set.

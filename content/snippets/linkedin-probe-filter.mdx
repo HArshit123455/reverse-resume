@@ -1,0 +1,49 @@
+---
+topic: "Probe-based dead-link detection: HTTP-fetch each LinkedIn job and classify by SSR signals (stale/open/inconclusive)"
+source_project: "job-mcp"
+language: "typescript"
+tags: ["filtering", "probing", "rate-limiting", "html-parsing", "dead-link-detection"]
+---
+
+## Context
+
+Search APIs happily return LinkedIn job URLs that 404, expired weeks ago, or say "No longer accepting applications." `probeLinkedInJobs` HTTP-fetches each URL in batches of 5 (with a 1s gap to dodge LinkedIn's rate limiter) and classifies the page by three signal layers, in priority order: explicit stale text → JSON-LD `validThrough` → positive apply signals ("sign in to apply" is the most reliable). Anything inconclusive is downgraded to `unverified` and dropped downstream. The probe map is keyed by URL, not array index — critical because `filter` shifts indices and indexed mapping silently corrupts results.
+
+```ts
+async function probeSingleUrl(url: string) {
+  const response = await axios.get(url, {
+    headers: { "User-Agent": USER_AGENT, ...(linkedinCookie && { Cookie: `li_at=${linkedinCookie}` }) },
+    timeout: PROBE_TIMEOUT_MS, maxRedirects: 3, validateStatus: () => true,
+  });
+  if (response.status === 404) return { status: "stale" };
+  if (response.status === 999 || response.status >= 500) return { status: null }; // LinkedIn blocked us
+
+  const html = typeof response.data === "string" ? response.data : "";
+  if (html.length < 500) return { status: null };
+  const htmlLower = html.toLowerCase();
+
+  // 1. Explicit stale text wins immediately
+  for (const signal of HTML_STALE_SIGNALS) if (htmlLower.includes(signal)) return { status: "stale" };
+
+  // 2. JSON-LD validThrough (present on ~20% of pages — authoritative when present)
+  const jobPosting = extractJobPostingJsonLd(html);
+  if (jobPosting?.validThrough) {
+    return { status: isExpired(jobPosting.validThrough) ? "stale" : "probe_verified" };
+  }
+
+  // 3. Positive apply signals ("sign in to apply" appears ONLY on open pages)
+  if (HTML_APPLY_SIGNALS.some(s => htmlLower.includes(s))) return { status: "probe_verified" };
+
+  return { status: null }; // inconclusive → caller drops
+}
+
+// Probe in batches of 5 with 1s delay. Key the result MAP BY URL, not index —
+// later .filter() shifts indices and silently mismatches probe results to jobs.
+const probeMap = new Map<string, "stale" | "probe_verified" | null>();
+```
+
+## What this proves
+
+- Layered signal hierarchy — text → structured data → positive markers — each layer overrides noisier downstream layers, so a single confident signal short-circuits the rest.
+- Rate-limit aware — batches of 5 with 1s gaps, authenticated requests via `li_at` cookie when configured for stronger signals on closed jobs.
+- Index-shift bug avoidance — keying by URL not array index, a small invariant that would silently corrupt half the result set under filtering.
