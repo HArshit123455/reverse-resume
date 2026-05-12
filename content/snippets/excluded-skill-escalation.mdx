@@ -1,4 +1,5 @@
 ---
+title: "Excluded-Skill Escalation Ladder"
 topic: "Adaptive escalation: when rejection-tally feedback can't help, walk down a strictness ladder (drop strict mode → strip primary skills → widen location)"
 source_project: "job-mcp"
 language: "typescript"
@@ -10,12 +11,8 @@ tags: ["adaptive-search", "escalation", "feedback-loop", "rejection-tracking", "
 The normal adaptation path (Rule 1: auto-add a heavily-rejected skill to the exclude list) works great — until every observed skill rejection is *already* excluded on the next tier, meaning the learner has nothing new to add. That's the signal that the constraint set is exhausted, not the search space. Rule 5 — the escalation ladder — fires only in that exact case. It walks down three increasingly aggressive widening steps: drop `location_strict` → strip primary-skill tokens from the query → widen the location to India. At most one step fires per call, ordered cheapest-widening-first. The "already excluded — N drops" log line (FIX 4) makes the *consideration* observable even when no action is taken.
 
 ```ts
-// Rule 1 logs the consideration even when it can't act — keeps the learner observable
-if (already) {
-  adaptations.push(`"${skill}" already excluded — ${drops} drops this tier. Considering escalation.`);
-  continue;
-}
-// ...
+// Rule 1: if a heavily-rejected skill is already excluded, log the consideration
+// and skip — `newExcludeAddedByRule1` stays false, which is the signal Rule 5 needs.
 
 // Rule 5: escalation — fires only when Rule 1 was a no-op AND every observed
 // skill-rejection is already excluded (i.e. constraint set is saturated).

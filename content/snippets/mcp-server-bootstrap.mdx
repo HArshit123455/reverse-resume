@@ -1,4 +1,5 @@
 ---
+title: "MCP Server Bootstrap"
 topic: "Bootstrapping an MCP server with stdio transport and env-validated tool registration"
 source_project: "job-mcp"
 language: "typescript"
@@ -40,4 +41,4 @@ await server.connect(transport);
 
 - Fail-fast environment validation — missing keys surface at startup, not on the first user query.
 - Clean separation between transport, server, and tool registration — each tool is testable in isolation because its handler closes over an injected `env`, not over `process.env`.
-- Real production use of `@modelcontextprotocol/sdk` — not a toy example, this server is running in Claude Desktop today.
+- Tool registrations are pure `(server, env) =>` calls — trivially mockable for integration tests, since each handler receives its environment by injection instead of reading `process.env` at call time.

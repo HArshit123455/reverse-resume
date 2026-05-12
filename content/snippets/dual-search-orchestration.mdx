@@ -1,4 +1,5 @@
 ---
+title: "Dual Search Orchestration"
 topic: "Serper + Tavily fan-out with automatic fallback on zero results, rate limits, and HTTP errors"
 source_project: "job-mcp"
 language: "typescript"
@@ -33,7 +34,7 @@ export async function executeSearch(params: SearchParams, env: EnvConfig): Promi
     try {
       const results = await searchTavily(params, env.tavilyApiKey!);
       return { results, source_api: "tavily", total_raw: results.length, total_filtered: results.length };
-    } catch (error: unknown) { console.error(`Tavily also failed: ${(error as Error).message}`); }
+    } catch (error: unknown) { console.error(`Tavily also failed: ${(error as Error).message}`); /* falls through to throw below */ }
   }
   // Structured error names exactly which keys are missing
   throw new Error("Search failed: Both search APIs are unavailable. " +

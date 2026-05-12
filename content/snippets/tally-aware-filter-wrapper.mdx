@@ -1,4 +1,5 @@
 ---
+title: "Tally-Aware Filter Wrapper"
 topic: "Tally-aware filter wrapper that preserves identical filter semantics while reporting per-cause drop counts"
 source_project: "job-mcp"
 language: "typescript"
@@ -7,7 +8,7 @@ tags: ["filtering", "instrumentation", "observability", "feedback-loop", "adapti
 
 ## Context
 
-Plain `Array.filter` returns survivors and silently discards everything else. That's fine for static pipelines but kills any adaptive system that needs to *learn from rejections* — like the cascading tier ladder that auto-adds a skill to the exclude list when it sees 8 jobs got dropped for mentioning ".NET" in this tier. The tally-aware wrapper pattern keeps the original filter as the canonical implementation (so behaviour can't drift) and adds a sibling function that returns `{ results, drops }` — where `drops` is a per-cause breakdown for skill filters, not just a count. Critically: regex construction is *copied verbatim* into the wrapper so filter semantics stay byte-identical.
+Plain `Array.filter` returns survivors and silently discards everything else. That's fine for static pipelines but kills any adaptive system that needs to *learn from rejections* — like the cascading tier ladder that auto-adds a skill to the exclude list when it sees 8 jobs got dropped for mentioning ".NET" in this tier. The tally-aware wrapper pattern keeps the original filter as the canonical implementation (so behaviour can't drift) and adds a sibling function that returns `{ results, drops }` — where `drops` is a per-cause breakdown for skill filters, not just a count. Instrumentation comes for free: the wrapper produces the rejection counts the adaptive learner needs without any change to the existing pipeline call sites. Critically: regex construction is *copied verbatim* into the wrapper so filter semantics stay byte-identical.
 
 ```ts
 export function filterExcludedSkillsWithTally(results: JobResult[], excludeSkills: string[] | undefined):

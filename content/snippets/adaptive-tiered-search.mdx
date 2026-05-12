@@ -1,4 +1,5 @@
 ---
+title: "Adaptive Tiered Search"
 topic: "Sequential cascading search ladder that loosens constraints tier-by-tier driven by per-tier rejection feedback"
 source_project: "job-mcp"
 language: "typescript"
@@ -44,5 +45,5 @@ for (let i = 0; i < hardTierLimit; i++) {
 ## What this proves
 
 - Sequential, feedback-driven orchestration — unlike `Promise.all` fan-out which is blind, each tier *learns* from the previous one's rejection tally.
-- Hardened invariants — `stop_reason: "target_hit"` literally throws if `finalResults.length < target_count`, so the metadata can't lie to the caller.
+- Stop decision is a pure function of `(tier_index, accumulated_count, target, max_tiers, ladder_length)` — `stopDecider` owns the priority order so unit tests can pin `target_hit > max_tiers > ladder_exhausted` in isolation from the search itself.
 - Dependency injection for testability — `deps` is a typed bag of `searchAndFilter`, `excludeSeenJobs`, etc., so tests run the full ladder against fakes with no module mocking.
