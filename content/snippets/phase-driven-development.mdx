@@ -1,0 +1,44 @@
+---
+title: "Phase-Driven Development With GSD Plans"
+topic: "Build large projects as a sequence of independently-executable phases with verification gates"
+source_project: "reverse-resume"
+language: "markdown"
+tags: ["gsd", "planning", "phases", "verification-gates", "workflow"]
+---
+
+## Context
+
+A "build a RAG portfolio in 8 contexts" task fails as one giant TODO list — drift, scope creep, lost state on context resets. The GSD-style fix is a single plan file split into numbered phases, each with explicit `Depends on` edges, file paths, step checkboxes, and an exit criterion. Each phase opens a fresh context window (`claude --model sonnet`), executes its tasks, commits atomically, and the next phase starts clean. A retrieval eval gate (recall@5 ≥ 0.9) wired into a CI script means "Phase 6 done" isn't a vibe — it's a number a script can check.
+
+```md
+## Phase Map (executable independently after Phase 0)
+
+| Phase | Outcome                                              | Depends on |
+|-------|------------------------------------------------------|------------|
+| 0     | Empty Next.js app builds, lints, tests pass          | —          |
+| 1     | Schema + migrations applied; pgvector extension      | 0          |
+| 2     | Token bucket + daily cap pass concurrent unit tests  | 1          |
+| 3     | All three sources can populate `documents` end-to-end| 1, 2       |
+| 4     | retrieve(q) returns top-5 cited chunks; streams      | 3          |
+| 5     | Recruiter can chat in browser, citations render      | 2, 4       |
+| 6     | recall@5 ≥ 0.9, Playwright passes, Vercel preview    | 5          |
+| 7     | All 20+ MDX files ingested, eval still passes        | 3          |
+```
+
+```json
+// package.json — the eval is a real script, gated in CI:
+{
+  "scripts": {
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run",
+    "test:e2e": "playwright test",
+    "eval:retrieval": "tsx evals/retrieval.eval.ts"
+  }
+}
+```
+
+## What this proves
+
+- Dependencies are explicit, so a fresh context window can pick up Phase 5 on day three without rereading days one and two — `Depends on: 2, 4` is the entire onboarding doc.
+- Verification is code, not a checklist. `pnpm eval:retrieval` returns a number; CI fails the build if recall@5 drops below 0.9 when adding new MDX content, so Phase 7 ("write content") can't quietly regress Phase 6 ("ship the RAG").
+- One context per phase + atomic commit per task means rollback is `git revert` of a single SHA, never "untangle three half-finished features."
