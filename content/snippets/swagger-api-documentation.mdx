@@ -1,0 +1,52 @@
+---
+title: "NestJS Swagger API Documentation"
+topic: "Declarative OpenAPI from DocumentBuilder + per-route @ApiOperation/@ApiResponse"
+source_project: "auth"
+language: "typescript"
+tags: ["swagger", "openapi", "nestjs", "api-documentation", "bearer-auth"]
+---
+
+## Context
+
+A multi-module NestJS service needs interactive docs that stay in lockstep with the code — a hand-maintained Postman collection drifts within a week. `@nestjs/swagger` solves it: a `DocumentBuilder` registers global metadata (title, version, bearer auth scheme), `SwaggerModule.createDocument(app, config)` walks the controllers and reads `@ApiTags/@ApiOperation/@ApiResponse` decorators, and the resulting schema feeds both an interactive `/api-doc` UI and a checked-in `postman-swagger.json` for downstream tooling. Production gets the JSON written to disk; only non-prod exposes the UI.
+
+```ts
+// bootstrap (main.ts)
+const config = new DocumentBuilder()
+  .setTitle('Auth APIs')
+  .setDescription('API for authentication services')
+  .setVersion('1.0')
+  .addBearerAuth({ type: 'http', scheme: 'bearer', bearerFormat: 'JWT' }, 'access-token')
+  .build()
+
+if (!isProdEnv) {
+  const document = SwaggerModule.createDocument(app, config)
+  SwaggerModule.setup('api-doc', app, document, { swaggerOptions: { persistAuthorization: true } })
+  writeFileSync('./postman-swagger.json', JSON.stringify(document, null, 2))
+}
+
+// controller
+@ApiTags('Sla Instances')
+@ApiBearerAuth('access-token')
+@Controller('sla-instances')
+export class SlaInstanceController {
+  @Get()
+  @ApiOperation({ summary: 'Get all SLA instances' })
+  @ApiResponse({ status: 200, type: SlaInstancesResponseDTO })
+  async findAll(@Query() query: GetSlaInstancesDTO) {
+    return this.service.findAll(query)
+  }
+
+  @Get(':id')
+  @ApiOperation({ summary: 'Get a single SLA instance by ID' })
+  @ApiResponse({ status: 200, type: SlaInstanceResponseDTO })
+  @ApiResponse({ status: 404, description: 'Not found' })
+  async findOne(@UUIDParam() id: UUID) { return this.service.findOne(id) }
+}
+```
+
+## What this proves
+
+- The OpenAPI schema is built from real decorators, not a separate file — adding a new query param to the DTO updates `/api-doc` and `postman-swagger.json` on next boot with zero manual sync.
+- `addBearerAuth(..., 'access-token')` + `@ApiBearerAuth('access-token')` makes the Swagger UI "Authorize" button work for every protected route — `persistAuthorization` even keeps the token across page reloads.
+- The JSON is written on every non-prod boot and committed to the repo, so frontend and QA teams can diff API changes in PRs instead of discovering them at runtime.

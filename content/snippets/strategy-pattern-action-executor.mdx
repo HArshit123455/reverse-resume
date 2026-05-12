@@ -1,0 +1,45 @@
+---
+title: "Strategy Pattern With Factory For Pluggable Actions"
+topic: "Open-closed action dispatcher: add a new action type without touching the executor"
+source_project: "auth"
+language: "typescript"
+tags: ["strategy-pattern", "factory", "nestjs", "open-closed", "extensibility"]
+---
+
+## Context
+
+A rule engine executes user-configured actions: send email, send SMS, send notification, update field, webhook, custom code. The naive shape is one giant `switch (action.type)` in the executor — fine at three cases, painful at seven, and impossible when a tenant wants to register a custom action without a redeploy. The strategy pattern splits each branch into its own class implementing a common interface; a factory builds a `Map<ActionType, IActionStrategy>` at module init via `ModuleRef`, so the executor just looks up and dispatches.
+
+```ts
+export interface IActionStrategy {
+  readonly actionType: ActionType
+  execute(ctx: ActionContext): Promise<ActionResult>
+  validate(config: ActionConfig): boolean | string
+}
+
+@Injectable()
+export class ActionStrategyFactory implements OnModuleInit {
+  private readonly strategies = new Map<ActionType, IActionStrategy>()
+  constructor(private readonly moduleRef: ModuleRef) {}
+
+  async onModuleInit() {
+    const built = [
+      UpdateFieldStrategy, SendNotificationStrategy, SendEmailStrategy,
+      SendSmsStrategy, WebhookStrategy, CustomActionStrategy, CreateEntityStrategy,
+    ]
+    for (const cls of built) {
+      const inst = await this.moduleRef.resolve(cls)
+      this.strategies.set(inst.actionType, inst)
+    }
+  }
+
+  registerStrategy(s: IActionStrategy) { this.strategies.set(s.actionType, s) }
+  getStrategy(type: ActionType): IActionStrategy | undefined { return this.strategies.get(type) }
+}
+```
+
+## What this proves
+
+- Open-closed in practice — adding `SendSlackStrategy` is one new file implementing `IActionStrategy`, one line in the `built` array. The executor doesn't change. No `switch` ever grows.
+- `ModuleRef.resolve` lets each strategy inject its own dependencies (mailer, SMS client, webhook HTTP client) instead of the factory carrying a god-class constructor.
+- `registerStrategy` is public on purpose — a per-tenant custom-action registry can plug in callbacks at runtime, so a new action type ships without a deploy.

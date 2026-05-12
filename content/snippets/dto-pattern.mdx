@@ -1,0 +1,41 @@
+---
+title: "DTO-Driven Boundary Validation"
+topic: "class-validator + class-transformer DTOs with Swagger-aware decorators"
+source_project: "auth"
+language: "typescript"
+tags: ["dto", "class-validator", "swagger", "nestjs", "boundary-validation"]
+---
+
+## Context
+
+Every controller in a NestJS service has the same problem: HTTP brings in untyped strings, the handler wants strict TS types. The DTO pattern collapses three concerns into one class — runtime validation (class-validator), shape transformation (class-transformer's `@Transform`), and OpenAPI schema generation (`@ApiPropertyOptional`). One declaration is the source of truth for the wire format, the runtime check, and the documentation.
+
+```ts
+export class GetEventsDTO extends IntersectionType(GetEventDTO, PaginationDto) {
+  @ApiPropertyOptional({ description: 'Filter by Entity ID', format: 'uuid' })
+  @IsOptional() @IsUUID('4')
+  entityId?: string
+
+  @ApiPropertyOptional({ description: 'Sort order', type: String, example: 'DESC' })
+  @IsOptional() @IsString() @FindOptionsOrderValueValidator()
+  sortOrder!: FindOptionsOrderValue
+
+  @ApiPropertyOptional({ description: 'Filter by status', type: [String], enum: Status })
+  @IsOptional()
+  @Transform(({ value }: { value: string | string[] }) =>
+    Array.isArray(value) ? value : value.split(',').map((s) => s.trim()),
+  )
+  @IsArray() @IsEnum(Status, { each: true })
+  status?: Status[]
+
+  @ApiPropertyOptional({ example: '2025-09-01', description: 'Created after (YYYY-MM-DD)' })
+  @IsOptional() @IsDateString()
+  createdAtFrom?: string
+}
+```
+
+## What this proves
+
+- `IntersectionType(...)` composes DTOs without inheritance gymnastics — pagination params + entity filters share one validated schema, and each piece stays reusable across endpoints.
+- `@Transform` runs before validation, so `status=A,B,C` becomes `['A','B','C']` *before* `@IsEnum(..., { each: true })` checks it. Validation rules stay simple because the transformer absorbs format quirks.
+- Three concerns, one class: `@ApiPropertyOptional` feeds Swagger, `@IsUUID/@IsDateString` enforces runtime constraints, and TS types come for free. `forbidNonWhitelisted: true` on the global pipe rejects anything not declared here.
