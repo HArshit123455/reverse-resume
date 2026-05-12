@@ -76,7 +76,8 @@ export async function ingestMdxDir(
     preSkipped = allChunks.length - newChunks.length;
   }
 
-  const BATCH = 64;
+  const BATCH = 8;
+  const SLEEP_BETWEEN_BATCHES_MS = 21_000;
   let costCents = 0;
   for (let i = 0; i < newChunks.length; i += BATCH) {
     const batch = newChunks.slice(i, i + BATCH);
@@ -85,6 +86,13 @@ export async function ingestMdxDir(
       c.embedding = result.embeddings[j];
     });
     costCents += voyageCostCents(result.totalTokens, "voyage-3");
+    const batchNum = Math.floor(i / BATCH) + 1;
+    const totalBatches = Math.ceil(newChunks.length / BATCH);
+    const isLast = i + BATCH >= newChunks.length;
+    console.log(
+      `[ingest:mdx] batch ${batchNum}/${totalBatches} embedded (${result.totalTokens} tokens)${isLast ? "" : ` — sleeping ${SLEEP_BETWEEN_BATCHES_MS / 1000}s for rate limit`}`
+    );
+    if (!isLast) await new Promise((r) => setTimeout(r, SLEEP_BETWEEN_BATCHES_MS));
   }
 
   if (costCents > 0) await recordSpend(db, costCents);
