@@ -1,0 +1,27 @@
+---
+title: "Pro-shop — MERN E-commerce Project"
+role: "Personal Project"
+employer: "Personal"
+dates: "2023"
+location: "Remote"
+stack: ["MongoDB", "Express", "React", "Node.js", "PayPal Sandbox"]
+themes: ["e-commerce", "payments", "crud", "fullstack"]
+---
+
+<!-- TODO: confirm year (2023 assumed; adjust if earlier/later) -->
+
+## Context
+
+A MERN-stack e-commerce store I built during university to learn full-stack JavaScript end-to-end. Standard online-shop shape — product catalog, cart, checkout, orders, basic admin — with PayPal sandbox wired in so the checkout flow goes through a real payment provider rather than being faked. Repo: https://github.com/HArshit123455/shop.
+
+## Stack & integration
+
+- **Backend:** Node.js + Express with REST endpoints for products, users, orders, and auth (JWT).
+- **Database:** MongoDB with Mongoose models for products, users, and orders.
+- **Frontend:** React (Create React App era) with Redux for cart and auth state, React Router for the page tree.
+- **Payments:** PayPal Sandbox integrated into the checkout flow — sandbox client ID, order capture on the server, success/failure handling on the client.
+- **Auth:** JWT-based, with protected admin routes for product and order management.
+
+## What this proves
+
+This is an older project so I don't lean on it heavily — but it's where I first put together a full CRUD app with a real third-party integration (payments) instead of just toy CRUD. It's also where I first felt the pain of untyped JS at the client/server boundary, which is a big part of why everything I've shipped since then is TypeScript end-to-end.

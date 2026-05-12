@@ -1,0 +1,30 @@
+---
+title: "Stack Philosophy — TypeScript End-to-End"
+role: "Position paper"
+employer: "Personal"
+stack: ["TypeScript", "Node.js", "React", "Next.js"]
+themes: ["typescript", "philosophy", "fullstack", "tooling", "type-safety"]
+---
+
+## The position
+
+TypeScript across the full stack — frontend, backend, build scripts, eval harnesses, infra glue, everything. Not "TypeScript on the frontend and Python on the backend." Not "TypeScript when convenient." TypeScript as the default, and any deviation requires a real reason.
+
+This is a deliberate choice, not a habit. It's the choice that the rest of the work in this resume runs on top of.
+
+## Why TS-only
+
+I've been interested in web development for a long time, and JavaScript and TypeScript are the languages the web was actually written in. Everything that runs in a browser is JS at the bottom; Node lets that same language run on the server. So the question was never "should I learn JS?" — it was "is there a version of JS that catches more bugs at compile time?" There is, and it's TypeScript.
+
+TypeScript adds type annotations on top of JavaScript. That sounds minor; in practice it changes the shape of the work. A function that returns `Promise<User | null>` is contract; you can't accidentally treat a possibly-null user as definitely a user. A discriminated union for domain events forces the consumer to handle every case. A DTO with `class-validator` decorators is both the runtime check at the controller boundary and the static type the service downstream consumes. The errors that used to surface in production at 2 AM surface in the editor at 2 PM instead.
+
+The other half of the answer is ecosystem cost. Splitting a stack across two languages means two package managers, two type systems (one of which is "none"), two test runners, two debuggers, two sets of CI plugins, and a serialization boundary at every client/server hop where the types have to be hand-mirrored. Picking one language deletes all of that.
+
+## What this enables
+
+- **Shared types across the wire.** A domain event defined once on the backend is the same type the frontend's SSE hook consumes. A DTO is the request shape and the response shape; the API client doesn't invent its own.
+- **One toolchain.** tsc, eslint, prettier, vitest, the same Node version, the same module resolver. New contributors learn the toolchain once.
+- **One mental model.** Switching from a NestJS service to a React hook to a CLI script is a context switch, but not a language switch. The same `Result<T, E>` patterns, the same exhaustive-switch on unions, the same async/await semantics, all the way down.
+- **Refactors that span the boundary.** Rename a field on a backend entity; the frontend won't compile until the consumer is updated. That cross-cutting feedback loop is the single biggest reason I won't go back to a mixed-language stack.
+
+The stack isn't "TypeScript because trendy." It's "one language, one type system, one toolchain, one mental model" — and TypeScript is the language that lets the web's native ecosystem also be type-safe. That's the whole pitch.

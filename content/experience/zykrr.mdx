@@ -1,0 +1,37 @@
+---
+title: "Zykrr — Software Developer"
+role: "Software Developer"
+employer: "Zykrr"
+dates: "2024 to present"
+location: "New Delhi, India"
+stack: ["TypeScript", "Node.js", "NestJS", "PostgreSQL", "TypeORM", "Redis", "BullMQ", "React", "Next.js"]
+themes: ["backend", "distributed-systems", "ticketing", "sla-engine", "events", "outbox", "caching", "frontend"]
+---
+
+## Context
+
+Zykrr is a SaaS platform with a multi-tenant backend and a React/Next.js frontend. My day-to-day spans both — a NestJS-style TypeScript backend (Postgres + TypeORM, Redis, BullMQ queues, server-sent events) and a Next.js admin/operator UI for the same domain. I work as a generalist on this stack: I pick up backend modules, design schemas and queues, write the DTOs and Swagger contracts, then wire the frontend hooks and screens that consume them.
+
+The product domain is "tickets, cases, SLAs, and entitlements" — the kind of workflow tooling where data correctness, idempotency, and time-based behaviour all matter. A breached SLA that flips a ticket's status incorrectly, or an entitlement that lets the wrong user see the wrong data, is a real bug with real consequences.
+
+## What I built
+
+**SLA engine.** A queue-driven service that watches ticket events (created, status changed, priority changed) and enforces SLA policies with multi-level escalation. The engine resolves policies per ticket priority, computes target times with a delay calculator that respects business hours, persists SLA instances with a status machine, and publishes breach transitions back as domain events. The flip from L0 → L1 on breach is implemented as a one-way ratchet — resolved, closed, cancelled, and already-escalated tickets are deliberately not clobbered, so the auto-transition never overwrites user intent. The processor runs as a BullMQ job with retry semantics; the listener picks up domain events from upstream and dispatches into the queue.
+
+**Outbox pattern across core entities.** TypeORM subscribers fan domain mutations (ticket, ticket-field, issue, case, case-field) out to an outbox table inside the same transaction as the write. A separate dispatcher drains the outbox and publishes to downstream — guaranteeing that no event is lost if the publish step fails, and no event is published if the transaction rolls back. This is the standard transactional-outbox shape; what I owned was making it consistent across multiple entity types with shared subscriber scaffolding rather than five different ad-hoc implementations.
+
+**Action executor with the strategy pattern.** A pluggable action runner where each action type (send email, send SMS, send notification, custom action) is a `*-action.strategy.ts` implementing a common base. A factory resolves the right strategy per action type and a registry handles custom actions. New action types ship as a new strategy file plus a registry entry — no branching in the executor itself. Template interpolation, assignee resolution, and field-value extraction live in shared utils so every strategy uses the same primitives.
+
+**Entitlement calculations with Redis caching.** The entitlement layer answers "what is this user allowed to see / do, in this org, given their policies?" — a question that is hot on every request and expensive to recompute. I built and maintain the cache layer that fronts the policy resolution: keyed on the user/org/policy-version triple, invalidated on policy changes, and read on every authorisation check. The cache service itself lives in a shared sub-backend with a clean wrapper around `ioredis` (connect timeout, command timeout, retry strategy, offline-queue disabled so callers fail fast instead of hanging).
+
+**SSE event delivery.** A per-pod rxjs `Subject` map for local subscribers, with the global online state and ref-count living in Redis so the system stays correct across multiple pods. The pubsub channel fans cross-pod events to wherever the user is actually connected, and the cache holds the user's payload so reconnects are cheap. The frontend `use-sse` hook consumes the stream and routes typed events into the right query caches.
+
+**Ticketing and case schemas.** Ticket and case modules with their associated fields, sections, templates, layouts, and rules. Repositories for the heavy reads, providers for the orchestration, DTOs (with `class-validator` and Swagger decorators) for the inputs and responses, controllers thin and pushing into services. The case-layout editor on the frontend is a multi-level fields-and-sections builder with a property inspector; the SLA form is a priority-keyed view with escalation level cards and an actions dialog.
+
+**Partitioning and retention.** Postgres partitioning on the high-volume log tables (notification history, audit logs, ticket logs) with a retention job that drops old partitions on schedule. Keeps the hot working set small without losing the recent tail.
+
+**Frontend feature work.** SLA list/filter/form pages, case-layout builder, rules engine UI, employee and group management, error-fix flows, import-users wizard, and the shared hooks (`use-sla`, `use-rule`, `use-entitlement-filter`, `use-cross-tab-session`, `use-idle-sessions`, `use-cursor-list`, `use-infinite-scroll`, `use-sse`) that the views are built on. Same TypeScript end-to-end.
+
+## What this proves
+
+I can hold a non-trivial domain — multi-tenant, event-driven, with hot caches and queue-driven workers — in my head and ship inside it. I default to patterns that make the next change cheap (strategy + factory + registry, transactional outbox, typed DTOs at the boundary, hooks for shared frontend logic) rather than one-off branching. I take the same TypeScript discipline through the whole stack: the types that describe a domain event on the backend are the types the frontend's `use-sse` hook consumes, and the DTO that validates the request is the same shape Swagger publishes for the client to read.
