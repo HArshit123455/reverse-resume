@@ -30,18 +30,13 @@ if (!isProdEnv) {
 @ApiBearerAuth('access-token')
 @Controller('sla-instances')
 export class SlaInstanceController {
-  @Get()
-  @ApiOperation({ summary: 'Get all SLA instances' })
-  @ApiResponse({ status: 200, type: SlaInstancesResponseDTO })
-  async findAll(@Query() query: GetSlaInstancesDTO) {
-    return this.service.findAll(query)
-  }
-
   @Get(':id')
   @ApiOperation({ summary: 'Get a single SLA instance by ID' })
   @ApiResponse({ status: 200, type: SlaInstanceResponseDTO })
   @ApiResponse({ status: 404, description: 'Not found' })
-  async findOne(@UUIDParam() id: UUID) { return this.service.findOne(id) }
+  async findOne(@UUIDParam() id: UUID) {
+    return this.service.findOne(id)
+  }
 }
 ```
 

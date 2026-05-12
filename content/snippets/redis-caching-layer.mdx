@@ -15,7 +15,7 @@ async getOrCompute(userId: string, orgId: string): Promise<string[]> {
   const cacheKey = `entitlements:${userId}:${orgId}`
   const lockKey  = `entitlements:lock:${userId}:${orgId}`
 
-  // 1. Try cache. Redis down → fall through to DB so the guard never 403s on infra failure.
+  // 1. Try cache. Redis down → fall through to DB so the guard never 403s.
   try {
     const cached = await this.redis.get<string[]>(cacheKey)
     if (cached) return cached
@@ -24,26 +24,22 @@ async getOrCompute(userId: string, orgId: string): Promise<string[]> {
     return this.compute(userId, orgId)
   }
 
-  // 2. NX lock — best-effort stampede protection. If we don't get it, briefly wait
-  //    for the winner to populate the cache, then retry.
+  // 2. NX lock — best-effort stampede protection.
   let locked = false
   try {
-    locked = await this.redis.setNX(lockKey, '1', 10)
+    locked = await this.redis.setNX(lockKey, '1', 10) // EX=10s ceiling
     if (!locked) {
       await new Promise((r) => setTimeout(r, 200))
       const retry = await this.redis.get<string[]>(cacheKey)
-      if (retry) return retry
-      // fall through and compute anyway — small redundancy beats stalling
+      if (retry) return retry // else fall through and compute anyway
     }
   } catch { /* lock failure is non-fatal */ }
 
   try {
     const value = await this.compute(userId, orgId)
-    try { await this.redis.set(cacheKey, value, 300) } catch { /* best-effort */ }
+    try { await this.redis.set(cacheKey, value, 300) } catch { /* fail open */ }
     return value
-  } finally {
-    if (locked) await this.redis.delete(lockKey).catch(() => {})
-  }
+  } finally { if (locked) await this.redis.delete(lockKey).catch(() => {}) }
 }
 ```
 
