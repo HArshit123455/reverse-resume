@@ -1,0 +1,50 @@
+---
+title: "Postgres Range Partitioning By Month"
+topic: "Idempotent monthly partition creation for high-volume event tables"
+source_project: "auth"
+language: "typescript"
+tags: ["postgres", "partitioning", "nestjs", "bullmq", "operational"]
+---
+
+## Context
+
+An `outbox_events` table grows unboundedly — vacuuming, index bloat, and retention all become expensive once it crosses tens of millions of rows. Range partitioning by `created_at` (monthly) lets Postgres drop old partitions in O(1) instead of `DELETE ... WHERE created_at < $1` scans. The hard part is keeping next month's partition pre-created so no insert ever hits the parent without a matching range. This handler does both a startup safety check (current + next month) and a monthly cron that creates two months ahead.
+
+```ts
+@Injectable()
+export class OutboxPartitionHandler implements OnModuleInit {
+  constructor(private readonly dataSource: DataSource) {}
+
+  async onModuleInit() {
+    await this.ensurePartition(new Date())            // current month
+    const next = new Date(); next.setMonth(next.getMonth() + 1)
+    await this.ensurePartition(next)                   // next month
+  }
+
+  async handle(): Promise<void> {                      // monthly cron
+    const next = new Date(); next.setMonth(next.getMonth() + 1)
+    const monthAfter = new Date(); monthAfter.setMonth(monthAfter.getMonth() + 2)
+    await this.ensurePartition(next)
+    await this.ensurePartition(monthAfter)
+  }
+
+  private async ensurePartition(date: Date): Promise<void> {
+    const y = date.getFullYear(), m = date.getMonth() + 1
+    const suffix = `${y}_${String(m).padStart(2, '0')}`
+    const start = `${y}-${String(m).padStart(2, '0')}-01`
+    const endDate = new Date(y, m, 1)
+    const end = `${endDate.getFullYear()}-${String(endDate.getMonth() + 1).padStart(2, '0')}-01`
+    await this.dataSource.query(`
+      CREATE TABLE IF NOT EXISTS events_${suffix}
+      PARTITION OF events
+      FOR VALUES FROM ('${start}') TO ('${end}')
+    `)
+  }
+}
+```
+
+## What this proves
+
+- `CREATE TABLE IF NOT EXISTS ... PARTITION OF` is idempotent — re-running the cron, restarting pods, or running multiple replicas never produces conflicting DDL.
+- Startup safety check + monthly cron gives two independent triggers; either one alone keeps the next month covered, so a missed cron doesn't cause an outage.
+- Always staying two months ahead means a single missed run still has a full month of buffer before inserts start failing.

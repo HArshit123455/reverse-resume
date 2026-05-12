@@ -1,0 +1,44 @@
+---
+title: "Transactional Outbox Pattern"
+topic: "Atomic durable event publishing via DB-row + post-commit Kafka dispatch"
+source_project: "auth"
+language: "typescript"
+tags: ["outbox", "transactional", "kafka", "nestjs", "typeorm"]
+---
+
+## Context
+
+When a NestJS service mutates an aggregate and must publish a Kafka event, "save row + send to Kafka" inside the same handler is a lie — either step can fail independently and leave the system inconsistent. The fix is the transactional outbox: write an `outbox_events` row inside the same DB transaction as the entity change, then let a TypeORM `afterTransactionCommit` hook dispatch to Kafka. If publish fails, the row stays `pending`/`failed` and a retrigger poller drains it. The API response never blocks on broker I/O.
+
+```ts
+@EventSubscriber()
+export class EntityOutboxSubscriber implements EntitySubscriberInterface<Entity> {
+  private pending = new WeakMap<QueryRunner, Map<string, PendingEntry>>()
+
+  async afterInsert(event: InsertEvent<Entity>) {
+    const id = event.entity?.id
+    if (!id || !event.queryRunner) return
+    const outboxId = await this.writeOutbox(event.queryRunner.manager, {
+      topic: this.topic, partitionKey: id,
+      eventType: 'entity.created', entityType: 'entity', entityId: id,
+      payload: { entityId: id },
+    })
+    if (outboxId) this.getMap(event.queryRunner).set(id, { outboxId, ... })
+  }
+
+  async afterTransactionCommit(event: TransactionCommitEvent) {
+    const map = this.pending.get(event.queryRunner)
+    if (!map?.size) return
+    const entries = [...map.values()]
+    this.pending.delete(event.queryRunner)
+    // Fire-and-forget: row is durable, retrigger handles failures.
+    setImmediate(() => void this.publish(entries))
+  }
+}
+```
+
+## What this proves
+
+- Atomicity through TypeORM `EntitySubscriberInterface` — the outbox row and the entity change share one transaction, so partial publishes are impossible.
+- `WeakMap<QueryRunner, ...>` scopes pending entries per-transaction without leaking — when the runner is GC'd the entry vanishes.
+- Post-commit `setImmediate` dispatch means API latency is bounded by Postgres, not Kafka — the broker can be down for minutes without dropping events.

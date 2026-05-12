@@ -1,0 +1,49 @@
+---
+title: "Periodic Retention Sweeper"
+topic: "Batched archive-then-delete for high-churn tables, scheduled via BullMQ cron"
+source_project: "auth"
+language: "typescript"
+tags: ["bullmq", "retention", "batched-delete", "nestjs", "postgres"]
+---
+
+## Context
+
+Hot tables like `notifications` accumulate rows much faster than they're read — 7 days is plenty for the live workload, but a naive `DELETE ... WHERE created_at < NOW() - INTERVAL '7 days'` locks the table and bloats WAL. The fix is a batched sweeper: fetch 500 rows, copy to a history table, delete by id, repeat. The producer side schedules it as a BullMQ repeatable job (`0 0 * * *`), so retention is enforced once a day regardless of pod restarts.
+
+```ts
+@Injectable()
+export class NotificationCleanupHandler implements IJobHandler<NotificationCleanup> {
+  readonly jobName = JOB_NAMES.NOTIFICATION_CLEANUP
+
+  constructor(
+    @InjectRepository(Notification) private repo: Repository<Notification>,
+    @InjectRepository(NotificationHistory) private historyRepo: Repository<NotificationHistory>,
+  ) {}
+
+  async handle(): Promise<void> {
+    const cutoff = getPastDate(7)
+    const BATCH = 500
+    let total = 0
+    while (true) {
+      const expired = await this.repo.find({
+        where: [{ createdAt: LessThan(cutoff) }, { expireAt: LessThan(new Date()) }],
+        take: BATCH,
+      })
+      if (expired.length === 0) break
+      await this.historyRepo.insert(expired)
+      await this.repo.delete(expired.map((n) => n.id))
+      total += expired.length
+    }
+    if (total > 0) this.logger.log(`Cleaned ${total} rows`)
+  }
+}
+
+// Producer side — declarative cron, no separate scheduler service:
+await this.addJob(JOB_NAMES.NOTIFICATION_CLEANUP, {}, { repeat: { pattern: '0 0 * * *' } })
+```
+
+## What this proves
+
+- Two-step archive-then-delete with `BATCH = 500` keeps each transaction short — no long-running locks, no replication lag spikes.
+- Two cutoffs in one `where` (`createdAt < cutoff OR expireAt < now`) handles both age-based and explicit-expiry rows in one sweeper.
+- BullMQ `repeat.pattern` registers a JobScheduler key, so adding the same job twice on different pods is a no-op — the schedule survives deploys without dedupe logic.
