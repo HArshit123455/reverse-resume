@@ -23,11 +23,27 @@ function authHeaders(): Record<string, string> {
   return { Authorization: `Bearer ${key}`, "Content-Type": "application/json" };
 }
 
+async function fetchWithRetry(
+  url: string,
+  init: RequestInit,
+  maxAttempts = 4
+): Promise<Response> {
+  for (let attempt = 1; attempt <= maxAttempts; attempt++) {
+    const res = await fetch(url, init);
+    if (res.status !== 429 || attempt === maxAttempts) return res;
+    const retryAfter = res.headers.get("retry-after");
+    const baseMs = retryAfter ? Number(retryAfter) * 1000 : 2000 * 2 ** (attempt - 1);
+    await new Promise((r) => setTimeout(r, baseMs));
+  }
+  // unreachable
+  throw new Error("fetchWithRetry: exhausted");
+}
+
 export async function embed(
   inputs: string[],
   model: VoyageEmbedModel = "voyage-3"
 ): Promise<EmbedResult> {
-  const res = await fetch(`${BASE}/embeddings`, {
+  const res = await fetchWithRetry(`${BASE}/embeddings`, {
     method: "POST",
     headers: authHeaders(),
     body: JSON.stringify({ input: inputs, model }),
@@ -53,7 +69,7 @@ export async function rerank(
   topK: number,
   model = "rerank-2"
 ): Promise<RerankResult> {
-  const res = await fetch(`${BASE}/rerank`, {
+  const res = await fetchWithRetry(`${BASE}/rerank`, {
     method: "POST",
     headers: authHeaders(),
     body: JSON.stringify({ query, documents, model, top_k: topK, return_documents: false }),
