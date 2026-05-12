@@ -42,7 +42,11 @@ async function main() {
   let passed = 0;
   const failures: { id: string; question: string; topPaths: string[] }[] = [];
 
-  for (const row of rows) {
+  // Throttle: each retrieve() makes 1 embed + 1 rerank call. Voyage free tier
+  // is 3 RPM, so we space questions ~25s apart to avoid 429-triggered BM25 fallback.
+  const SLEEP_BETWEEN_QUERIES_MS = 25_000;
+  for (let i = 0; i < rows.length; i++) {
+    const row = rows[i];
     const result = await retrieve(database, row.question, { topK: 5 });
     const matched = result.some((c) =>
       row.must_cite_at_least_one_of.some((exp) =>
@@ -59,6 +63,10 @@ async function main() {
           (c) => `${c.sourceType}:${c.sourceProject ?? "-"}:${c.filePath}`
         ),
       });
+    }
+    if (i < rows.length - 1) {
+      console.log(`[eval] question ${i + 1}/${rows.length} done — sleeping ${SLEEP_BETWEEN_QUERIES_MS / 1000}s for rate limit`);
+      await new Promise((r) => setTimeout(r, SLEEP_BETWEEN_QUERIES_MS));
     }
   }
 

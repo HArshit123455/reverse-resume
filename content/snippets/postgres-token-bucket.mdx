@@ -1,0 +1,46 @@
+---
+title: "Postgres Token-Bucket Rate Limit"
+topic: "Atomic per-IP rate limit using Postgres only — no Redis required"
+source_project: "reverse-resume"
+language: "typescript"
+tags: ["rate-limiting", "postgres", "token-bucket", "concurrency", "upsert"]
+---
+
+## Context
+
+A single atomic `INSERT ... ON CONFLICT DO UPDATE` does refill and decrement in one round trip — no read-modify-write race between concurrent requests for the same IP. The bucket is allowed to go negative so we can return a real `retryAfterSeconds` instead of a generic "try later". Postgres-only on purpose: this site runs at small scale and one less moving part (no Redis) wins.
+
+```ts
+export async function consume(
+  db: AnyDb,
+  ipHash: string,
+  config: TokenBucketConfig,
+  cost = 1
+): Promise<ConsumeResult> {
+  const { maxTokens, refillPerSecond } = config;
+
+  const result = await db.execute<{ bucket_tokens: number }>(sql`
+    INSERT INTO rate_limits (ip_hash, bucket_tokens, last_refill)
+    VALUES (${ipHash}, ${maxTokens}::double precision - ${cost}::double precision, now())
+    ON CONFLICT (ip_hash) DO UPDATE SET
+      bucket_tokens = LEAST(
+        ${maxTokens}::double precision,
+        rate_limits.bucket_tokens
+          + EXTRACT(EPOCH FROM (now() - rate_limits.last_refill))
+            * ${refillPerSecond}::double precision
+      ) - ${cost}::double precision,
+      last_refill = now()
+    RETURNING bucket_tokens
+  `);
+
+  const t = Number(result[0].bucket_tokens);
+  if (t >= 0) return { allowed: true, remaining: t };
+  return { allowed: false, remaining: 0, retryAfterSeconds: Math.ceil(-t / refillPerSecond) };
+}
+```
+
+## What this proves
+
+- One SQL round trip, atomic — no read-modify-write race window between concurrent requests sharing an IP hash.
+- Negative bucket as a signal: instead of `false` + arbitrary wait, the caller gets a precise `retryAfterSeconds` derived from the deficit and the refill rate.
+- No Redis: at this scale the Postgres write is cheap, and the operational simplicity of one datastore is worth more than the few microseconds Redis would save.
