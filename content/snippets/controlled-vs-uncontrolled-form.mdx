@@ -1,0 +1,42 @@
+---
+title: "Controlled vs Uncontrolled Forms: When Each Wins"
+topic: "Trade-off note from shipping both react-hook-form and store-driven dynamic forms"
+source_project: "insights"
+language: "typescript"
+tags: ["forms", "react-hook-form", "controlled-form", "uncontrolled-form", "architecture"]
+---
+
+## Context
+
+A frontend codebase will eventually ship both kinds of form: a static one (a product editor, a profile page) whose fields are known at compile time, and a dynamic one (an admin-configured form whose schema arrives from the API). I've built both in the same app, and the wrong instinct is to pick one library and force it everywhere. The honest take: `react-hook-form` + `zod` is the right default for static forms, but it becomes a liability the moment the schema is unknown until runtime. For dynamic forms a plain Zustand store with field-level `setError`/`setValue` is shorter, more debuggable, and survives the schema reshaping that an admin UI will inevitably do.
+
+```tsx
+// Static form — react-hook-form shines. Schema is known, types flow from zod.
+const schema = z.object({ name: z.string().min(2), price: z.string() })
+const form = useForm<z.infer<typeof schema>>({ resolver: zodResolver(schema) })
+
+// Dynamic form — schema comes from the server, field count is unbounded.
+// Trying to hand RHF a runtime-generated zod schema works, but you fight the
+// API at every step: re-registering fields, recomputing defaultValues on
+// schema change, fighting StrictMode double-mounts.
+const { formData, formErrors, updateFormData, updateFormError } = useFormStore()
+
+function FieldRenderer({ field }: { field: ServerField }) {
+  return (
+    <Input
+      value={formData[field.sectionId]?.[field.id] ?? ''}
+      onChange={(e) => updateFormData(field.sectionId, field.id, e.target.value)}
+      aria-invalid={!!formErrors[field.id]}
+    />
+  )
+}
+```
+
+## When each wins
+
+- **Static schema, ≤ ~30 fields, validation rules known at build time** → `react-hook-form` + `zod`. The schema is the type, the type is the doc, error messages live next to the rules. `Controller`-based primitives (the shadcn `FormField`) give you `aria-*` and labelled errors free.
+- **Schema is server-driven, fields can be added/removed at runtime, or the form is a step in a wizard with cross-step dependencies** → plain Zustand store keyed by `[sectionId][fieldId]`, validation as plain functions that read the store. You lose `register`, but you gain: a single object you can `JSON.stringify` for autosave, no "fields-not-yet-registered" race on first render, and a debugger view that shows your form state by name.
+
+## Trade-off
+
+`react-hook-form` is faster to write per field but slower to bend — its assumption that the schema exists at hook-call time is load-bearing. A Zustand store with manual `updateFormData`/`updateFormError` is more keystrokes per field but stays linear: a new field type is a new render branch, not a new resolver. Pick the controlled library when the form is a *form*; pick the store when the form is a *renderer over a schema*.

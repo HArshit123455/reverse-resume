@@ -1,0 +1,52 @@
+---
+title: "Reorderable List With @dnd-kit"
+topic: "Sortable list with pointer sensor, layout-shift lock, and store-driven order"
+source_project: "insights"
+language: "typescript"
+tags: ["react", "dnd-kit", "drag-and-drop", "accessibility", "ux"]
+---
+
+## Context
+
+A builder UI lets users reorder a stack of action cards by drag-and-drop, then persists the order back to a store. Naive implementations drop the dragged item in mid-air when the container height collapses or fire reorder events on every micro-movement. `@dnd-kit/sortable` solves the keyboard-accessibility and pointer-coalescing parts; what's left is wiring a stable `id` per row, a sensor, and an `onDragEnd` that translates `(active.id, over.id)` into an index swap. Locking the container height on drag-start prevents the layout from collapsing under the dragging element.
+
+```tsx
+import { DndContext, closestCenter, PointerSensor, useSensor, useSensors, type DragEndEvent } from '@dnd-kit/core'
+import { SortableContext, verticalListSortingStrategy } from '@dnd-kit/sortable'
+
+const ReorderableList: React.FC<Props> = ({ items, onReorder }) => {
+  const sensors = useSensors(useSensor(PointerSensor))
+  const containerRef = useRef<HTMLDivElement>(null)
+
+  const handleDragStart = useCallback(() => {
+    if (containerRef.current) {
+      containerRef.current.style.height = `${containerRef.current.offsetHeight}px`
+    }
+  }, [])
+
+  const handleDragEnd = useCallback((event: DragEndEvent) => {
+    if (containerRef.current) containerRef.current.style.height = ''
+    const { active, over } = event
+    if (!over || active.id === over.id) return
+    const oldIndex = items.findIndex((i) => i.id === active.id)
+    const newIndex = items.findIndex((i) => i.id === over.id)
+    onReorder(oldIndex, newIndex)
+  }, [items, onReorder])
+
+  return (
+    <div ref={containerRef}>
+      <DndContext sensors={sensors} collisionDetection={closestCenter} onDragStart={handleDragStart} onDragEnd={handleDragEnd}>
+        <SortableContext items={items.map((i) => i.id)} strategy={verticalListSortingStrategy}>
+          {items.map((item) => <SortableRow key={item.id} item={item} />)}
+        </SortableContext>
+      </DndContext>
+    </div>
+  )
+}
+```
+
+## What this proves
+
+- `PointerSensor` plus `closestCenter` collision detection gives a sensible default for vertical lists — the dragged item snaps to whichever neighbour's centre it crosses, not whichever its outline overlaps first.
+- Locking `containerRef.current.style.height` on `onDragStart` prevents a layout-shift bug: as the dragged child becomes absolutely positioned, the parent collapses by one row, and the drop target flickers under the cursor.
+- `SortableContext` accepts a stable `items` array of ids, not the row objects themselves — keeping `id` as the identity means the renderer can keep the same React keys while a parent store mutates `orderId`/index fields.

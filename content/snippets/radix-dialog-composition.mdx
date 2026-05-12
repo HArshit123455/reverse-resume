@@ -1,0 +1,60 @@
+---
+title: "Composable Dialog Patterns With Radix"
+topic: "Headless dialog primitives composed into a typed, accessible app dialog"
+source_project: "insights"
+language: "typescript"
+tags: ["radix", "dialog", "accessibility", "composable-ui", "react"]
+---
+
+## Context
+
+Hand-rolled modals get the easy parts wrong: focus trap escapes on tab, the page scrolls behind the overlay, `Esc` closes a parent dialog instead of the inner one. `@radix-ui/react-dialog` ships a headless `Root`/`Portal`/`Overlay`/`Content` set that handles focus management, scroll lock, `Esc`, and `aria-*` correctly — the cost is composing each piece. The pattern here re-exports the primitives wrapped in className-injecting `forwardRef` components, so the rest of the app can write `<Dialog>...<DialogContent>` without re-implementing focus or animation rules.
+
+```tsx
+import * as React from 'react'
+import * as DialogPrimitive from '@radix-ui/react-dialog'
+import { Cross2Icon } from '@radix-ui/react-icons'
+import { cn } from '@/lib/utils'
+
+const Dialog = DialogPrimitive.Root
+const DialogTrigger = DialogPrimitive.Trigger
+const DialogPortal = DialogPrimitive.Portal
+const DialogClose = DialogPrimitive.Close
+
+const DialogOverlay = React.forwardRef<
+  React.ElementRef<typeof DialogPrimitive.Overlay>,
+  React.ComponentPropsWithoutRef<typeof DialogPrimitive.Overlay>
+>(({ className, ...props }, ref) => (
+  <DialogPrimitive.Overlay ref={ref} className={cn(
+    'fixed inset-0 z-50 bg-black/50 data-[state=open]:animate-in data-[state=closed]:animate-out',
+    className,
+  )} {...props} />
+))
+
+const DialogContent = React.forwardRef<
+  React.ElementRef<typeof DialogPrimitive.Content>,
+  React.ComponentPropsWithoutRef<typeof DialogPrimitive.Content>
+>(({ className, children, ...props }, ref) => (
+  <DialogPortal>
+    <DialogOverlay />
+    <DialogPrimitive.Content ref={ref} className={cn(
+      'fixed left-1/2 top-1/2 z-50 w-full max-w-lg -translate-x-1/2 -translate-y-1/2 rounded-lg bg-background p-6 shadow-lg',
+      className,
+    )} {...props}>
+      {children}
+      <DialogPrimitive.Close className="absolute right-4 top-4 opacity-70 hover:opacity-100">
+        <Cross2Icon className="h-4 w-4" />
+        <span className="sr-only">Close</span>
+      </DialogPrimitive.Close>
+    </DialogPrimitive.Content>
+  </DialogPortal>
+))
+
+export { Dialog, DialogTrigger, DialogContent, DialogClose }
+```
+
+## What this proves
+
+- Re-exporting Radix primitives via `forwardRef` + `cn(...)` lets the design system bake in styling and animation defaults once — call sites stay declarative (`<DialogContent className="max-w-4xl">`) without forking the headless behaviour.
+- `data-[state=open]`/`data-[state=closed]` selectors couple Tailwind animation classes to Radix's state machine, so enter/exit transitions get the right duration even when `open` is controlled externally — no `useState` for animation visibility.
+- `React.ElementRef<typeof DialogPrimitive.Content>` + `React.ComponentPropsWithoutRef<...>` make the wrapper transparently typed: every prop Radix accepts on `Content` flows through, including `onEscapeKeyDown` and `onPointerDownOutside` for opt-out behaviour on nested dialogs.
