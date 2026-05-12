@@ -1,0 +1,57 @@
+---
+topic: "Synonym dictionary as the canonical taxonomy for skill matching, with reverse-index built once at module load"
+source_project: "job-mcp"
+language: "typescript"
+tags: ["query-expansion", "normalization", "taxonomy", "skill-matching", "synonym-resolution"]
+---
+
+## Context
+
+Resume and JD writers spell the same thing twelve different ways: `Node.js`, `nodejs`, `Node`, `Express.js` — all the same hire signal. Centralizing a ~150-group synonym dictionary as canonical → aliases gives one source of truth for skill matching, query generation, and the rejection-tally feedback loop. The reverse-index (`alias → canonical`) is built ONCE at module load time, so every `resolveSkill` call is O(1) regardless of dictionary size. The shape is intentionally simple — a plain `Record<string, string[]>` — so it diffs cleanly in code review and can be edited by hand without tooling.
+
+```ts
+export const SYNONYM_GROUPS: Record<string, string[]> = {
+  // Programming Languages
+  "javascript": ["js", "es6", "ecmascript", "es2015", "es2020"],
+  "typescript": ["ts"],
+  "csharp":     ["c#", "c sharp"],
+  "go":         ["golang"],
+  // Frontend
+  "react":  ["reactjs", "react.js"],
+  "vue":    ["vuejs", "vue.js"],
+  "nextjs": ["next.js", "next js"],
+  // Backend
+  "nodejs":  ["node.js", "node js", "node"],
+  "nestjs":  ["nest.js", "nest js"],
+  "spring":  ["spring boot", "springboot"],
+  "dotnet":  ["asp.net", ".net", "aspnet"],
+  // DBs
+  "postgresql":    ["postgres", "pg", "psql"],
+  "mongodb":       ["mongo"],
+  "elasticsearch": ["elastic", "elastic search"],
+  // ... ~150 groups total across languages, frameworks, DBs, cloud, ML, roles
+};
+
+// Build reverse index ONCE at module load — every alias maps to its canonical.
+// resolveSkill() is then a single Map.get() — O(1) regardless of dictionary size.
+const aliasToCanonical = new Map<string, string>();
+for (const [canonical, aliases] of Object.entries(SYNONYM_GROUPS)) {
+  aliasToCanonical.set(normalize(canonical), canonical);
+  for (const alias of aliases) aliasToCanonical.set(normalize(alias), canonical);
+}
+
+export function resolveSkill(raw: string): string {
+  const normalized = normalize(raw);
+  return aliasToCanonical.get(normalized) ?? normalized;
+}
+
+export function areSkillsSynonymous(a: string, b: string): boolean {
+  return resolveSkill(a) === resolveSkill(b);
+}
+```
+
+## What this proves
+
+- One taxonomy, many consumers — scoring, query generation, exclude filters, and rejection tallies all collapse aliases through the same `resolveSkill` so the system speaks one vocabulary internally.
+- Module-load reverse-indexing — pre-compute once, lookup forever; no runtime cost for query expansion.
+- Hand-editable shape — a plain object that any dev can grep and patch when they spot a missing alias, no migration or codegen required.

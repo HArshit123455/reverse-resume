@@ -1,0 +1,55 @@
+---
+topic: "Composable scoring pipeline: weighted skills/role/location plus stack-family mismatch penalty"
+source_project: "job-mcp"
+language: "typescript"
+tags: ["scoring", "ranking", "matching", "synonym-resolution", "penalty-scoring"]
+---
+
+## Context
+
+Naive keyword scoring rewards a Node.js candidate for a .NET job because the title says "Engineer" and the location matches. `rankJobs` builds the score from three weighted signals (keyword 60%, role 25%, location 15%) and then applies a *multiplicative* stack-mismatch penalty: if the job demands a stack family the candidate doesn't have (dotnet, java, angular, ruby, php, go, rust, flutter), the final score is multiplied by 0.3 — so a 95% keyword match on a .NET role drops to 28 instead of dominating the ranking. All keyword matching runs through `resolveSkill` so synonyms normalize first (`"node.js"` → `"nodejs"`).
+
+```ts
+const STACK_FAMILIES: Record<string, string[]> = {
+  dotnet: ["dotnet", "csharp", "aspnet"], java: ["java", "spring"],
+  angular: ["angular"], vue: ["vue", "nuxt"], ruby: ["ruby", "rails"],
+  php: ["php", "laravel"], go: ["go", "gin"], rust: ["rust", "actix"],
+  flutter: ["flutter", "dart"],
+};
+
+function stackMismatchPenalty(candidateSkills: Set<string>, jobSkills: Set<string>): number {
+  for (const [, familySkills] of Object.entries(STACK_FAMILIES)) {
+    const jobRequiresFamily = familySkills.some(s => jobSkills.has(s));
+    const candidateHasFamily = familySkills.some(s => candidateSkills.has(s));
+    if (jobRequiresFamily && !candidateHasFamily) return 0.3; // heavy penalty
+  }
+  return 1.0;
+}
+
+export function rankJobs(jobs: JobResult[], criteria: { keywords: string[]; role?: string; location?: string }): RankedJobResult[] {
+  const resolvedKeywords = criteria.keywords.map(kw => resolveSkill(kw)); // normalize via synonym dict
+  const candidateSkillSet = new Set(resolvedKeywords);
+
+  const ranked = jobs.map(job => {
+    const jobSkills = extractSkills(`${job.job_title} ${job.short_description}`.toLowerCase());
+    const jobCanonicalSet = new Set(jobSkills.canonical);
+
+    const keywordMatches = resolvedKeywords.filter(kw => jobCanonicalSet.has(kw)).length;
+    const keywordScore = resolvedKeywords.length > 0 ? keywordMatches / resolvedKeywords.length : 0.5;
+    const rScore = criteria.role ? roleScore(criteria.role, job.job_title.toLowerCase()) : 0.5;
+    const locationScore = criteria.location && job.location.toLowerCase().includes(criteria.location.toLowerCase()) ? 1.0 : 0.3;
+
+    const penalty = stackMismatchPenalty(candidateSkillSet, jobCanonicalSet);
+    const rawScore = keywordScore * 0.60 + rScore * 0.25 + locationScore * 0.15;
+    const relevance_score = Math.round(rawScore * penalty * 100); // penalty applied multiplicatively
+    return { ...job, relevance_score };
+  });
+  return ranked.sort((a, b) => b.relevance_score - a.relevance_score);
+}
+```
+
+## What this proves
+
+- Multiplicative penalties (not additive) — applied at the end so a strong stack signal can't be drowned out by accidental keyword overlap.
+- Synonym-aware matching — `resolveSkill("node.js")` and `resolveSkill("nodejs")` collapse to the same canonical, so the score reflects intent not surface tokens.
+- Tunable component weights (0.60/0.25/0.15) sit at the top of the file — easy to A/B test ranking quality without restructuring the function.
