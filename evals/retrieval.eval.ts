@@ -1,4 +1,7 @@
-import "dotenv/config";
+import { config } from "dotenv";
+config({ path: ".env.local" });
+config();
+
 import { db, closeDb } from "@/lib/db/client";
 import { retrieve } from "@/lib/rag/retrieve";
 import seed from "@/content/seed-questions.json";
