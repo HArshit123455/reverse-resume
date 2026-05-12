@@ -1,7 +1,17 @@
+import matter from "gray-matter";
+import { readFileSync } from "node:fs";
+import { join } from "node:path";
 import { ChatShell } from "@/components/chat-shell";
-import landing from "@/content/landing.placeholder.json";
+
+interface LandingFront { headline: string; subheadline: string; demoPrompts: string[] }
+
+function loadLanding(): LandingFront {
+  const raw = readFileSync(join(process.cwd(), "content/landing.mdx"), "utf-8");
+  return matter(raw).data as LandingFront;
+}
 
 export default function Home() {
+  const landing = loadLanding();
   return (
     <main className="space-y-8">
       <header className="space-y-2">
