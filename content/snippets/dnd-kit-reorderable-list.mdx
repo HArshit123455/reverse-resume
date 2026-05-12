@@ -19,9 +19,7 @@ const ReorderableList: React.FC<Props> = ({ items, onReorder }) => {
   const containerRef = useRef<HTMLDivElement>(null)
 
   const handleDragStart = useCallback(() => {
-    if (containerRef.current) {
-      containerRef.current.style.height = `${containerRef.current.offsetHeight}px`
-    }
+    if (containerRef.current) containerRef.current.style.height = `${containerRef.current.offsetHeight}px`
   }, [])
 
   const handleDragEnd = useCallback((event: DragEndEvent) => {

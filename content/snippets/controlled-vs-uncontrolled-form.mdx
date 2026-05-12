@@ -40,3 +40,9 @@ function FieldRenderer({ field }: { field: ServerField }) {
 ## Trade-off
 
 `react-hook-form` is faster to write per field but slower to bend — its assumption that the schema exists at hook-call time is load-bearing. A Zustand store with manual `updateFormData`/`updateFormError` is more keystrokes per field but stays linear: a new field type is a new render branch, not a new resolver. Pick the controlled library when the form is a *form*; pick the store when the form is a *renderer over a schema*.
+
+## What this proves
+
+- Willingness to default to `react-hook-form` + `zod` for known schemas *and* hand-build a store layer when the schema is runtime-driven — single-paradigm orthodoxy isn't a virtue, it's a tax the next dynamic-form ticket pays.
+- The cost axis I weigh is *bendability*, not *keystrokes-per-field*: a few extra lines per `<Input>` is cheap; fighting a resolver's lifecycle to register/unregister server-driven fields is not. Pick the abstraction whose failure mode is "more code", not "wrong assumption".
+- Naming the shape — *form* vs *renderer over a schema* — is the actual decision tool. Once the question is "which kind of UI is this", the library choice falls out automatically and stops being a religion.
