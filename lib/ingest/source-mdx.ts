@@ -1,13 +1,13 @@
 import { readFile, readdir } from "node:fs/promises";
 import { join, extname } from "node:path";
-import { sql } from "drizzle-orm";
+import { inArray } from "drizzle-orm";
 import { chunkMdx } from "./chunk-mdx";
 import { upsertDocuments } from "./upsert";
 import { embed, voyageCostCents } from "@/lib/clients/voyage";
 import { recordSpend } from "@/lib/spend-cap/daily-cap";
 import type { TestDb } from "@/tests/helpers/test-db";
 import type { db as dbFn } from "@/lib/db/client";
-import type { NewDocument } from "@/lib/db/schema";
+import { documents, type NewDocument } from "@/lib/db/schema";
 
 type AnyDb = TestDb | ReturnType<typeof dbFn>;
 
@@ -67,10 +67,11 @@ export async function ingestMdxDir(
   let newChunks = allChunks;
   if (allChunks.length > 0) {
     const hashes = allChunks.map((c) => c.contentHash);
-    const existingRows = await db.execute<{ content_hash: string }>(sql`
-      SELECT content_hash FROM documents WHERE content_hash = ANY(${hashes})
-    `);
-    const existingSet = new Set(existingRows.map((r) => r.content_hash));
+    const existingRows = await db
+      .select({ contentHash: documents.contentHash })
+      .from(documents)
+      .where(inArray(documents.contentHash, hashes));
+    const existingSet = new Set(existingRows.map((r) => r.contentHash));
     newChunks = allChunks.filter((c) => !existingSet.has(c.contentHash));
     preSkipped = allChunks.length - newChunks.length;
   }
