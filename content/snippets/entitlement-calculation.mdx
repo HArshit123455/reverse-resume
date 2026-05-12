@@ -1,0 +1,44 @@
+---
+title: "Entitlement Calculation + Cache + Async Recalc"
+topic: "Layered permission resolution with BullMQ-driven background recalculation"
+source_project: "auth"
+language: "typescript"
+tags: ["entitlements", "authorization", "bullmq", "cache-invalidation", "nestjs"]
+---
+
+## Context
+
+An authorization model with three layers — direct user grants, group membership grants, team membership grants — has to merge three sources of `(policy → entitlement → allow/deny)` into one final set on every request. Computing this on the hot path is unacceptable, so it's a two-system design: a synchronous read path that hits Redis with a DB fallback (cache-aside), and an async write path that recomputes-and-invalidates whenever a policy, collection, or assignment changes. The producer enqueues recalc jobs with `jobId` dedupe; the processor recomputes, writes back to the DB, then evicts the affected cache keys.
+
+```ts
+@Injectable()
+export class EntitlementRecalcProducer {
+  constructor(@InjectQueue(QUEUE_NAMES.ENTITLEMENT_RECALC) private readonly q: Queue) {}
+
+  async recalcUser(userId: string, organisationId: string, reason: string) {
+    await this.q.add(JOB_NAMES.RECALC_USER, { userId, organisationId, reason }, {
+      jobId: `recalc-user-${userId}-${organisationId}-${Date.now()}`,
+      removeOnComplete: true,
+      attempts: 3,
+      backoff: { type: 'exponential', delay: 1000 },
+    })
+  }
+}
+
+@Processor(QUEUE_NAMES.ENTITLEMENT_RECALC, { concurrency: 5 })
+export class EntitlementRecalcProcessor extends BaseProcessor {
+  async process(job: Job) {
+    if (job.name === JOB_NAMES.RECALC_USER) {
+      const { userId, organisationId } = job.data
+      await this.calc.calculateUserEntitlements(userId, organisationId) // writes DB
+      await this.cache.invalidate(userId, organisationId)                // evicts Redis
+    }
+  }
+}
+```
+
+## What this proves
+
+- Read/write split: reads stay on the cache-aside hot path (sub-ms), writes are debounced through a queue with `concurrency: 5` so a burst of policy edits doesn't fan out into a thousand parallel recomputes.
+- Recompute-then-invalidate (not the other way round) — the eviction happens *after* the DB is correct, so a racing read either sees the stale value (acceptable for 5 min) or the new value, never an empty set.
+- `attempts: 3` + exponential backoff handles transient DB blips, and `removeOnComplete: true` keeps the queue table small. Each job carries a `reason` field so production incidents can grep "why was this user's permissions recalculated?"
