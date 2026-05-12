@@ -11,38 +11,31 @@ Naive keyword scoring rewards a Node.js candidate for a .NET job because the tit
 
 ```ts
 const STACK_FAMILIES: Record<string, string[]> = {
-  dotnet: ["dotnet", "csharp", "aspnet"], java: ["java", "spring"],
-  angular: ["angular"], vue: ["vue", "nuxt"], ruby: ["ruby", "rails"],
-  php: ["php", "laravel"], go: ["go", "gin"], rust: ["rust", "actix"],
-  flutter: ["flutter", "dart"],
+  dotnet: ["dotnet", "csharp", "aspnet"], java: ["java", "spring"], angular: ["angular"],
+  vue: ["vue", "nuxt"], ruby: ["ruby", "rails"], php: ["php", "laravel"],
+  go: ["go", "gin"], rust: ["rust", "actix"], flutter: ["flutter", "dart"],
 };
 
-function stackMismatchPenalty(candidateSkills: Set<string>, jobSkills: Set<string>): number {
-  for (const [, familySkills] of Object.entries(STACK_FAMILIES)) {
-    const jobRequiresFamily = familySkills.some(s => jobSkills.has(s));
-    const candidateHasFamily = familySkills.some(s => candidateSkills.has(s));
-    if (jobRequiresFamily && !candidateHasFamily) return 0.3; // heavy penalty
+function stackMismatchPenalty(candidate: Set<string>, job: Set<string>): number {
+  for (const [, family] of Object.entries(STACK_FAMILIES)) {
+    if (family.some(s => job.has(s)) && !family.some(s => candidate.has(s))) return 0.3; // heavy penalty
   }
   return 1.0;
 }
 
-export function rankJobs(jobs: JobResult[], criteria: { keywords: string[]; role?: string; location?: string }): RankedJobResult[] {
-  const resolvedKeywords = criteria.keywords.map(kw => resolveSkill(kw)); // normalize via synonym dict
-  const candidateSkillSet = new Set(resolvedKeywords);
-
+export function rankJobs(jobs: JobResult[], criteria: { keywords: string[]; role?: string; location?: string }) {
+  const resolved = criteria.keywords.map(kw => resolveSkill(kw)); // normalize via synonym dict
+  const candidateSet = new Set(resolved);
   const ranked = jobs.map(job => {
     const jobSkills = extractSkills(`${job.job_title} ${job.short_description}`.toLowerCase());
-    const jobCanonicalSet = new Set(jobSkills.canonical);
-
-    const keywordMatches = resolvedKeywords.filter(kw => jobCanonicalSet.has(kw)).length;
-    const keywordScore = resolvedKeywords.length > 0 ? keywordMatches / resolvedKeywords.length : 0.5;
+    const jobSet = new Set(jobSkills.canonical);
+    const matches = resolved.filter(kw => jobSet.has(kw)).length;
+    const keywordScore = resolved.length > 0 ? matches / resolved.length : 0.5;
     const rScore = criteria.role ? roleScore(criteria.role, job.job_title.toLowerCase()) : 0.5;
-    const locationScore = criteria.location && job.location.toLowerCase().includes(criteria.location.toLowerCase()) ? 1.0 : 0.3;
-
-    const penalty = stackMismatchPenalty(candidateSkillSet, jobCanonicalSet);
-    const rawScore = keywordScore * 0.60 + rScore * 0.25 + locationScore * 0.15;
-    const relevance_score = Math.round(rawScore * penalty * 100); // penalty applied multiplicatively
-    return { ...job, relevance_score };
+    const locScore = criteria.location && job.location.toLowerCase().includes(criteria.location.toLowerCase()) ? 1.0 : 0.3;
+    const penalty = stackMismatchPenalty(candidateSet, jobSet);
+    const raw = keywordScore * 0.60 + rScore * 0.25 + locScore * 0.15;
+    return { ...job, relevance_score: Math.round(raw * penalty * 100) }; // penalty multiplicative
   });
   return ranked.sort((a, b) => b.relevance_score - a.relevance_score);
 }

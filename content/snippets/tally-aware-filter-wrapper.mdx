@@ -10,26 +10,22 @@ tags: ["filtering", "instrumentation", "observability", "feedback-loop", "adapti
 Plain `Array.filter` returns survivors and silently discards everything else. That's fine for static pipelines but kills any adaptive system that needs to *learn from rejections* — like the cascading tier ladder that auto-adds a skill to the exclude list when it sees 8 jobs got dropped for mentioning ".NET" in this tier. The tally-aware wrapper pattern keeps the original filter as the canonical implementation (so behaviour can't drift) and adds a sibling function that returns `{ results, drops }` — where `drops` is a per-cause breakdown for skill filters, not just a count. Critically: regex construction is *copied verbatim* into the wrapper so filter semantics stay byte-identical.
 
 ```ts
-export function filterExcludedSkillsWithTally(
-  results: JobResult[],
-  excludeSkills: string[] | undefined,
-): { results: JobResult[]; drops: Record<string, number> } {
+export function filterExcludedSkillsWithTally(results: JobResult[], excludeSkills: string[] | undefined):
+  { results: JobResult[]; drops: Record<string, number> } {
   const drops: Record<string, number> = {};
-  if (!excludeSkills || excludeSkills.length === 0) return { results, drops };
+  if (!excludeSkills?.length) return { results, drops };
 
   // Regex construction COPIED VERBATIM from filterExcludedSkills above.
   // Aliases tally under the CANONICAL key so excluded_skill_<canonical>
   // counts stay consistent for the adaptive tier learner.
-  const skillGroups = excludeSkills
-    .map(s => s.trim()).filter(s => s.length > 0)
-    .map(s => {
-      const tokens = expandSkillWithAliases(s); // e.g. "PHP" → [PHP, Laravel, Symfony, ...]
-      const regexes = tokens.map(t => {
-        const escaped = t.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
-        return new RegExp(`(^|[^A-Za-z0-9])${escaped}($|[^A-Za-z0-9])`, "i");
-      });
-      return { canonical: s.toLowerCase(), regexes };
+  const skillGroups = excludeSkills.map(s => s.trim()).filter(s => s.length > 0).map(s => {
+    const tokens = expandSkillWithAliases(s); // e.g. "PHP" → [PHP, Laravel, Symfony, ...]
+    const regexes = tokens.map(t => {
+      const escaped = t.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+      return new RegExp(`(^|[^A-Za-z0-9])${escaped}($|[^A-Za-z0-9])`, "i");
     });
+    return { canonical: s.toLowerCase(), regexes };
+  });
 
   const kept: JobResult[] = [];
   for (const r of results) {

@@ -11,8 +11,8 @@ The same job leaks into the result set from multiple sources with different trac
 
 ```ts
 // Signal-based stale filter — runs BEFORE expensive HTTP probes
-const STALE_SIGNALS = ["no longer accepting", "position filled", "expired", "closed",
-  "no longer hiring", "role filled", "this listing has expired", /* ... */];
+const STALE_SIGNALS = ["no longer accepting", "position filled", "expired",
+  "closed", "no longer hiring", "role filled", "this listing has expired", /* ... */];
 
 export function filterStaleResults(results: JobResult[]): JobResult[] {
   return results.filter(r => {
@@ -36,9 +36,7 @@ export function deduplicateByUrl(results: JobResult[]): JobResult[] {
     const key = normalizeUrl(job.job_link);
     const existing = seen.get(key);
     // Keep the lower-ranked (= better) freshness_status when keys collide
-    if (!existing || (rank[job.freshness_status] ?? 2) < (rank[existing.freshness_status] ?? 2)) {
-      seen.set(key, job);
-    }
+    if (!existing || (rank[job.freshness_status] ?? 2) < (rank[existing.freshness_status] ?? 2)) seen.set(key, job);
   }
   return Array.from(seen.values());
 }

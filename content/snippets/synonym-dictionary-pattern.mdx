@@ -11,23 +11,16 @@ Resume and JD writers spell the same thing twelve different ways: `Node.js`, `no
 
 ```ts
 export const SYNONYM_GROUPS: Record<string, string[]> = {
-  // Programming Languages
-  "javascript": ["js", "es6", "ecmascript", "es2015", "es2020"],
-  "typescript": ["ts"],
-  "csharp":     ["c#", "c sharp"],
-  "go":         ["golang"],
+  // Languages
+  "javascript": ["js", "es6", "ecmascript", "es2015"],
+  "typescript": ["ts"], "csharp": ["c#", "c sharp"], "go": ["golang"],
   // Frontend
-  "react":  ["reactjs", "react.js"],
-  "vue":    ["vuejs", "vue.js"],
-  "nextjs": ["next.js", "next js"],
+  "react": ["reactjs", "react.js"], "vue": ["vuejs", "vue.js"], "nextjs": ["next.js", "next js"],
   // Backend
-  "nodejs":  ["node.js", "node js", "node"],
-  "nestjs":  ["nest.js", "nest js"],
-  "spring":  ["spring boot", "springboot"],
-  "dotnet":  ["asp.net", ".net", "aspnet"],
+  "nodejs": ["node.js", "node js", "node"], "nestjs": ["nest.js", "nest js"],
+  "spring": ["spring boot", "springboot"], "dotnet": ["asp.net", ".net", "aspnet"],
   // DBs
-  "postgresql":    ["postgres", "pg", "psql"],
-  "mongodb":       ["mongo"],
+  "postgresql": ["postgres", "pg", "psql"], "mongodb": ["mongo"],
   "elasticsearch": ["elastic", "elastic search"],
   // ... ~150 groups total across languages, frameworks, DBs, cloud, ML, roles
 };
@@ -41,8 +34,7 @@ for (const [canonical, aliases] of Object.entries(SYNONYM_GROUPS)) {
 }
 
 export function resolveSkill(raw: string): string {
-  const normalized = normalize(raw);
-  return aliasToCanonical.get(normalized) ?? normalized;
+  return aliasToCanonical.get(normalize(raw)) ?? normalize(raw);
 }
 
 export function areSkillsSynonymous(a: string, b: string): boolean {

@@ -13,7 +13,6 @@ tags: ["llm-chain", "rule-based-nlp", "transformation-pipeline", "tone-modifiers
 export function refineMessage(message: string, instruction: string): RefinementResult {
   let refined = message;
   const changesApplied: string[] = [];
-
   // Parse intent cheaply with regex — no LLM, no API call
   const isShorter   = /\b(shorter|concise|brief)\b/i.test(instruction);
   const isCasual    = /\b(casual|less formal|informal)\b/i.test(instruction);
@@ -26,18 +25,13 @@ export function refineMessage(message: string, instruction: string): RefinementR
     refined = refined.replace(/\s{2,}/g, " ").trim();
     changesApplied.push("removed filler phrases");
     const sentences = refined.split(/(?<=[.!?])\s+/);
-    if (sentences.length > 4) {
-      refined = sentences.slice(0, 4).join(" ");
-      changesApplied.push("trimmed to 4 sentences");
-    }
+    if (sentences.length > 4) { refined = sentences.slice(0, 4).join(" "); changesApplied.push("trimmed to 4 sentences"); }
   }
-
   // 2. Tone swaps — applySwaps uses word-boundary regex for short tokens
   //    so "just" doesn't eat "justified" when stripped as a hedge word.
   if (isCasual)    { refined = applyTone(refined, "casual");       changesApplied.push("applied casual tone"); }
   if (isFormal)    { refined = applyTone(refined, "professional"); changesApplied.push("applied professional tone"); }
   if (isConfident) { refined = applyTone(refined, "confident");    changesApplied.push("applied confident tone"); }
-
   // 3. Unrecognized instruction — return original with a note, never silently no-op
   if (changesApplied.length === 0) {
     refined = `${message}\n\n[Refinement note: ${instruction}]`;
