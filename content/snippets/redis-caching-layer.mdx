@@ -1,0 +1,54 @@
+---
+title: "Cache-Aside With Stampede Protection"
+topic: "Read-through Redis cache with NX-lock and fail-open fallback to the DB"
+source_project: "auth"
+language: "typescript"
+tags: ["redis", "cache-aside", "stampede-prevention", "fail-open", "nestjs"]
+---
+
+## Context
+
+A per-request authorization check runs on every API call — recomputing it from joins across users, collections, and policies on every hit melts Postgres. Cache-aside in Redis with a 5-min TTL fixes the hot path, but two more failure modes need explicit handling: (1) a thundering herd on key expiry can stampede the DB, and (2) Redis itself going down must not 403 every user. The lock is a best-effort `SET NX EX`; Redis failures fall through to the DB compute path instead of propagating.
+
+```ts
+async getOrCompute(userId: string, orgId: string): Promise<string[]> {
+  const cacheKey = `entitlements:${userId}:${orgId}`
+  const lockKey  = `entitlements:lock:${userId}:${orgId}`
+
+  // 1. Try cache. Redis down → fall through to DB so the guard never 403s on infra failure.
+  try {
+    const cached = await this.redis.get<string[]>(cacheKey)
+    if (cached) return cached
+  } catch (err) {
+    this.logger.warn(`Cache read failed, falling back to DB: ${err}`)
+    return this.compute(userId, orgId)
+  }
+
+  // 2. NX lock — best-effort stampede protection. If we don't get it, briefly wait
+  //    for the winner to populate the cache, then retry.
+  let locked = false
+  try {
+    locked = await this.redis.setNX(lockKey, '1', 10)
+    if (!locked) {
+      await new Promise((r) => setTimeout(r, 200))
+      const retry = await this.redis.get<string[]>(cacheKey)
+      if (retry) return retry
+      // fall through and compute anyway — small redundancy beats stalling
+    }
+  } catch { /* lock failure is non-fatal */ }
+
+  try {
+    const value = await this.compute(userId, orgId)
+    try { await this.redis.set(cacheKey, value, 300) } catch { /* best-effort */ }
+    return value
+  } finally {
+    if (locked) await this.redis.delete(lockKey).catch(() => {})
+  }
+}
+```
+
+## What this proves
+
+- Three-tier fail-open: cache miss → DB compute, cache error → DB compute, lock error → compute without protection. The user never sees a 5xx because Redis hiccuped.
+- `SET NX EX 10` gives the lock a TTL ceiling — even if the holder crashes, the lock self-releases after 10s instead of jamming the cache permanently.
+- The 200ms wait-and-retry covers the common case (peer just finished computing) without paying for a second compute; the fallthrough covers the slow case without livelocking.

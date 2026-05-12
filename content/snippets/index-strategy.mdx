@@ -1,0 +1,36 @@
+---
+title: "Partial Indexes For Selective Queries"
+topic: "Postgres partial indexes that match the actual hot query, not the whole table"
+source_project: "auth"
+language: "typescript"
+tags: ["postgres", "indexing", "partial-index", "typeorm", "query-optimization"]
+---
+
+## Context
+
+The outbox poller runs every few seconds with a query of shape `WHERE status = 'pending' ORDER BY created_at LIMIT 100`. A full `(status, created_at)` btree would index every row — but >99% are `published` and never queried by the poller. A *partial* index on `created_at WHERE status = 'pending'` is dramatically smaller, fits in shared buffers, and is updated in-place when a row transitions to `published` (the row leaves the index instead of being rewritten). A second partial index covers the retry path for `failed`.
+
+```ts
+@Entity('outbox_events')
+@Index('idx_outbox_events_pending', ['createdAt'], { where: '"status" = \'pending\'' })
+@Index('idx_outbox_events_failed',  ['createdAt'], { where: '"status" = \'failed\'' })
+export class OutboxEvent {
+  @PrimaryGeneratedColumn({ type: 'bigint' })           id!: string
+  @Column({ type: 'varchar' })                          topic!: string
+  @Column({ name: 'partition_key', type: 'varchar', nullable: true })
+                                                        partitionKey!: string | null
+  @Column({ type: 'jsonb' })                            payload!: Record<string, unknown>
+  @CreateDateColumn({ name: 'created_at', type: 'timestamptz' })
+                                                        createdAt!: Date
+  @Column({ name: 'published_at', type: 'timestamptz', nullable: true })
+                                                        publishedAt!: Date | null
+  @Column({ type: 'smallint', default: 0 })             attempts!: number
+  @Column({ type: 'varchar', default: 'pending' })      status!: OutboxStatus
+}
+```
+
+## What this proves
+
+- TypeORM `@Index({ where: ... })` emits a Postgres `CREATE INDEX ... WHERE` clause — the index physically only contains rows matching the predicate, so size scales with active workload, not table cardinality.
+- Two separate partial indexes (pending vs failed) keep the retry poller and main poller from competing on the same btree; their working sets stay disjoint in shared buffers.
+- When a row transitions `pending → published`, Postgres deletes the index entry instead of rewriting it — partial indexes reward the steady state where most rows leave the indexed predicate quickly.
