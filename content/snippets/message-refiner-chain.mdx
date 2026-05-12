@@ -1,0 +1,54 @@
+---
+topic: "Rule-based outreach refinement: parse natural-language intent, apply operations in fixed order with side-effect ordering"
+source_project: "job-mcp"
+language: "typescript"
+tags: ["llm-chain", "rule-based-nlp", "transformation-pipeline", "tone-modifiers", "messaging"]
+---
+
+## Context
+
+"Make this shorter and more confident" is two intents — and the order matters. Trim filler words FIRST so the tone-modifier swap dictionary doesn't waste cycles on phrases that'll get deleted anyway, then apply tone, then flag generic phrases. `refineMessage` parses the natural-language instruction with cheap regex intent-detectors, then runs each operation in a *fixed order* (shorter → tone → specific). Tone changes themselves are dictionary swaps via `applyTone` — word-boundary matching for short tokens so `"just"` doesn't eat `"justified"`. When nothing matches, the original is returned with a note so the caller doesn't silently get a no-op back.
+
+```ts
+export function refineMessage(message: string, instruction: string): RefinementResult {
+  let refined = message;
+  const changesApplied: string[] = [];
+
+  // Parse intent cheaply with regex — no LLM, no API call
+  const isShorter   = /\b(shorter|concise|brief)\b/i.test(instruction);
+  const isCasual    = /\b(casual|less formal|informal)\b/i.test(instruction);
+  const isFormal    = /\b(formal|professional)\b/i.test(instruction);
+  const isConfident = /\b(confident|assertive|bold)\b/i.test(instruction);
+
+  // 1. Shorter first — tone swaps shouldn't run on text we're about to delete
+  if (isShorter) {
+    for (const pattern of FILLER_PATTERNS) refined = refined.replace(pattern, "");
+    refined = refined.replace(/\s{2,}/g, " ").trim();
+    changesApplied.push("removed filler phrases");
+    const sentences = refined.split(/(?<=[.!?])\s+/);
+    if (sentences.length > 4) {
+      refined = sentences.slice(0, 4).join(" ");
+      changesApplied.push("trimmed to 4 sentences");
+    }
+  }
+
+  // 2. Tone swaps — applySwaps uses word-boundary regex for short tokens
+  //    so "just" doesn't eat "justified" when stripped as a hedge word.
+  if (isCasual)    { refined = applyTone(refined, "casual");       changesApplied.push("applied casual tone"); }
+  if (isFormal)    { refined = applyTone(refined, "professional"); changesApplied.push("applied professional tone"); }
+  if (isConfident) { refined = applyTone(refined, "confident");    changesApplied.push("applied confident tone"); }
+
+  // 3. Unrecognized instruction — return original with a note, never silently no-op
+  if (changesApplied.length === 0) {
+    refined = `${message}\n\n[Refinement note: ${instruction}]`;
+    changesApplied.push("instruction noted -- unrecognized pattern");
+  }
+  return { original: message, refined, instruction, changes_applied: changesApplied };
+}
+```
+
+## What this proves
+
+- Deterministic, LLM-free refinement chain — every transformation is a regex or dictionary swap so the same input always produces the same output (testable, debuggable, free).
+- Side-effect ordering matters — trim filler before tone-swapping so the swap dictionary doesn't operate on text that's about to be deleted.
+- Observable changes — `changes_applied` records every operation so the caller can show the user exactly what changed and why.

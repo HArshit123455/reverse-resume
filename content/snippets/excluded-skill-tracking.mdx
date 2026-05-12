@@ -1,0 +1,53 @@
+---
+topic: "Adaptive escalation: when rejection-tally feedback can't help, walk down a strictness ladder (drop strict mode → strip primary skills → widen location)"
+source_project: "job-mcp"
+language: "typescript"
+tags: ["adaptive-search", "escalation", "feedback-loop", "rejection-tracking", "exhaustion-detection"]
+---
+
+## Context
+
+The normal adaptation path (Rule 1: auto-add a heavily-rejected skill to the exclude list) works great — until every observed skill rejection is *already* excluded on the next tier, meaning the learner has nothing new to add. That's the signal that the constraint set is exhausted, not the search space. Rule 5 — the escalation ladder — fires only in that exact case. It walks down three increasingly aggressive widening steps: drop `location_strict` → strip primary-skill tokens from the query → widen the location to India. At most one step fires per call, ordered cheapest-widening-first. The "already excluded — N drops" log line (FIX 4) makes the *consideration* observable even when no action is taken.
+
+```ts
+// Did Rule 1 actually add anything new this round?
+let newExcludeAddedByRule1 = false;
+// ... Rule 1 sets this to true when it pushes a new skill ...
+if (already) {
+  // FIX 4: log that we considered it — keeps the learner observable
+  adaptations.push(`"${skill}" already excluded — ${drops} drops this tier. Considering escalation.`);
+  continue;
+}
+
+// Rule 5: escalation — fires only when Rule 1 was a no-op AND every observed
+// skill-rejection is already excluded (i.e. constraint set is saturated).
+const skillReasons = Object.entries(tally).filter(([k]) => k.startsWith("excluded_skill_"));
+const allSkillsAlreadyExcluded = skillReasons.length > 0 && skillReasons.every(([k]) => {
+  const skill = k.slice("excluded_skill_".length);
+  return next.exclude_skills.some(s => s.toLowerCase() === skill.toLowerCase());
+});
+
+if (!newExcludeAddedByRule1 && allSkillsAlreadyExcluded) {
+  if (prev.after_filter_count < 5 && next.location_strict) {
+    // 5a — cheapest widening
+    next.location_strict = false;
+    adaptations.push(`Escalation: location_strict=false (thin yield with strict filter, tier ${prev.tier.index} returned ${prev.after_filter_count} survivors)`);
+  } else if (prev.after_filter_count < 5 && opts?.primarySkills?.some(p => next.query.toLowerCase().includes(p.toLowerCase()))) {
+    // 5b — strip primary-skill tokens from the query
+    const primaries = opts.primarySkills.map(p => p.toLowerCase());
+    const beforeQuery = next.query;
+    next.query = next.query.split(/\s+/).filter(t => !primaries.includes(t.toLowerCase())).join(" ").trim();
+    adaptations.push(`Escalation: role-type query (primary skills under-delivered) — "${beforeQuery}" → "${next.query}"`);
+  } else if (prev.after_filter_count < 3 && next.location.toLowerCase() !== "india") {
+    // 5c — most aggressive widening
+    next.location = "India";
+    adaptations.push(`Escalation: widening to India (local market thin)`);
+  }
+}
+```
+
+## What this proves
+
+- Two-level adaptation — first try to *narrow* (auto-exclude heavily-rejected skills), and only when that's exhausted, *widen* the search itself.
+- Observable inaction — when Rule 1 can't act because the skill is already excluded, it still logs the consideration so the escalation ladder has signal AND the operator can see what the learner saw.
+- Stepwise widening ordered by cost — drop the strictest filter first, then the most-defining query tokens, only widen location as a last resort.
