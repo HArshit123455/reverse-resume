@@ -1,0 +1,43 @@
+---
+topic: "Bootstrapping an MCP server with stdio transport and env-validated tool registration"
+source_project: "job-mcp"
+language: "typescript"
+tags: ["mcp", "model-context-protocol", "stdio", "sdk", "tool-registration"]
+---
+
+## Context
+
+job-mcp exposes ~12 tools (search-jobs, match-resume, refine-message, ...) to any MCP-compatible client (Claude Desktop, Cursor, etc.) over stdio. The bootstrap is intentionally boring: validate environment BEFORE constructing the server (so a missing API key fails loudly at startup, not on the first tool call), then register each tool as a closure that already has the validated env bound. The transport is `StdioServerTransport` — no HTTP, no auth, just stdin/stdout JSON-RPC for local desktop use.
+
+```ts
+import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
+import { StdioServerTransport } from "@modelcontextprotocol/sdk/server/stdio.js";
+import { validateEnv } from "./config/env.js";
+import { setLinkedinCookie } from "./filters/linkedin-probe.js";
+import { registerSearchJobsTool } from "./tools/search-jobs.js";
+import { registerMatchResumeTool } from "./tools/match-resume.js";
+import { registerAdaptiveSearchJobsTool } from "./tools/adaptive-search-jobs.js";
+// ... more tool imports
+
+// Validate env BEFORE the server exists — fail-fast on missing keys
+const env = validateEnv();
+setLinkedinCookie(env.linkedinCookie);
+
+const server = new McpServer({ name: "job-mcp", version: "1.0.0" });
+
+// Each register* closes over the validated env so tool handlers
+// never re-read process.env at call time.
+registerSearchJobsTool(server, env);
+registerMatchResumeTool(server);
+registerAdaptiveSearchJobsTool(server, env);
+// ... more registrations
+
+const transport = new StdioServerTransport();
+await server.connect(transport);
+```
+
+## What this proves
+
+- Fail-fast environment validation — missing keys surface at startup, not on the first user query.
+- Clean separation between transport, server, and tool registration — each tool is testable in isolation because its handler closes over an injected `env`, not over `process.env`.
+- Real production use of `@modelcontextprotocol/sdk` — not a toy example, this server is running in Claude Desktop today.

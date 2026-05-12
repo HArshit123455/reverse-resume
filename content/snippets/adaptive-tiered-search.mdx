@@ -1,0 +1,48 @@
+---
+topic: "Sequential cascading search ladder that loosens constraints tier-by-tier driven by per-tier rejection feedback"
+source_project: "job-mcp"
+language: "typescript"
+tags: ["adaptive-search", "feedback-loop", "orchestration", "escalation", "search-ladder"]
+---
+
+## Context
+
+A single flat job-search query is wasteful: if Tier 1 (primary skills + exact city + strict mode) returns enough, we stop; if it returns zero, we widen. `runAdaptiveSearch` executes a 5+ tier ladder sequentially, feeding each tier's rejection tally into `applyAdaptations` to tweak the *next* tier before it runs (auto-add heavily-rejected skills to exclude list, force location_strict when most results were non-India, drop primary-skill tokens when adaptations are exhausted). `decideStopReason` owns priority order so `stop_reason` in the response is correct by construction — never a lie.
+
+```ts
+for (let i = 0; i < hardTierLimit; i++) {
+  const tier = ladder[i];
+  const pipeline = await deps.searchAndFilter(
+    tier.query, tier.location, remaining, env,
+    { excludeSkills: tier.exclude_skills, locationStrict: tier.location_strict },
+  );
+
+  // Cross-tier dedupe + seen-exclusion INSIDE the loop so stop decisions
+  // match what the caller actually receives (FIX 1 — was a silent lie).
+  const newResults = pipeline.results.filter(r => !seenLinks.has(r.job_link));
+  const freshResults = input.include_seen ? newResults : deps.excludeSeenJobs(newResults);
+  accumulated.push(...freshResults);
+
+  // decideStopReason owns priority: target_hit > max_tiers > ladder_exhausted
+  const decision = stopDecider(accumulated.length, input.target_count, i, input.max_tiers, ladder.length);
+  if (decision.stop) { stopReason = decision.reason!; break; }
+
+  // Two consecutive 0-survivor tiers → diminishing_returns (FIX 6)
+  if (freshResults.length === 0 && ++consecutiveZeroTiers >= 2) {
+    stopReason = "diminishing_returns"; break;
+  }
+
+  // Feed THIS tier's outcome into adaptation rules for the NEXT tier
+  const { nextTier, adaptations_applied } = applyAdaptations(
+    { tier, raw_count: pipeline.total_raw, after_filter_count: pipeline.results.length, rejection_tally: pipeline.rejection_tally },
+    ladder[i + 1], { primarySkills, locationInput: input.location },
+  );
+  ladder[i + 1] = nextTier;
+}
+```
+
+## What this proves
+
+- Sequential, feedback-driven orchestration — unlike `Promise.all` fan-out which is blind, each tier *learns* from the previous one's rejection tally.
+- Hardened invariants — `stop_reason: "target_hit"` literally throws if `finalResults.length < target_count`, so the metadata can't lie to the caller.
+- Dependency injection for testability — `deps` is a typed bag of `searchAndFilter`, `excludeSeenJobs`, etc., so tests run the full ladder against fakes with no module mocking.

@@ -1,0 +1,57 @@
+---
+topic: "Serper + Tavily fan-out with automatic fallback on zero results, rate limits, and HTTP errors"
+source_project: "job-mcp"
+language: "typescript"
+tags: ["orchestration", "fallback", "rate-limiting", "graceful-degradation", "search-api"]
+---
+
+## Context
+
+Search APIs fail in three different ways — HTTP errors, rate limits, and (most insidiously) `200 OK` with zero results. `executeSearch` runs Serper first because it's cheaper and faster, then silently falls back to Tavily on any of those three signals. The `429` case gets a single 1.5s retry before falling back (Serper's free-tier rate limit is bursty, so one retry usually clears it). Total failure throws a structured error that names *which* keys were missing, so the caller knows how to fix it.
+
+```ts
+export async function executeSearch(params: SearchParams, env: EnvConfig): Promise<SearchResponse> {
+  if (env.hasSerper) {
+    try {
+      const results = await searchSerper(params, env.serperApiKey!);
+      // Zero results is a silent failure — treat it like an error
+      if (results.length > 0) {
+        return { results, source_api: "serper", total_raw: results.length, total_filtered: results.length };
+      }
+      console.error("Serper returned zero results, falling back to Tavily");
+    } catch (error: unknown) {
+      const err = error as Error & { response?: { status?: number } };
+      // Rate limit: single retry after 1.5s, then fall back
+      if (err.response?.status === 429) {
+        await delay(1500);
+        try {
+          const retryResults = await searchSerper(params, env.serperApiKey!);
+          if (retryResults.length > 0) {
+            return { results: retryResults, source_api: "serper", total_raw: retryResults.length, total_filtered: retryResults.length };
+          }
+        } catch { /* fall through to Tavily */ }
+      }
+    }
+  }
+
+  if (env.hasTavily) {
+    try {
+      const results = await searchTavily(params, env.tavilyApiKey!);
+      return { results, source_api: "tavily", total_raw: results.length, total_filtered: results.length };
+    } catch (error: unknown) {
+      console.error(`Tavily also failed: ${(error as Error).message}`);
+    }
+  }
+
+  // Structured error names exactly which keys are missing
+  throw new Error("Search failed: Both search APIs are unavailable. " +
+    (env.hasSerper ? "" : "SERPER_API_KEY not configured. ") +
+    (env.hasTavily ? "" : "TAVILY_API_KEY not configured. "));
+}
+```
+
+## What this proves
+
+- Graceful degradation across three distinct failure modes (HTTP error, 429, zero-result-200) — each handled with the right strategy, not a blanket try/catch.
+- Cost-aware ordering — cheaper provider first, fallback only when the cheaper one literally can't deliver.
+- The `source_api` is propagated all the way to the response metadata, so the caller can see *which* provider answered (useful when debugging quality regressions tied to one upstream).
