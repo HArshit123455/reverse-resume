@@ -7,10 +7,14 @@ export default defineConfig({
       "@": fileURLToPath(new URL("./", import.meta.url)),
     },
   },
+  esbuild: {
+    jsx: "automatic",
+  },
   test: {
-    environment: "node",
-    include: ["**/*.test.ts"],
+    environment: "jsdom",
+    include: ["**/*.test.ts", "**/*.test.tsx"],
     exclude: ["node_modules", ".next", "e2e"],
+    setupFiles: ["./tests/setup.ts"],
     testTimeout: 30000,
   },
 });

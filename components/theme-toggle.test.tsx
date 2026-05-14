@@ -1,0 +1,40 @@
+import { describe, it, expect, beforeEach, vi } from "vitest";
+import { render, screen, fireEvent } from "@testing-library/react";
+import { ThemeToggle } from "./theme-toggle";
+
+describe("ThemeToggle", () => {
+  beforeEach(() => {
+    localStorage.clear();
+    document.documentElement.classList.remove("dark");
+  });
+
+  it("renders a button with an accessible label reflecting current theme", () => {
+    render(<ThemeToggle />);
+    expect(screen.getByRole("button", { name: /switch to dark mode/i })).toBeInTheDocument();
+  });
+
+  it("toggles html.dark class and localStorage on click", () => {
+    render(<ThemeToggle />);
+    fireEvent.click(screen.getByRole("button"));
+    expect(document.documentElement.classList.contains("dark")).toBe(true);
+    expect(localStorage.getItem("theme")).toBe("dark");
+    fireEvent.click(screen.getByRole("button"));
+    expect(document.documentElement.classList.contains("dark")).toBe(false);
+    expect(localStorage.getItem("theme")).toBe("light");
+  });
+
+  it("respects prefers-color-scheme: dark on first mount when no localStorage", () => {
+    vi.spyOn(window, "matchMedia").mockImplementation((q) => ({
+      matches: q.includes("dark"),
+      media: q,
+      addEventListener: vi.fn(),
+      removeEventListener: vi.fn(),
+      addListener: vi.fn(),
+      removeListener: vi.fn(),
+      onchange: null,
+      dispatchEvent: vi.fn(),
+    } as unknown as MediaQueryList));
+    render(<ThemeToggle />);
+    expect(screen.getByRole("button", { name: /switch to light mode/i })).toBeInTheDocument();
+  });
+});
