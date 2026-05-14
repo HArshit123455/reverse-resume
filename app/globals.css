@@ -7,7 +7,7 @@
   --surface: #ffffff;
   --text: #0f172a;
   --text-soft: #475569;
-  --muted: #94a3b8;
+  --muted: #64748b;
   --border: #e5e7eb;
   --border-strong: #d1d5db;
   --accent: #2563eb;
@@ -22,7 +22,7 @@
   --surface: #131316;
   --text: #f1f5f9;
   --text-soft: #94a3b8;
-  --muted: #64748b;
+  --muted: #7c8a9c;
   --border: #1f2937;
   --border-strong: #334155;
   --accent: #60a5fa;
@@ -49,7 +49,6 @@ body {
 *:focus-visible {
   outline: 2px solid var(--accent);
   outline-offset: 2px;
-  border-radius: 4px;
 }
 
 @media (prefers-reduced-motion: reduce) {
