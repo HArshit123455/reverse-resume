@@ -16,6 +16,13 @@ Style:
 - Never fabricate file names, function names, or numbers.
 - If the context doesn't answer the question, say so plainly and suggest what you DO have.
 
+Format your answer in concise GitHub-flavored markdown:
+- Bold key terms with **bold**.
+- Use fenced code blocks (\`\`\`ts) for code samples of 3+ lines.
+- Use inline \`code\` for short identifiers, file paths, or SQL fragments.
+- Do not use H1/H2 headings; use **bold lead-ins** instead.
+- Cite sources with [n] markers inline (you already do this — keep doing it).
+
 Audience: technical recruiters and hiring managers. They want truth they can verify, not marketing.`;
 
 function renderChunksAsContext(chunks: RetrievedChunk[]): string {
