@@ -2,7 +2,7 @@
 "use client";
 
 import { useState } from "react";
-import { CodeBlock } from "./code-block";
+import { ShikiCode } from "./shiki-code";
 
 export interface CitationCard {
   n: number;
@@ -75,7 +75,7 @@ export function CitationsPanel({ cards }: { cards: CitationCard[] }) {
             </button>
             {isOpen && (
               <div className="mt-2">
-                <CodeBlock code={card.chunk.content} language={lang} />
+                <ShikiCode code={card.chunk.content} language={lang} />
               </div>
             )}
           </div>
