@@ -14,3 +14,5 @@ dist/
 .turbo/
 .claude/
 *.tsbuildinfo
+
+.superpowers/
