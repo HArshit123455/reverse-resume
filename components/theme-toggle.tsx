@@ -12,7 +12,7 @@ export function ThemeToggle() {
   });
 
   useEffect(() => {
-    document.documentElement.classList.toggle("dark", isDark);
+    document.documentElement.setAttribute("data-theme", isDark ? "dark" : "light");
     window.localStorage.setItem("theme", isDark ? "dark" : "light");
   }, [isDark]);
 

@@ -17,9 +17,9 @@ export const metadata: Metadata = {
 const NO_FLASH_SCRIPT = `(function () {
   try {
     var t = localStorage.getItem("theme");
-    if (t === "dark" || (!t && window.matchMedia && window.matchMedia("(prefers-color-scheme: dark)").matches)) {
-      document.documentElement.classList.add("dark");
-    }
+    var prefersDark = window.matchMedia && window.matchMedia("(prefers-color-scheme: dark)").matches;
+    var theme = t === "dark" || t === "light" ? t : (prefersDark ? "dark" : "light");
+    document.documentElement.setAttribute("data-theme", theme);
   } catch (_) {}
 })();`;
 

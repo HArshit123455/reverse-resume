@@ -5,7 +5,7 @@ import { ThemeToggle } from "./theme-toggle";
 describe("ThemeToggle", () => {
   beforeEach(() => {
     localStorage.clear();
-    document.documentElement.classList.remove("dark");
+    document.documentElement.removeAttribute("data-theme");
   });
 
   it("renders a button with an accessible label reflecting current theme", () => {
@@ -13,13 +13,13 @@ describe("ThemeToggle", () => {
     expect(screen.getByRole("button", { name: /switch to dark mode/i })).toBeInTheDocument();
   });
 
-  it("toggles html.dark class and localStorage on click", () => {
+  it("toggles html[data-theme] attribute and localStorage on click", () => {
     render(<ThemeToggle />);
     fireEvent.click(screen.getByRole("button"));
-    expect(document.documentElement.classList.contains("dark")).toBe(true);
+    expect(document.documentElement.getAttribute("data-theme")).toBe("dark");
     expect(localStorage.getItem("theme")).toBe("dark");
     fireEvent.click(screen.getByRole("button"));
-    expect(document.documentElement.classList.contains("dark")).toBe(false);
+    expect(document.documentElement.getAttribute("data-theme")).toBe("light");
     expect(localStorage.getItem("theme")).toBe("light");
   });
 
