@@ -17,7 +17,7 @@
   --shadow: 0 1px 2px rgba(15, 23, 42, 0.04);
 }
 
-:root.dark {
+:root[data-theme="dark"] {
   --bg: #0a0a0a;
   --surface: #131316;
   --text: #f1f5f9;
