@@ -9,14 +9,14 @@ interface ShikiCodeProps {
 
 function useIsDark(): boolean {
   const [isDark, setIsDark] = useState<boolean>(() =>
-    typeof document !== "undefined" && document.documentElement.classList.contains("dark")
+    typeof document !== "undefined" && document.documentElement.getAttribute("data-theme") === "dark"
   );
   useEffect(() => {
     const root = document.documentElement;
     const observer = new MutationObserver(() => {
-      setIsDark(root.classList.contains("dark"));
+      setIsDark(root.getAttribute("data-theme") === "dark");
     });
-    observer.observe(root, { attributes: true, attributeFilter: ["class"] });
+    observer.observe(root, { attributes: true, attributeFilter: ["data-theme"] });
     return () => observer.disconnect();
   }, []);
   return isDark;
