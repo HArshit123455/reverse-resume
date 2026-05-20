@@ -16,10 +16,10 @@ export function MarkdownMessage({ content }: MarkdownMessageProps) {
       className="prose prose-neutral prose-sm max-w-none dark:prose-invert
                  prose-p:my-3 prose-pre:my-3 prose-pre:bg-transparent prose-pre:p-0
                  prose-headings:font-serif prose-headings:tracking-tight
-                 prose-strong:text-text prose-strong:font-semibold
+                 prose-strong:text-fg prose-strong:font-semibold
                  prose-a:text-accent prose-a:no-underline hover:prose-a:underline
-                 prose-code:rounded prose-code:bg-code-bg prose-code:px-1.5 prose-code:py-0.5
-                 prose-code:text-[0.92em] prose-code:font-normal prose-code:text-text
+                 prose-code:rounded prose-code:bg-bg-sunk prose-code:px-1.5 prose-code:py-0.5
+                 prose-code:text-[0.92em] prose-code:font-normal prose-code:text-fg
                  prose-code:before:content-none prose-code:after:content-none"
     >
       <ReactMarkdown

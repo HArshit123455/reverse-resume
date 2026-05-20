@@ -96,7 +96,7 @@ function ChatBody({ demoPrompts }: { demoPrompts: string[] }) {
       <div>
         {messages.length === 0 && (
           <div className="space-y-2">
-            <p className="text-[11px] font-medium uppercase tracking-[0.08em] text-muted">
+            <p className="font-mono text-[10.5px] uppercase tracking-[0.10em] text-muted-2">
               Try one of these
             </p>
             <div className="flex flex-wrap gap-2">
@@ -105,7 +105,7 @@ function ChatBody({ demoPrompts }: { demoPrompts: string[] }) {
                   key={p}
                   type="button"
                   onClick={() => send(p)}
-                  className="rounded-full border border-border bg-surface px-3 py-1 text-sm text-text-soft transition-colors hover:border-border-strong hover:text-text"
+                  className="inline-flex items-center gap-2 rounded-pill border border-transparent bg-bg-sunk px-3.5 py-2 text-[13.5px] text-fg-soft transition-colors hover:border-border-strong hover:bg-bg-elev hover:text-fg"
                 >
                   {p}
                 </button>
@@ -117,7 +117,7 @@ function ChatBody({ demoPrompts }: { demoPrompts: string[] }) {
           {messages.map((m, i) => (
             <div key={i} className={m.role === "user" ? "flex justify-end" : ""}>
               {m.role === "user" ? (
-                <div className="max-w-[85%] whitespace-pre-wrap rounded-lg bg-code-bg px-4 py-2 text-text">
+                <div className="max-w-[78%] whitespace-pre-wrap rounded-[20px_20px_6px_20px] border border-border bg-bg-sunk px-5 py-3 text-[15px] font-medium leading-[1.45] text-fg">
                   {m.content}
                 </div>
               ) : m.content ? (
@@ -129,7 +129,7 @@ function ChatBody({ demoPrompts }: { demoPrompts: string[] }) {
           ))}
         </div>
         {statusBanner && (
-          <div className="mt-4 flex items-center justify-between rounded-md border border-amber-200 bg-amber-50 px-3 py-2 text-sm text-amber-900 dark:border-amber-500/30 dark:bg-amber-500/10 dark:text-amber-200">
+          <div className="mt-4 flex items-center justify-between rounded-[12px] border border-amber-200 bg-amber-50 px-4 py-2.5 text-[13px] text-amber-900 dark:border-amber-500/30 dark:bg-amber-500/10 dark:text-amber-200">
             <span>{statusBanner}</span>
             <button
               type="button"
@@ -153,12 +153,12 @@ function ChatBody({ demoPrompts }: { demoPrompts: string[] }) {
             onChange={(e) => setInput(e.target.value)}
             disabled={busy}
             placeholder="Ask anything about Harshit's work…"
-            className="flex-1 rounded-lg border border-border bg-surface px-3 py-2 text-sm text-text placeholder:text-muted focus:border-accent focus:outline-none"
+            className="flex-1 rounded-[16px] border border-border bg-bg-elev px-5 py-[18px] text-[15.5px] text-fg placeholder:text-muted-2 transition-all focus:border-accent focus:outline-none focus:ring-4 focus:ring-accent-soft"
           />
           <button
             type="submit"
             disabled={busy || !input.trim()}
-            className="inline-flex items-center gap-1.5 rounded-lg bg-accent px-4 py-2 text-sm font-medium text-white transition-opacity hover:opacity-90 disabled:opacity-50"
+            className="inline-flex items-center gap-2.5 rounded-[16px] bg-fg px-6 py-[18px] text-[14.5px] font-semibold text-bg transition-transform hover:-translate-y-px disabled:opacity-50"
           >
             Ask
             <span aria-hidden>→</span>

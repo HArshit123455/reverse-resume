@@ -38,22 +38,22 @@ function CitationCardView({ card }: { card: CitationCard }) {
       ref={elRef}
       data-cite-n={card.n}
       data-active={isActive ? "true" : undefined}
-      className={`rounded-lg border bg-surface p-4 shadow-token transition-shadow ${
-        isActive ? "border-accent ring-2 ring-accent/15" : "border-border"
+      className={`rounded-[12px] border bg-bg-elev p-4 transition-all hover:border-border-strong ${
+        isActive ? "border-accent ring-2 ring-accent/15 shadow-md" : "border-border"
       }`}
     >
       <div className="mb-2 flex items-center gap-2">
-        <span className="inline-flex h-5 min-w-[20px] items-center justify-center rounded bg-accent-bg px-1.5 text-[11px] font-semibold text-accent">
+        <span className="inline-flex h-5 min-w-[22px] items-center justify-center rounded font-mono bg-accent-soft px-1.5 text-[10.5px] font-medium text-accent">
           {card.n}
         </span>
         <span className={`rounded px-2 py-0.5 text-[10px] font-medium tracking-wide ${BADGE_COLOR[card.chunk.sourceType]}`}>
           {BADGE_LABEL[card.chunk.sourceType]}
         </span>
       </div>
-      <div className="text-sm font-semibold leading-snug text-text">
+      <div className="text-[13.5px] font-semibold leading-snug tracking-[-0.005em] text-fg">
         {card.chunk.title ?? card.chunk.filePath}
       </div>
-      <div className="mt-1 flex flex-wrap items-center gap-x-2 text-[11px] text-text-soft">
+      <div className="mt-1 flex flex-wrap items-center gap-x-2 font-mono text-[11px] text-muted">
         {card.chunk.sourceProject && <span>{card.chunk.sourceProject}</span>}
         {card.chunk.sourceProject && card.chunk.filePath && <span>·</span>}
         {card.chunk.filePath && <span className="truncate">{card.chunk.filePath}</span>}
@@ -71,7 +71,7 @@ function CitationCardView({ card }: { card: CitationCard }) {
         onClick={() => setOpen((v) => !v)}
         aria-expanded={open}
         aria-controls={`cite-body-${card.n}`}
-        className="mt-3 inline-flex items-center gap-1 text-[11px] text-text-soft hover:text-text"
+        className="mt-3 inline-flex items-center gap-1.5 text-[12px] text-muted hover:text-fg transition-colors"
       >
         <span aria-hidden className={`inline-block transition-transform ${open ? "rotate-90" : ""}`}>▸</span>
         <span>{open ? "Hide excerpt" : "Show excerpt"}</span>
