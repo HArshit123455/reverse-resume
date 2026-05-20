@@ -25,7 +25,7 @@ export default function Home() {
           Open to senior/mid full-stack roles · Delhi / Remote
         </div>
         <h1 className="font-serif text-[clamp(48px,8vw,96px)] font-medium leading-[0.94] tracking-[-0.03em] text-fg">
-          Ask my work <em className="not-italic font-medium text-accent italic">anything</em>.
+          Ask my work <em className="font-medium italic text-accent">anything</em>.
         </h1>
         <p className="max-w-[580px] text-[17px] leading-[1.6] text-muted">
           {landing.subheadline}

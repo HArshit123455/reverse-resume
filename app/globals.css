@@ -25,7 +25,6 @@ html[data-theme="light"] {
   --code-bg: var(--bg-sunk);
   --accent-bg: var(--accent-soft);
   --highlight: var(--accent-soft);
-  --sans: var(--font-inter); /* interim fallback; Task 3 swaps to Geist */
 
   /* Radii / shadows / motion */
   --radius-sm: 6px;
@@ -80,10 +79,6 @@ html[data-mode="love"][data-theme="dark"] {
   --mono: var(--font-jetbrains), "JetBrains Mono", ui-monospace, SFMono-Regular, Consolas, monospace;
 }
 
-body {
-  font-family: var(--sans);
-}
-
 html {
   scroll-behavior: smooth;
 }
@@ -91,6 +86,7 @@ html {
 body {
   background: var(--bg);
   color: var(--fg);
+  font-family: var(--sans);
   font-size: 15px;
   line-height: 1.65;
   -webkit-font-smoothing: antialiased;
