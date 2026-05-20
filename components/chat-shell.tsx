@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import { CitationsPanel } from "./citations-panel";
+import { SourcesRail } from "./chat/sources-rail";
 import { CitationsProvider, useCitations } from "./citations-context";
 import { MarkdownMessage } from "./markdown-message";
 
@@ -165,7 +165,7 @@ function ChatBody({ demoPrompts }: { demoPrompts: string[] }) {
           </button>
         </form>
       </div>
-      <CitationsPanel />
+      <SourcesRail />
     </div>
   );
 }

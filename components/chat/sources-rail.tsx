@@ -1,22 +1,24 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import { ShikiCode } from "./shiki-code";
-import { useCitations, type CitationCard } from "./citations-context";
+import { ShikiCode } from "../shiki-code";
+import { useCitations, type CitationCard } from "../citations-context";
 
-const BADGE_LABEL: Record<CitationCard["chunk"]["sourceType"], string> = {
-  github: "github",
+// Tag mapping: an explicit chunk.metadata.tag wins (allows per-MDX override);
+// otherwise we fall back to a stable mapping from sourceType.
+const TAG_FROM_SOURCE_TYPE: Record<CitationCard["chunk"]["sourceType"], string> = {
+  github: "production",
   experience: "experience",
   snippet: "snippet",
 };
 
-const BADGE_COLOR: Record<CitationCard["chunk"]["sourceType"], string> = {
-  github: "bg-emerald-50 text-emerald-800 dark:bg-emerald-500/10 dark:text-emerald-300",
-  experience: "bg-sky-50 text-sky-800 dark:bg-sky-500/10 dark:text-sky-300",
-  snippet: "bg-amber-50 text-amber-800 dark:bg-amber-500/10 dark:text-amber-300",
-};
+function tagFor(card: CitationCard): string {
+  const meta = card.chunk.metadata?.tag;
+  if (typeof meta === "string" && meta.length > 0) return meta;
+  return TAG_FROM_SOURCE_TYPE[card.chunk.sourceType];
+}
 
-function CitationCardView({ card }: { card: CitationCard }) {
+function SourceCard({ card }: { card: CitationCard }) {
   const { registerCard, activeCardN } = useCitations();
   const elRef = useRef<HTMLDivElement | null>(null);
   const [open, setOpen] = useState(false);
@@ -29,7 +31,6 @@ function CitationCardView({ card }: { card: CitationCard }) {
   }, [card.n, registerCard]);
 
   useEffect(() => {
-    // Auto-expand on activation so the user sees the excerpt immediately
     if (isActive && !open) setOpen(true);
   }, [isActive, open]);
 
@@ -42,16 +43,16 @@ function CitationCardView({ card }: { card: CitationCard }) {
         isActive ? "border-accent ring-2 ring-accent/15 shadow-md" : "border-border"
       }`}
     >
-      <div className="mb-2 flex items-center gap-2">
+      <div className="mb-2 flex items-center justify-between gap-2">
         <span className="inline-flex h-5 min-w-[22px] items-center justify-center rounded font-mono bg-accent-soft px-1.5 text-[10.5px] font-medium text-accent">
           {card.n}
         </span>
-        <span className={`rounded px-2 py-0.5 text-[10px] font-medium tracking-wide ${BADGE_COLOR[card.chunk.sourceType]}`}>
-          {BADGE_LABEL[card.chunk.sourceType]}
+        <span className="font-mono text-[10px] uppercase tracking-[0.06em] text-muted">
+          {tagFor(card)}
         </span>
       </div>
       <div className="text-[13.5px] font-semibold leading-snug tracking-[-0.005em] text-fg">
-        {card.chunk.title ?? card.chunk.filePath}
+        {card.chunk.title ?? card.chunk.filePath ?? "source"}
       </div>
       <div className="mt-1 flex flex-wrap items-center gap-x-2 font-mono text-[11px] text-muted">
         {card.chunk.sourceProject && <span>{card.chunk.sourceProject}</span>}
@@ -85,11 +86,11 @@ function CitationCardView({ card }: { card: CitationCard }) {
   );
 }
 
-export function CitationsPanel() {
+export function SourcesRail() {
   const { citations } = useCitations();
 
   const header = (
-    <h2 className="mb-3 text-[11px] font-medium uppercase tracking-[0.08em] text-muted">
+    <h2 className="mb-3 font-mono text-[10.5px] uppercase tracking-[0.10em] text-muted-2">
       Sources
     </h2>
   );
@@ -101,26 +102,26 @@ export function CitationsPanel() {
   return (
     <>
       {/* Desktop: sticky right rail */}
-      <aside className="hidden md:block sticky top-20 max-h-[calc(100vh-6rem)] overflow-y-auto pb-4">
+      <aside className="hidden md:block sticky top-20 max-h-[calc(100vh-6rem)] overflow-y-auto pb-4" data-sources-rail>
         {header}
         <div className="space-y-3">
-          {citations.length === 0 ? empty : citations.map((c) => <CitationCardView key={c.n} card={c} />)}
+          {citations.length === 0 ? empty : citations.map((c) => <SourceCard key={c.n} card={c} />)}
         </div>
       </aside>
 
       {/* Mobile: collapsed details accordion */}
-      <details className="md:hidden mt-4 rounded-[12px] border border-border bg-bg-elev">
+      <details className="md:hidden mt-4 rounded-[12px] border border-border bg-bg-elev" data-sources-rail-mobile>
         <summary className="cursor-pointer list-none p-3 text-sm font-medium text-fg">
           <span className="mr-1.5 inline-block transition-transform [details[open]_&]:rotate-90" aria-hidden>▸</span>
           Sources ({citations.length})
         </summary>
         <div className="space-y-3 p-3 pt-0">
-          {citations.length === 0 ? empty : citations.map((c) => <CitationCardView key={c.n} card={c} />)}
+          {citations.length === 0 ? empty : citations.map((c) => <SourceCard key={c.n} card={c} />)}
         </div>
       </details>
     </>
   );
 }
 
-// Re-export the type so existing imports still work
-export type { CitationCard } from "./citations-context";
+// Re-export the type so existing imports still work during the migration
+export type { CitationCard } from "../citations-context";
