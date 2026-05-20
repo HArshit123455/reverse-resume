@@ -23,7 +23,7 @@ export function ThemeToggle() {
       type="button"
       onClick={() => setIsDark((v) => !v)}
       aria-label={label}
-      className="inline-flex h-8 w-8 items-center justify-center rounded-md text-text-soft hover:bg-code-bg hover:text-text transition-colors"
+      className="inline-flex h-9 w-9 items-center justify-center rounded-[10px] text-muted hover:bg-bg-sunk hover:text-fg transition-colors"
     >
       {isDark ? (
         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden>
