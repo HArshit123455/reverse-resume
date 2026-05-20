@@ -47,7 +47,7 @@ export function CitationMarker({ n }: CitationMarkerProps) {
         onBlur={onLeave}
         aria-label={`Citation ${n}, view source ${sourceLabel}`}
         aria-describedby={hovered ? `cite-pop-${n}` : undefined}
-        className="ml-0.5 inline-flex h-[18px] min-w-[18px] items-center justify-center rounded-[4px] bg-accent-bg px-1.5 text-[10px] font-medium leading-none text-accent transition-colors hover:bg-accent hover:text-surface"
+        className="ml-0.5 inline-flex h-[18px] min-w-[18px] items-center justify-center rounded-[4px] bg-accent-soft px-1.5 text-[10px] font-medium leading-none text-accent transition-colors hover:bg-accent hover:text-accent-ink"
       >
         {n}
       </button>
@@ -55,7 +55,7 @@ export function CitationMarker({ n }: CitationMarkerProps) {
         <span
           id={`cite-pop-${n}`}
           role="tooltip"
-          className="pointer-events-none absolute left-0 top-full z-20 mt-2 w-64 rounded-md bg-text px-3 py-2 text-xs leading-relaxed text-surface shadow-token [@media(hover:none)]:hidden"
+          className="pointer-events-none absolute left-0 top-full z-20 mt-2 w-64 rounded-md bg-fg px-3 py-2 text-xs leading-relaxed text-bg shadow-md [@media(hover:none)]:hidden"
         >
           <span className="mb-1 block font-medium">{sourceLabel}</span>
           {meta && <span className="mb-1.5 block text-[10px] text-muted">{meta}</span>}

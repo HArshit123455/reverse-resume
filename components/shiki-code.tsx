@@ -58,7 +58,7 @@ export function ShikiCode({ code, language }: ShikiCodeProps) {
 
   return (
     <div
-      className="group relative my-3 overflow-hidden rounded-lg border border-border bg-code-bg"
+      className="group relative my-3 overflow-hidden rounded-lg border border-border bg-bg-sunk"
       role="region"
       aria-label={`Code excerpt${language ? `, ${language}` : ""}`}
     >
@@ -66,7 +66,7 @@ export function ShikiCode({ code, language }: ShikiCodeProps) {
         type="button"
         onClick={onCopy}
         aria-label={copied ? "Copied" : "Copy code"}
-        className="absolute right-2 top-2 z-10 inline-flex items-center gap-1 rounded-md border border-border bg-surface px-2 py-1 text-[11px] text-text-soft opacity-0 transition-opacity hover:text-text group-hover:opacity-100 focus-visible:opacity-100"
+        className="absolute right-2 top-2 z-10 inline-flex items-center gap-1 rounded-md border border-border bg-bg-elev px-2 py-1 text-[11px] text-fg-soft opacity-0 transition-opacity hover:text-fg group-hover:opacity-100 focus-visible:opacity-100"
       >
         {copied ? "Copied" : "Copy"}
       </button>
