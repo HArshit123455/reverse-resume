@@ -2,10 +2,23 @@ import { anthropic, SONNET_MODEL, anthropicCostCents } from "@/lib/clients/anthr
 import { recordSpend } from "@/lib/spend-cap/daily-cap";
 import { CitationStreamParser, type StreamEvent } from "./citation-parser";
 import type { RetrievedChunk } from "./retrieve";
+import type { Audience } from "@/lib/sse";
 import type { TestDb } from "@/tests/helpers/test-db";
 import type { db as dbFn } from "@/lib/db/client";
 
 type AnyDb = TestDb | ReturnType<typeof dbFn>;
+
+// VOICE_INSTRUCTIONS — Phase 2 placeholders. Phase 5b (Content authoring)
+// will polish the wording with the user. The shapes here are stable; the
+// strings are what get tuned.
+const VOICE_INSTRUCTIONS: Record<Audience, string> = {
+  curious:
+    "Audience: a curious reader exploring this portfolio. Use plain English. Avoid jargon when a normal word works. Lead with the story or the human problem, not the implementation. Short paragraphs. It's OK to be a little playful.",
+  recruiter:
+    "Audience: a technical recruiter or hiring manager. Lead with quantified outcomes, scope, and business impact in the first sentence. State the role and the team size where relevant. Keep code talk minimal — link to the artifact via [n] instead. Bias toward results over process.",
+  engineer:
+    "Audience: a senior engineer reviewing this work. Lead with the design decision and the tradeoff. Name specific files, modules, or functions when citing. Show code where it adds signal. Acknowledge what you'd do differently. Be concrete; skip the marketing layer.",
+};
 
 const SYSTEM_PROMPT = `You are the chat backend of Harshit Sindhu's "Reverse Resume" — a portfolio that proves engineering claims with real artifacts.
 
@@ -38,6 +51,7 @@ function renderChunksAsContext(chunks: RetrievedChunk[]): string {
 export interface GenerateOptions {
   history: Array<{ role: "user" | "assistant"; content: string }>;
   chunks: RetrievedChunk[];
+  audience: Audience;
   signal?: AbortSignal;
 }
 
@@ -45,16 +59,18 @@ export async function* generate(
   db: AnyDb,
   options: GenerateOptions
 ): AsyncGenerator<StreamEvent> {
-  const { history, chunks, signal } = options;
+  const { history, chunks, audience, signal } = options;
   const parser = new CitationStreamParser(chunks);
 
-  // Use beta.promptCaching.messages.stream for cache_control support on system blocks.
-  // Core.RequestOptions includes `signal` for abort handling.
+  // Prepend the audience voice block as its own (non-cached) system text.
+  // SYSTEM_PROMPT stays the ephemeral-cached block so the cache stays warm
+  // across audience switches.
   const stream = anthropic().beta.promptCaching.messages.stream(
     {
       model: SONNET_MODEL,
       max_tokens: 1024,
       system: [
+        { type: "text", text: VOICE_INSTRUCTIONS[audience] },
         { type: "text", text: SYSTEM_PROMPT, cache_control: { type: "ephemeral" } },
         { type: "text", text: renderChunksAsContext(chunks) },
       ],

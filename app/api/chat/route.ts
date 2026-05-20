@@ -16,6 +16,7 @@ const Body = z.object({
     role: z.enum(["user", "assistant"]),
     content: z.string().min(1).max(2000),
   })).min(1),
+  audience: z.enum(["curious", "recruiter", "engineer"]).default("curious"),
 });
 
 function clientIp(req: Request): string {
@@ -70,6 +71,15 @@ export async function POST(req: Request) {
       const rewritten = await rewriteQuery(database, body.data.messages);
       const chunks = await retrieve(database, rewritten, { topK: 5 });
 
+      // 3a. Announce the message-id + retrieved chunk ids so the client can
+      //     later request follow-up tabs (Phase 3) against the same chunks.
+      const messageId = crypto.randomUUID();
+      send({
+        type: "init",
+        messageId,
+        chunkIds: chunks.map((c) => String(c.id)),
+      });
+
       // 4. Re-check cap before expensive Sonnet call
       const cap2 = await checkCap(database, capCents);
       if (!cap2.ok) {
@@ -85,6 +95,7 @@ export async function POST(req: Request) {
       for await (const event of generate(database, {
         history: body.data.messages,
         chunks,
+        audience: body.data.audience,
         signal: abortController.signal,
       })) {
         send(event);

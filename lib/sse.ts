@@ -1,5 +1,8 @@
 // lib/sse.ts
+export type Audience = "curious" | "recruiter" | "engineer";
+
 export type ServerEvent =
+  | { type: "init"; messageId: string; chunkIds: string[] }
   | { type: "token"; text: string }
   | { type: "citation"; n: number; chunk: unknown }
   | { type: "done" }
