@@ -1,7 +1,29 @@
 import type { Metadata } from "next";
-import { Inter } from "next/font/google";
+import { Cormorant_Garamond, Geist, JetBrains_Mono, Inter } from "next/font/google";
 import { Header } from "@/components/header";
 import "./globals.css";
+
+const cormorant = Cormorant_Garamond({
+  subsets: ["latin"],
+  weight: ["400", "500", "600"],
+  style: ["normal", "italic"],
+  display: "swap",
+  variable: "--font-cormorant",
+});
+
+const geist = Geist({
+  subsets: ["latin"],
+  weight: ["300", "400", "500", "600", "700"],
+  display: "swap",
+  variable: "--font-geist",
+});
+
+const jetbrains = JetBrains_Mono({
+  subsets: ["latin"],
+  weight: ["400", "500"],
+  display: "swap",
+  variable: "--font-jetbrains",
+});
 
 const inter = Inter({
   subsets: ["latin"],
@@ -24,12 +46,13 @@ const NO_FLASH_SCRIPT = `(function () {
 })();`;
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
+  const fontClasses = `${cormorant.variable} ${geist.variable} ${jetbrains.variable} ${inter.variable}`;
   return (
-    <html lang="en" className={inter.variable} suppressHydrationWarning>
+    <html lang="en" className={fontClasses} suppressHydrationWarning>
       <head>
         <script dangerouslySetInnerHTML={{ __html: NO_FLASH_SCRIPT }} />
       </head>
-      <body className="bg-bg text-text">
+      <body className="bg-bg text-fg">
         <Header />
         <div className="mx-auto max-w-5xl px-6 py-10">{children}</div>
       </body>

@@ -74,6 +74,16 @@ html[data-mode="love"][data-theme="dark"] {
   --accent-soft: rgba(247, 143, 179, 0.14);
 }
 
+:root {
+  --serif: var(--font-cormorant), "Cormorant Garamond", Georgia, serif;
+  --sans: var(--font-geist), "Geist", var(--font-inter), ui-sans-serif, system-ui, sans-serif;
+  --mono: var(--font-jetbrains), "JetBrains Mono", ui-monospace, SFMono-Regular, Consolas, monospace;
+}
+
+body {
+  font-family: var(--sans);
+}
+
 html {
   scroll-behavior: smooth;
 }
