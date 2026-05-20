@@ -1,12 +1,12 @@
 import matter from "gray-matter";
 import { readFileSync } from "node:fs";
 import { join } from "node:path";
-import { ChatShell } from "@/components/chat-shell";
+import { ChatShell, type SuggestionChipsByAudience } from "@/components/chat-shell";
 
 interface LandingFront {
   headline: string;
   subheadline: string;
-  demoPrompts: string[];
+  suggestionChips: SuggestionChipsByAudience;
 }
 
 function loadLanding(): LandingFront {
@@ -18,20 +18,7 @@ export default function Home() {
   const landing = loadLanding();
   return (
     <main className="space-y-10">
-      {/* NOTE: eyebrow copy is the design-mock placeholder; user confirms/rewrites in Phase 5b content authoring. */}
-      <header className="max-w-3xl space-y-7">
-        <div className="inline-flex items-center gap-2.5 font-mono text-[11.5px] uppercase tracking-[0.06em] text-muted">
-          <span aria-hidden className="relative inline-block h-1.5 w-1.5 rounded-full bg-accent ring-4 ring-accent-soft animate-[pulse-dot_2.6s_ease-in-out_infinite]" />
-          Open to senior/mid full-stack roles · Delhi / Remote
-        </div>
-        <h1 className="font-serif text-[clamp(48px,8vw,96px)] font-medium leading-[0.94] tracking-[-0.03em] text-fg">
-          Ask my work <em className="font-medium italic text-accent">anything</em>.
-        </h1>
-        <p className="max-w-[580px] text-[17px] leading-[1.6] text-muted">
-          {landing.subheadline}
-        </p>
-      </header>
-      <ChatShell demoPrompts={landing.demoPrompts} />
+      <ChatShell subheadline={landing.subheadline} suggestionChips={landing.suggestionChips} />
       <footer className="mt-20 grid gap-6 border-t border-border pt-[52px] pb-11 sm:grid-cols-[1fr_auto] sm:items-center">
         <div className="font-mono text-[11.5px] tracking-[0.02em] text-muted">
           © {new Date().getFullYear()} Harshit Sindhu · Built in TypeScript, deployed on a Tuesday ·{" "}
