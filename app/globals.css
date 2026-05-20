@@ -25,6 +25,7 @@ html[data-theme="light"] {
   --code-bg: var(--bg-sunk);
   --accent-bg: var(--accent-soft);
   --highlight: var(--accent-soft);
+  --sans: var(--font-inter); /* interim fallback; Task 3 swaps to Geist */
 
   /* Radii / shadows / motion */
   --radius-sm: 6px;
