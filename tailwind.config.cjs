@@ -18,13 +18,6 @@ module.exports = {
         accent: "var(--accent)",
         "accent-soft": "var(--accent-soft)",
         "accent-ink": "var(--accent-ink)",
-        // Legacy aliases (remove in Phase 2)
-        surface: "var(--surface)",
-        text: "var(--text)",
-        "text-soft": "var(--text-soft)",
-        "accent-bg": "var(--accent-bg)",
-        "code-bg": "var(--code-bg)",
-        highlight: "var(--highlight)",
       },
       fontFamily: {
         serif: ['var(--serif)', '"Charter"', '"Source Serif 4"', "Georgia", "serif"],
@@ -35,7 +28,6 @@ module.exports = {
         pill: "var(--radius-pill)",
       },
       boxShadow: {
-        token: "var(--shadow)",
         sm: "var(--shadow-sm)",
         md: "var(--shadow-md)",
       },
