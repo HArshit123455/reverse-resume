@@ -109,8 +109,8 @@ export function CitationsPanel() {
       </aside>
 
       {/* Mobile: collapsed details accordion */}
-      <details className="md:hidden mt-4 rounded-lg border border-border bg-surface">
-        <summary className="cursor-pointer list-none p-3 text-sm font-medium text-text">
+      <details className="md:hidden mt-4 rounded-[12px] border border-border bg-bg-elev">
+        <summary className="cursor-pointer list-none p-3 text-sm font-medium text-fg">
           <span className="mr-1.5 inline-block transition-transform [details[open]_&]:rotate-90" aria-hidden>▸</span>
           Sources ({citations.length})
         </summary>
