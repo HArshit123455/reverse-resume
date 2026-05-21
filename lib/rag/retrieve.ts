@@ -101,6 +101,41 @@ export async function retrieve(
   }
 }
 
+/**
+ * Hydrate cached chunk-ids back to full RetrievedChunk rows. Preserves the
+ * caller-supplied ordering — tab.ts depends on chunks[0] being the
+ * highest-ranked chunk from the original retrieve() call. Rows no longer
+ * present in the database are silently skipped. No spend recorded — this
+ * is a single indexed SELECT, not a retrieval pass.
+ */
+export async function retrieveByIds(db: AnyDb, ids: number[]): Promise<RetrievedChunk[]> {
+  if (ids.length === 0) return [];
+  const rows = await db.execute<{
+    id: number; content: string; source_type: string; source_project: string | null;
+    source_url: string | null; file_path: string | null; title: string | null;
+    metadata: Record<string, unknown>;
+  }>(sql`
+    SELECT id, content, source_type, source_project, source_url, file_path, title, metadata
+    FROM documents
+    WHERE id = ANY(${ids}::int[])
+  `);
+  const byId = new Map(rows.map((r) => [Number(r.id), r] as const));
+  return ids
+    .map((id) => byId.get(id))
+    .filter((r): r is NonNullable<typeof r> => r !== undefined)
+    .map((r) => ({
+      id: Number(r.id),
+      content: r.content,
+      sourceType: r.source_type,
+      sourceProject: r.source_project,
+      sourceUrl: r.source_url,
+      filePath: r.file_path,
+      title: r.title,
+      metadata: r.metadata,
+      cosineScore: 0,
+    }));
+}
+
 async function retrieveBm25(db: AnyDb, query: string, topK: number): Promise<RetrievedChunk[]> {
   const rows = await db.execute<{
     id: number; content: string; source_type: string; source_project: string | null;
