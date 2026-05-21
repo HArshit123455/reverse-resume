@@ -1,7 +1,7 @@
 "use client";
 
-import { MarkdownMessage } from "../markdown-message";
 import type { Audience } from "@/lib/sse";
+import { AnswerCard } from "./answer-card";
 
 export interface TurnData {
   id: string;
@@ -27,13 +27,7 @@ export function Turn({ turn }: TurnProps) {
           {turn.q}
         </div>
       </div>
-      <div>
-        {turn.a ? (
-          <MarkdownMessage content={turn.a} />
-        ) : turn.status === "streaming" ? (
-          <span className="text-muted" aria-live="polite">…</span>
-        ) : null}
-      </div>
+      <AnswerCard turn={turn} />
     </div>
   );
 }
