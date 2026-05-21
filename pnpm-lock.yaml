@@ -23,6 +23,9 @@ importers:
       gray-matter:
         specifier: ^4.0.3
         version: 4.0.3
+      lru-cache:
+        specifier: ^11
+        version: 11.3.6
       next:
         specifier: 15.5.18
         version: 15.5.18(@playwright/test@1.59.1)(react-dom@19.0.0(react@19.0.0))(react@19.0.0)
