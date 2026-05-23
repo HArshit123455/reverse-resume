@@ -1,0 +1,15 @@
+---
+title: "Transactional outbox across core entities"
+slug: "outbox-dispatcher"
+year: "2025"
+kind: "Experiment"
+status: "live"
+description: "TypeORM subscribers fan domain mutations across five entity types into an outbox table inside the same transaction as the write. A separate dispatcher drains the outbox and publishes downstream — no event lost, no event published on rollback."
+tags: ["TypeORM", "PostgreSQL", "Event-driven"]
+stats:
+  - { label: "Entities covered", val: "5" }
+  - { label: "Subscribers",       val: "shared" }
+order: 2
+---
+
+The standard transactional-outbox shape. What I owned was making it consistent across ticket, ticket-field, issue, case, case-field via one shared subscriber scaffold rather than five ad-hoc implementations.

@@ -1,0 +1,15 @@
+---
+title: "SLA engine with multi-level escalation"
+slug: "sla-engine"
+year: "2025"
+kind: "Experiment"
+status: "live"
+description: "Queue-driven service that watches ticket events and enforces SLA policies. The L0 to L1 flip on breach is a one-way ratchet — resolved, closed, cancelled, and already-escalated tickets are deliberately not clobbered."
+tags: ["NestJS", "BullMQ", "PostgreSQL", "TypeORM"]
+stats:
+  - { label: "Escalation levels", val: "4" }
+  - { label: "Status machine",    val: "9-state" }
+order: 1
+---
+
+Resolves policies per ticket priority, computes target times with a business-hours-aware delay calculator, persists SLA instances, and publishes breach transitions back as domain events. Listener picks up upstream events; processor runs as a BullMQ job with retry semantics.
