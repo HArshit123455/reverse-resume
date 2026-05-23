@@ -5,6 +5,7 @@
   "type": "module",
   "scripts": {
     "dev": "next dev",
+    "prebuild": "tsx scripts/fetch-gitlab-calendar.ts || echo 'using cached calendar'",
     "build": "next build",
     "start": "next start",
     "lint": "next lint",
