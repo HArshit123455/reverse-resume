@@ -18,6 +18,13 @@ html[data-theme="light"] {
   --accent-soft: rgba(26, 143, 79, 0.10);
   --accent-ink: #ffffff;
 
+  /* GitLab commit-graph palette (Phase 4) */
+  --commit-l0: var(--bg-sunk);
+  --commit-l1: color-mix(in oklab, var(--accent) 22%, var(--bg-sunk));
+  --commit-l2: color-mix(in oklab, var(--accent) 45%, var(--bg-sunk));
+  --commit-l3: color-mix(in oklab, var(--accent) 70%, var(--bg-sunk));
+  --commit-l4: var(--accent);
+
   /* Radii / shadows / motion */
   --radius-sm: 6px;
   --radius: 12px;
@@ -41,6 +48,13 @@ html[data-theme="dark"] {
   --accent: #34d399;
   --accent-soft: rgba(52, 211, 153, 0.12);
   --accent-ink: #0c0d0f;
+
+  /* GitLab commit-graph palette (Phase 4) */
+  --commit-l0: var(--bg-sunk);
+  --commit-l1: color-mix(in oklab, var(--accent) 26%, var(--bg-sunk));
+  --commit-l2: color-mix(in oklab, var(--accent) 50%, var(--bg-sunk));
+  --commit-l3: color-mix(in oklab, var(--accent) 75%, var(--bg-sunk));
+  --commit-l4: var(--accent);
 
   --shadow-sm: 0 1px 0 rgba(0, 0, 0, 0.4);
   --shadow-md: 0 1px 0 rgba(0, 0, 0, 0.4), 0 18px 40px -22px rgba(0, 0, 0, 0.7);
@@ -100,3 +114,13 @@ body {
   0%, 100% { transform: scale(1); }
   50%      { transform: scale(0.6); }
 }
+
+/* Commit graph (Phase 4) — data-l drives the per-cell color from the
+   --commit-lN palette declared in the theme blocks above. Lives in CSS
+   rather than Tailwind classes so the JSON-driven attribute names match
+   the rule selectors directly. */
+[data-commit-graph] [data-l="0"] { background: var(--commit-l0); }
+[data-commit-graph] [data-l="1"] { background: var(--commit-l1); }
+[data-commit-graph] [data-l="2"] { background: var(--commit-l2); }
+[data-commit-graph] [data-l="3"] { background: var(--commit-l3); }
+[data-commit-graph] [data-l="4"] { background: var(--commit-l4); }
