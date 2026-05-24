@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, type FormEvent, type KeyboardEvent } from "react";
+import { useInlineCommands } from "../eggs/use-inline-commands";
 
 interface ChatInputProps {
   onSubmit: (text: string) => void;
@@ -11,12 +12,13 @@ interface ChatInputProps {
 
 export function ChatInput({ onSubmit, disabled, placeholder, autoFocus }: ChatInputProps) {
   const [value, setValue] = useState("");
+  const wrappedSubmit = useInlineCommands(onSubmit);
 
   function submit() {
     const trimmed = value.trim();
     if (!trimmed || disabled) return;
     setValue("");
-    onSubmit(trimmed);
+    wrappedSubmit(trimmed);
   }
 
   function onFormSubmit(e: FormEvent) {
