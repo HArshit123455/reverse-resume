@@ -1,23 +1,13 @@
-import Link from "next/link";
 import { ThemeToggle } from "./theme-toggle";
+import { BrandWordmark } from "./eggs/brand-wordmark";
+import { CmdKPill } from "./palette/cmd-k-pill";
 
 export function Header() {
   return (
     <header className="sticky top-0 z-30 border-b border-border bg-bg/30 backdrop-blur-2xl backdrop-saturate-150">
       <div className="mx-auto flex h-[72px] max-w-5xl items-center justify-between px-6">
-        <Link href="/" className="group inline-flex items-baseline gap-0 leading-none" aria-label="Harshit Sindhu — home">
-          <span className="font-serif text-2xl font-medium italic tracking-tight text-fg">
-            harshit
-          </span>
-          <span
-            aria-hidden
-            className="ml-[3px] inline-block h-1.5 w-1.5 translate-y-0.5 rounded-full bg-accent"
-          />
-          <small className="ml-3.5 border-l border-border pl-3.5 font-sans text-xs font-normal not-italic text-muted">
-            Full-stack engineer
-          </small>
-        </Link>
-        <div className="flex items-center gap-1">
+        <BrandWordmark />
+        <div className="flex items-center gap-2">
           <a
             href="https://www.linkedin.com/in/harshit-sindhu/"
             target="_blank"
@@ -51,6 +41,7 @@ export function Header() {
               <path d="M22.65 14.39 12 22.13 1.35 14.39a.84.84 0 0 1-.3-.94l1.22-3.78 2.44-7.51A.42.42 0 0 1 4.82 2a.43.43 0 0 1 .58 0 .42.42 0 0 1 .11.18l2.44 7.5h8.1l2.44-7.5A.42.42 0 0 1 18.6 2a.43.43 0 0 1 .58 0 .42.42 0 0 1 .11.18l2.44 7.51L23 13.45a.84.84 0 0 1-.35.94z"/>
             </svg>
           </a>
+          <CmdKPill />
           <ThemeToggle />
         </div>
       </div>

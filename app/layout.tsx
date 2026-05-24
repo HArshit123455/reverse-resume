@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { Cormorant_Garamond, Geist, JetBrains_Mono, Inter } from "next/font/google";
 import { Header } from "@/components/header";
+import { Chrome } from "@/components/chrome";
 import "./globals.css";
 
 const cormorant = Cormorant_Garamond({
@@ -53,8 +54,10 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         <script dangerouslySetInnerHTML={{ __html: NO_FLASH_SCRIPT }} />
       </head>
       <body className="bg-bg text-fg">
-        <Header />
-        <div className="mx-auto max-w-5xl px-6 py-10">{children}</div>
+        <Chrome>
+          <Header />
+          <div className="mx-auto max-w-5xl px-6 py-10">{children}</div>
+        </Chrome>
       </body>
     </html>
   );

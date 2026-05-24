@@ -1,9 +1,14 @@
+import { FooterCmdKTrigger } from "./palette/footer-cmd-k-trigger";
+
 export function Footer() {
   return (
-    <footer className="mt-20 grid gap-6 border-t border-border pt-[52px] pb-11 sm:grid-cols-[1fr_auto] sm:items-center">
+    <footer
+      id="footer"
+      className="mt-20 grid scroll-mt-20 gap-6 border-t border-border pt-[52px] pb-11 sm:grid-cols-[1fr_auto] sm:items-center"
+    >
       <div className="font-mono text-[11.5px] tracking-[0.02em] text-muted">
         © {new Date().getFullYear()} Harshit Sindhu · Built in TypeScript, deployed on a Tuesday ·{" "}
-        <span className="text-accent">press ⌘K</span> for the good stuff
+        <FooterCmdKTrigger /> for the good stuff
       </div>
       <div className="flex flex-wrap gap-2">
         <a
