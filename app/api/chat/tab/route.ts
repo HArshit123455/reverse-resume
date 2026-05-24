@@ -73,9 +73,20 @@ export async function POST(req: Request) {
   try {
     chunks = await retrieveByIds(database, numericIds);
   } catch (e) {
-    console.error("[tab route] retrieveByIds failed", e);
+    const err = e as { message?: string; code?: string; detail?: string; stack?: string };
+    console.error("[tab route] retrieveByIds failed", {
+      message: err.message,
+      code: err.code,
+      detail: err.detail,
+      stack: err.stack,
+      ids: numericIds,
+    });
     return new Response(
-      JSON.stringify({ error: "retrieve_failed", message: "Could not load source chunks." }),
+      JSON.stringify({
+        error: "retrieve_failed",
+        message: "Could not load source chunks.",
+        detail: err.message ?? String(e),
+      }),
       { status: 500, headers: { "Content-Type": "application/json" } }
     );
   }

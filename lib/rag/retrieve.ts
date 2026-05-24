@@ -1,4 +1,5 @@
-import { sql } from "drizzle-orm";
+import { sql, inArray } from "drizzle-orm";
+import { documents } from "@/lib/db/schema";
 import { embed, rerank, voyageCostCents } from "@/lib/clients/voyage";
 import { recordSpend } from "@/lib/spend-cap/daily-cap";
 import type { TestDb } from "@/tests/helpers/test-db";
@@ -110,28 +111,36 @@ export async function retrieve(
  */
 export async function retrieveByIds(db: AnyDb, ids: number[]): Promise<RetrievedChunk[]> {
   if (ids.length === 0) return [];
-  const rows = await db.execute<{
-    id: number; content: string; source_type: string; source_project: string | null;
-    source_url: string | null; file_path: string | null; title: string | null;
-    metadata: Record<string, unknown>;
-  }>(sql`
-    SELECT id, content, source_type, source_project, source_url, file_path, title, metadata
-    FROM documents
-    WHERE id = ANY(${ids}::int[])
-  `);
-  const byId = new Map(rows.map((r) => [Number(r.id), r] as const));
+  // Use drizzle's inArray helper instead of raw `id = ANY(${ids}::int[])` —
+  // the raw template's array binding has bitten us across postgres-js +
+  // Neon serverless. inArray emits IN (?, ?, ?) with one bind per id, which
+  // every driver handles identically.
+  const rows = await db
+    .select({
+      id: documents.id,
+      content: documents.content,
+      sourceType: documents.sourceType,
+      sourceProject: documents.sourceProject,
+      sourceUrl: documents.sourceUrl,
+      filePath: documents.filePath,
+      title: documents.title,
+      metadata: documents.metadata,
+    })
+    .from(documents)
+    .where(inArray(documents.id, ids));
+  const byId = new Map(rows.map((r) => [r.id, r] as const));
   return ids
     .map((id) => byId.get(id))
     .filter((r): r is NonNullable<typeof r> => r !== undefined)
     .map((r) => ({
-      id: Number(r.id),
+      id: r.id,
       content: r.content,
-      sourceType: r.source_type,
-      sourceProject: r.source_project,
-      sourceUrl: r.source_url,
-      filePath: r.file_path,
+      sourceType: r.sourceType,
+      sourceProject: r.sourceProject,
+      sourceUrl: r.sourceUrl,
+      filePath: r.filePath,
       title: r.title,
-      metadata: r.metadata,
+      metadata: (r.metadata ?? {}) as Record<string, unknown>,
       cosineScore: 0,
     }));
 }
