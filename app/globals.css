@@ -124,3 +124,18 @@ body {
 [data-commit-graph] [data-l="2"] { background: var(--commit-l2); }
 [data-commit-graph] [data-l="3"] { background: var(--commit-l3); }
 [data-commit-graph] [data-l="4"] { background: var(--commit-l4); }
+
+/* Easter-egg overlay keyframes (Phase 5a). Live in CSS rather than styled-jsx
+   so the overlay components stay pure client components. */
+@keyframes rrSparkle {
+  0%   { opacity: 0; transform: scale(0.4) rotate(-20deg); }
+  50%  { opacity: 1; transform: scale(1.2) rotate(0deg); }
+  100% { opacity: 0; transform: scale(0.6) rotate(20deg); }
+}
+@keyframes rrHeartRise {
+  0%   { transform: translateY(0) rotate(-6deg); opacity: 0; }
+  15%  { opacity: 1; }
+  100% { transform: translateY(-110vh) rotate(8deg); opacity: 0; }
+}
+[data-egg-sparkle] { animation: rrSparkle 1200ms var(--ease) both; }
+[data-egg-heart]   { animation: rrHeartRise var(--rr-dur, 5000ms) linear var(--rr-delay, 0ms) both; }
