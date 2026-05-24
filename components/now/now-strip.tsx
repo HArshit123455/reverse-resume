@@ -15,7 +15,7 @@ export function NowStrip() {
             Now
           </div>
           <h2 className="font-serif text-[28px] italic leading-tight tracking-[-0.01em] text-fg">
-            What I'm into this season
+            What I&apos;m into this season
           </h2>
         </div>
         <span className="font-mono text-[10.5px] text-muted-2">
