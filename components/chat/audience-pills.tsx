@@ -39,14 +39,14 @@ export function AudiencePills({ audience, onChange }: AudiencePillsProps) {
             aria-checked={active}
             aria-label={`${opt.label} — ${opt.blurb}`}
             onClick={() => handle(opt.value)}
-            className={`inline-flex items-baseline gap-2 rounded-pill px-3.5 py-1.5 text-[13px] transition-colors ${
+            className={`inline-flex items-baseline gap-2 rounded-pill px-3 py-1.5 text-[13px] transition-colors sm:px-3.5 ${
               active
                 ? "bg-fg text-bg"
                 : "text-fg-soft hover:bg-bg-sunk hover:text-fg"
             }`}
           >
             <span className="font-medium">{opt.label}</span>
-            <span className={`text-[11px] ${active ? "text-bg/70" : "text-muted"}`}>{opt.blurb}</span>
+            <span className={`hidden text-[11px] sm:inline ${active ? "text-bg/70" : "text-muted"}`}>{opt.blurb}</span>
           </button>
         );
       })}

@@ -43,14 +43,15 @@ export function ChatInput({ onSubmit, disabled, placeholder, autoFocus }: ChatIn
         rows={1}
         autoFocus={autoFocus}
         placeholder={placeholder ?? "Ask anything about Harshit's work…"}
-        className="flex-1 resize-none rounded-[16px] border border-border bg-bg-elev px-5 py-[18px] text-[15.5px] leading-[1.5] text-fg placeholder:text-muted-2 transition-all focus:border-accent focus:outline-none focus:ring-4 focus:ring-accent-soft"
+        className="flex-1 resize-none rounded-[14px] border border-border bg-bg-elev px-4 py-3 text-[15px] leading-[1.5] text-fg placeholder:text-muted-2 transition-all focus:border-accent focus:outline-none focus:ring-4 focus:ring-accent-soft sm:rounded-[16px] sm:px-5 sm:py-[18px] sm:text-[15.5px]"
       />
       <button
         type="submit"
         disabled={disabled || !value.trim()}
-        className="inline-flex items-center gap-2.5 rounded-[16px] bg-fg px-6 py-[18px] text-[14.5px] font-semibold text-bg transition-transform hover:-translate-y-px disabled:opacity-50"
+        aria-label="Ask"
+        className="inline-flex items-center gap-2.5 rounded-[14px] bg-fg px-4 py-3 text-[14.5px] font-semibold text-bg transition-transform hover:-translate-y-px disabled:opacity-50 sm:rounded-[16px] sm:px-6 sm:py-[18px]"
       >
-        Ask
+        <span className="hidden sm:inline">Ask</span>
         <span aria-hidden>→</span>
       </button>
     </form>

@@ -164,7 +164,7 @@ function Body({ subheadline, suggestionChips }: ChatShellProps) {
               <ChatInput onSubmit={send} disabled={busy} autoFocus />
             </div>
           ) : (
-            <div className="space-y-8">
+            <div className="space-y-8 pb-32 sm:pb-0">
               {turns.map((t) => (
                 <Turn key={t.id} turn={t} />
               ))}

@@ -20,7 +20,7 @@ export function SuggestionChips({ prompts, onPick, disabled }: SuggestionChipsPr
             type="button"
             disabled={disabled}
             onClick={() => onPick(p)}
-            className="inline-flex items-center gap-2 rounded-pill border border-transparent bg-bg-sunk px-3.5 py-2 text-[13.5px] text-fg-soft transition-colors hover:border-border-strong hover:bg-bg-elev hover:text-fg disabled:opacity-50"
+            className="inline-flex items-center gap-2 rounded-[12px] border border-transparent bg-bg-sunk px-3 py-1.5 text-left text-[13px] leading-snug text-fg-soft transition-colors hover:border-border-strong hover:bg-bg-elev hover:text-fg disabled:opacity-50 sm:rounded-pill sm:px-3.5 sm:py-2 sm:text-[13.5px]"
           >
             {p}
           </button>
