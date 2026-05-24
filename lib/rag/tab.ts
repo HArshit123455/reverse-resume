@@ -112,20 +112,63 @@ export interface CodeChunkResult {
   code: string;
   sourceProject: string | null;
   sourceUrl: string | null;
+  // "code" → render via Shiki (syntax highlight); "prose" → render via
+  // MarkdownMessage. Picked when the top retrieved chunk is an MDX
+  // experience/now/landing entry rather than a real source file.
+  kind: "code" | "prose";
+}
+
+const PROSE_LANGS = new Set(["mdx", "md", "markdown"]);
+
+function stripFrontmatter(content: string): string {
+  // Strip a single leading YAML frontmatter block: ---\n...\n---
+  const m = content.match(/^---\r?\n[\s\S]*?\r?\n---\r?\n?/);
+  return m ? content.slice(m[0].length).trimStart() : content;
+}
+
+function makeResult(
+  c: RetrievedChunk,
+  language: string,
+  kind: "code" | "prose"
+): CodeChunkResult {
+  return {
+    file: c.filePath,
+    language,
+    code: kind === "prose" ? stripFrontmatter(c.content) : c.content,
+    sourceProject: c.sourceProject,
+    sourceUrl: c.sourceUrl,
+    kind,
+  };
 }
 
 export function pickCodeChunk(chunks: RetrievedChunk[]): CodeChunkResult | null {
+  // Pass 1: real code — sourceType=github + explicit non-prose language.
   for (const c of chunks) {
     const lang = (c.metadata?.language as string | undefined) ?? "";
-    if (c.sourceType === "github" || lang) {
-      return {
-        file: c.filePath,
-        language: lang || inferLanguage(c.filePath) || "text",
-        code: c.content,
-        sourceProject: c.sourceProject,
-        sourceUrl: c.sourceUrl,
-      };
+    if (c.sourceType === "github" && lang && !PROSE_LANGS.has(lang)) {
+      return makeResult(c, lang, "code");
     }
+  }
+  // Pass 2: any chunk with an explicit non-prose language (e.g. snippet).
+  for (const c of chunks) {
+    const lang = (c.metadata?.language as string | undefined) ?? "";
+    if (lang && !PROSE_LANGS.has(lang)) {
+      return makeResult(c, lang, "code");
+    }
+  }
+  // Pass 3: github chunk with language inferred from filepath.
+  for (const c of chunks) {
+    if (c.sourceType === "github") {
+      const lang = inferLanguage(c.filePath) || "text";
+      const kind: "code" | "prose" = PROSE_LANGS.has(lang) ? "prose" : "code";
+      return makeResult(c, lang, kind);
+    }
+  }
+  // Pass 4: fall back to the top-ranked chunk as prose (MDX experience etc.).
+  if (chunks.length > 0) {
+    const c = chunks[0];
+    const lang = inferLanguage(c.filePath) || "mdx";
+    return makeResult(c, lang, "prose");
   }
   return null;
 }

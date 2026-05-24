@@ -15,6 +15,7 @@ interface CodeChunk {
   code: string;
   sourceProject: string | null;
   sourceUrl: string | null;
+  kind: "code" | "prose";
 }
 interface CodeState { status: "idle" | "loading" | "ready" | "error"; chunk: CodeChunk | null }
 interface StoryState { status: "idle" | "loading" | "streaming" | "ready" | "error"; text: string }
@@ -221,7 +222,13 @@ export function AnswerCard({ turn }: AnswerCardProps) {
                 </>
               )}
             </div>
-            <ShikiCode code={code.chunk.code} language={code.chunk.language} />
+            {code.chunk.kind === "prose" ? (
+              <div className="prose-preview rounded-lg border border-border bg-bg-elev px-5 py-4">
+                <MarkdownMessage content={code.chunk.code} />
+              </div>
+            ) : (
+              <ShikiCode code={code.chunk.code} language={code.chunk.language} />
+            )}
           </div>
         )}
       </div>
