@@ -2,11 +2,10 @@
 
 import { useCallback, useRef, useState } from "react";
 
-// Drafted hint copy — flagged in PR review for user tweak.
 export const BRAND_CLICK_HINTS: Record<number, string> = {
-  5: "You found the easter egg track. Keep going.",
-  10: "Persistent. There's one more.",
-  15: "Try ⌘K — the good stuff's in there.",
+  5: "Hi. The brand wasn't supposed to do anything. Now it does this.",
+  10: "Ten clicks. Respect. There's one more.",
+  15: "Try ⌘K. That's where I hid the actual interface.",
 };
 
 export function useLogoClickCounter(onHint: (message: string) => void) {

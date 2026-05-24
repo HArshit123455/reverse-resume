@@ -14,13 +14,14 @@ const LoveOverlay = dynamic(() => import("./eggs/love-overlay"), { ssr: false })
 const MatrixOverlay = dynamic(() => import("./eggs/matrix-overlay"), { ssr: false });
 
 const HIDDEN_JOKES = [
+  "I asked the LLM for a one-line bio. It cited a source.",
+  "Tests pass in CI. Whether anyone reads them is a separate question.",
+  "Production is a state of mind. So is staging.",
   "Two SSE streams walk into a bar. The bartender says, why so chunky?",
-  "I told my code to be more independent. Now it has its own opinions.",
-  "There are 10 kinds of devs: those who write tests and those who debug in prod.",
 ];
 
 const HIDDEN_CREDITS =
-  "Built by Harshit. Powered by curiosity, RAG, and one extra coffee.";
+  "Built by Harshit. Retrieval by pgvector + Voyage. Words by Anthropic. Hosting by Vercel. Bugs by me.";
 
 function persistAudience(a: Audience) {
   try {
