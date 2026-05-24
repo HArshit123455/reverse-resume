@@ -126,6 +126,12 @@ function stripFrontmatter(content: string): string {
   return m ? content.slice(m[0].length).trimStart() : content;
 }
 
+function isMarkdownFile(filePath: string | null): boolean {
+  if (!filePath) return false;
+  const ext = filePath.split(".").pop()?.toLowerCase();
+  return ext === "mdx" || ext === "md";
+}
+
 function makeResult(
   c: RetrievedChunk,
   language: string,
@@ -142,29 +148,36 @@ function makeResult(
 }
 
 export function pickCodeChunk(chunks: RetrievedChunk[]): CodeChunkResult | null {
-  // Pass 1: real code — sourceType=github + explicit non-prose language.
+  // Pass 1: real source code — sourceType=github + non-prose language +
+  // not a Markdown wrapper. Markdown files always go to prose path because
+  // MarkdownMessage handles their headings AND fenced code blocks better
+  // than dumping the whole MDX through Shiki-as-language-X.
   for (const c of chunks) {
+    if (isMarkdownFile(c.filePath)) continue;
     const lang = (c.metadata?.language as string | undefined) ?? "";
     if (c.sourceType === "github" && lang && !PROSE_LANGS.has(lang)) {
       return makeResult(c, lang, "code");
     }
   }
-  // Pass 2: any chunk with an explicit non-prose language (e.g. snippet).
+  // Pass 2: any non-markdown chunk with an explicit non-prose language.
   for (const c of chunks) {
+    if (isMarkdownFile(c.filePath)) continue;
     const lang = (c.metadata?.language as string | undefined) ?? "";
     if (lang && !PROSE_LANGS.has(lang)) {
       return makeResult(c, lang, "code");
     }
   }
-  // Pass 3: github chunk with language inferred from filepath.
+  // Pass 3: any github chunk with language inferred from filepath (still
+  // skipping markdown files).
   for (const c of chunks) {
+    if (isMarkdownFile(c.filePath)) continue;
     if (c.sourceType === "github") {
       const lang = inferLanguage(c.filePath) || "text";
-      const kind: "code" | "prose" = PROSE_LANGS.has(lang) ? "prose" : "code";
-      return makeResult(c, lang, kind);
+      return makeResult(c, lang, "code");
     }
   }
-  // Pass 4: fall back to the top-ranked chunk as prose (MDX experience etc.).
+  // Pass 4: fall back to the top-ranked chunk as prose (MDX experience /
+  // snippet wrappers).
   if (chunks.length > 0) {
     const c = chunks[0];
     const lang = inferLanguage(c.filePath) || "mdx";
