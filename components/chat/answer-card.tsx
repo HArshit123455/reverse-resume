@@ -38,7 +38,7 @@ export function AnswerCard({ turn }: AnswerCardProps) {
       const res = await fetch("/api/chat/tab", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ messageId: turn.id, audience: turn.audience, tab: "impact" }),
+        body: JSON.stringify({ question: turn.q, chunkIds: turn.chunkIds, audience: turn.audience, tab: "impact" }),
       });
       if (!res.ok) throw new Error(`status ${res.status}`);
       const data = await res.json();
@@ -56,7 +56,7 @@ export function AnswerCard({ turn }: AnswerCardProps) {
       const res = await fetch("/api/chat/tab", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ messageId: turn.id, audience: turn.audience, tab: "code" }),
+        body: JSON.stringify({ question: turn.q, chunkIds: turn.chunkIds, audience: turn.audience, tab: "code" }),
       });
       if (!res.ok) throw new Error(`status ${res.status}`);
       const data = await res.json();
@@ -73,7 +73,7 @@ export function AnswerCard({ turn }: AnswerCardProps) {
       const res = await fetch("/api/chat/tab", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ messageId: turn.id, audience: turn.audience, tab: "story" }),
+        body: JSON.stringify({ question: turn.q, chunkIds: turn.chunkIds, audience: turn.audience, tab: "story" }),
       });
       if (!res.ok || !res.body) throw new Error(`status ${res.status}`);
       setStory({ status: "streaming", text: "" });

@@ -8,7 +8,6 @@ import { rewriteQuery } from "@/lib/rag/rewrite";
 import { retrieve } from "@/lib/rag/retrieve";
 import { generate } from "@/lib/rag/generate";
 import { makeSseStream } from "@/lib/sse";
-import { cacheChunks } from "@/lib/rag/cache";
 
 export const runtime = "nodejs";
 
@@ -73,18 +72,11 @@ export async function POST(req: Request) {
       const chunks = await retrieve(database, rewritten, { topK: 5 });
 
       // 3a. Announce the message-id + retrieved chunk ids so the client can
-      //     later request follow-up tabs against the same chunks. Cache the
-      //     chunk-id list + question + audience under messageId so
-      //     /api/chat/tab can hydrate chunks in one DB query.
+      //     later request follow-up tabs against the same chunks. The client
+      //     round-trips chunkIds + question on tab calls — separate Vercel
+      //     functions don't share memory, so we don't try to cache server-side.
       const messageId = crypto.randomUUID();
       const chunkIds = chunks.map((c) => String(c.id));
-      const lastUserMessage =
-        [...body.data.messages].reverse().find((m) => m.role === "user")?.content ?? "";
-      cacheChunks(messageId, {
-        chunkIds,
-        question: lastUserMessage,
-        audience: body.data.audience,
-      });
       send({ type: "init", messageId, chunkIds });
 
       // 4. Re-check cap before expensive Sonnet call

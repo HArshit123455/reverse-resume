@@ -4,15 +4,20 @@ import { db } from "@/lib/db/client";
 import { hashIp, todayIstDateStr } from "@/lib/rate-limit/ip-hash";
 import { consume } from "@/lib/rate-limit/postgres-token-bucket";
 import { checkCap } from "@/lib/spend-cap/daily-cap";
-import { getChunks } from "@/lib/rag/cache";
 import { retrieveByIds } from "@/lib/rag/retrieve";
 import { generateImpact, generateStory, pickCodeChunk } from "@/lib/rag/tab";
 import { encodeSse } from "@/lib/sse";
 
 export const runtime = "nodejs";
 
+// chunkIds + question travel in the request body because Vercel serverless
+// functions don't share an in-memory cache across routes — the original LRU
+// in lib/rag/cache.ts only worked in single-process dev. The client already
+// holds both: it received chunkIds via the SSE init event and knows the
+// question it asked.
 const Body = z.object({
-  messageId: z.string().min(1).max(80),
+  question: z.string().min(1).max(2000),
+  chunkIds: z.array(z.string()).min(1).max(40),
   audience: z.enum(["curious", "recruiter", "engineer"]),
   tab: z.enum(["impact", "code", "story"]),
 });
@@ -54,29 +59,47 @@ export async function POST(req: Request) {
     );
   }
 
-  const entry = getChunks(body.data.messageId);
-  if (!entry) {
+  const numericIds = body.data.chunkIds
+    .map((s) => Number(s))
+    .filter((n) => Number.isFinite(n));
+  if (numericIds.length === 0) {
     return new Response(
-      JSON.stringify({ error: "cache_miss", message: "Original answer expired — ask the question again." }),
-      { status: 404, headers: { "Content-Type": "application/json" } }
+      JSON.stringify({ error: "no_chunks", message: "No valid chunk IDs in request." }),
+      { status: 400, headers: { "Content-Type": "application/json" } }
     );
   }
 
-  const numericIds = entry.chunkIds.map((s) => Number(s)).filter((n) => Number.isFinite(n));
-  const chunks = await retrieveByIds(database, numericIds);
+  let chunks;
+  try {
+    chunks = await retrieveByIds(database, numericIds);
+  } catch (e) {
+    console.error("[tab route] retrieveByIds failed", e);
+    return new Response(
+      JSON.stringify({ error: "retrieve_failed", message: "Could not load source chunks." }),
+      { status: 500, headers: { "Content-Type": "application/json" } }
+    );
+  }
 
   if (body.data.tab === "code") {
-    const picked = pickCodeChunk(chunks);
-    return new Response(JSON.stringify({ chunk: picked }), {
-      status: 200,
-      headers: { "Content-Type": "application/json" },
-    });
+    try {
+      const picked = pickCodeChunk(chunks);
+      return new Response(JSON.stringify({ chunk: picked }), {
+        status: 200,
+        headers: { "Content-Type": "application/json" },
+      });
+    } catch (e) {
+      console.error("[tab/code route]", e);
+      return new Response(JSON.stringify({ chunk: null }), {
+        status: 200,
+        headers: { "Content-Type": "application/json" },
+      });
+    }
   }
 
   if (body.data.tab === "impact") {
     try {
       const result = await generateImpact(database, {
-        question: entry.question,
+        question: body.data.question,
         audience: body.data.audience,
         chunks,
       });
@@ -99,7 +122,7 @@ export async function POST(req: Request) {
     async start(controller) {
       try {
         for await (const ev of generateStory(database, {
-          question: entry.question,
+          question: body.data.question,
           audience: body.data.audience,
           chunks,
         })) {
