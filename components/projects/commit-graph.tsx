@@ -1,18 +1,5 @@
-import calendarJson from "@/content/generated/gitlab-calendar.json";
-
-interface CalendarCell {
-  date: string;
-  count: number;
-  level: 0 | 1 | 2 | 3 | 4;
-}
-
-interface CalendarSnapshot {
-  fetchedAt: string;
-  source: "gitlab" | "snapshot" | "seed";
-  weeks: CalendarCell[][];
-}
-
-const calendar = calendarJson as CalendarSnapshot;
+import { getGitlabCalendar } from "@/lib/gitlab";
+import { totalCommits } from "@/lib/gitlab-calendar";
 
 function formatCount(count: number): string {
   if (count === 0) return "No commits";
@@ -20,12 +7,11 @@ function formatCount(count: number): string {
   return `${count} commits`;
 }
 
-export function CommitGraph() {
-  const total = calendar.weeks.reduce(
-    (sum, week) => sum + week.reduce((s, cell) => s + cell.count, 0),
-    0
-  );
+export async function CommitGraph() {
+  const calendar = await getGitlabCalendar();
+  const total = totalCommits(calendar.weeks);
   const fetchedAt = new Date(calendar.fetchedAt).toISOString().slice(0, 10);
+  const freshness = calendar.source === "gitlab" ? "live" : `snapshot ${fetchedAt}`;
 
   return (
     <div
@@ -38,12 +24,12 @@ export function CommitGraph() {
           GitLab activity · last 53 weeks
         </div>
         <div className="font-mono text-[11px] text-muted-2">
-          {total} commits · snapshot {fetchedAt}
+          {total} commits · {freshness}
         </div>
       </div>
       <div
         role="img"
-        aria-label={`GitLab commit graph: ${total} commits over the last 53 weeks. Snapshot from ${fetchedAt}.`}
+        aria-label={`GitLab commit graph: ${total} commits over the last 53 weeks (${freshness}).`}
         className="grid auto-cols-min grid-flow-col gap-[3px] overflow-x-auto"
       >
         {calendar.weeks.map((week, w) => (
