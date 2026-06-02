@@ -172,7 +172,7 @@ function Body({ subheadline, suggestionChips }: ChatShellProps) {
         // constellation track the cursor across the whole hero, not just its stage.
         <div
           data-hero
-          className="grid grid-cols-1 items-center gap-7 min-[901px]:grid-cols-[minmax(0,1.04fr)_minmax(0,0.96fr)]"
+          className="grid grid-cols-1 items-start gap-7 min-[901px]:grid-cols-[minmax(0,1.25fr)_minmax(0,0.85fr)]"
         >
           <div className="space-y-7">
             <Hero
