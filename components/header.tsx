@@ -1,6 +1,7 @@
 import { ThemeToggle } from "./theme-toggle";
 import { BrandWordmark } from "./eggs/brand-wordmark";
 import { CmdKPill } from "./palette/cmd-k-pill";
+import Link from "next/link";
 
 export function Header() {
   return (
@@ -8,6 +9,12 @@ export function Header() {
       <div className="mx-auto flex h-[72px] max-w-5xl items-center justify-between px-6">
         <BrandWordmark />
         <div className="flex items-center gap-2">
+          <Link
+            href="/about"
+            className="mr-1 hidden sm:inline-flex items-center rounded-[10px] px-2.5 py-1.5 text-[13px] text-muted hover:bg-bg-sunk hover:text-fg transition-colors"
+          >
+            About
+          </Link>
           <a
             href="https://www.linkedin.com/in/harshit-sindhu/"
             target="_blank"
