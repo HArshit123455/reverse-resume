@@ -60,8 +60,9 @@ export function KnowledgeGraph({ animate = true }: { animate?: boolean }) {
     // Edges
     const edgePoints: number[] = [];
     for (const e of GRAPH.edges) {
-      const a = pos.get(e.from)!;
-      const b = pos.get(e.to)!;
+      const a = pos.get(e.from);
+      const b = pos.get(e.to);
+      if (!a || !b) continue;
       edgePoints.push(a.x, a.y, a.z, b.x, b.y, b.z);
     }
     const edgeGeo = new THREE.BufferGeometry();
@@ -74,7 +75,8 @@ export function KnowledgeGraph({ animate = true }: { animate?: boolean }) {
     const sphereGeo = new THREE.SphereGeometry(1, 16, 16);
     const meshes: THREE.Mesh[] = [];
     for (const n of GRAPH.nodes) {
-      const p = pos.get(n.id)!;
+      const p = pos.get(n.id);
+      if (!p) continue;
       const r = n.group === "self" ? 0.32 : n.group === "repo" ? 0.18 : 0.1;
       const mat = new THREE.MeshBasicMaterial({ color: colorFor(n.group, accent) });
       const mesh = new THREE.Mesh(sphereGeo, mat);
@@ -93,7 +95,7 @@ export function KnowledgeGraph({ animate = true }: { animate?: boolean }) {
       targetRotY = ((ev.clientX - rect.left) / rect.width - 0.5) * 0.6;
       targetRotX = ((ev.clientY - rect.top) / rect.height - 0.5) * 0.6;
     };
-    mount.addEventListener("pointermove", onPointerMove);
+    if (animate) mount.addEventListener("pointermove", onPointerMove);
 
     const renderFrame = () => {
       group.rotation.x += (targetRotX - group.rotation.x) * 0.05;
