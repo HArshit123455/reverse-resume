@@ -11,8 +11,8 @@ export function SkillGroups({ skills }: { skills: AboutFrontmatterT["skills"] })
           <div key={g.group} className="rounded-[12px] border border-border bg-bg-elev p-4">
             <div className="mb-2 font-mono text-[11px] uppercase tracking-[0.08em] text-muted">{g.group}</div>
             <div className="flex flex-wrap gap-1.5">
-              {g.items.map((it) => (
-                <span key={it} className="rounded-full bg-bg-sunk px-2.5 py-1 text-[12.5px] text-fg-soft">
+              {g.items.map((it, i) => (
+                <span key={`${it}-${i}`} className="rounded-full bg-bg-sunk px-2.5 py-1 text-[12.5px] text-fg-soft">
                   {it}
                 </span>
               ))}

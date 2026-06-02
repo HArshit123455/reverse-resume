@@ -7,8 +7,8 @@ export function WorkTimeline({ items }: { items: ExperienceFrontmatterT[] }) {
         Where I've worked
       </h2>
       <ol className="space-y-3 border-l border-border pl-5">
-        {items.map((e) => (
-          <li key={`${e.employer}-${e.dates}`} className="relative rounded-[12px] border border-border bg-bg-elev p-4">
+        {items.map((e, i) => (
+          <li key={`${e.employer}-${e.role}-${e.dates ?? i}`} className="relative rounded-[12px] border border-border bg-bg-elev p-4">
             <span className="absolute -left-[27px] top-5 h-2.5 w-2.5 rounded-full bg-accent" aria-hidden />
             <div className="flex flex-wrap items-baseline justify-between gap-x-3">
               <h3 className="text-[15px] font-semibold text-fg">{e.role}</h3>
@@ -20,8 +20,8 @@ export function WorkTimeline({ items }: { items: ExperienceFrontmatterT[] }) {
             </div>
             {e.stack.length > 0 && (
               <div className="mt-2 flex flex-wrap gap-1.5">
-                {e.stack.map((s) => (
-                  <span key={s} className="rounded-full bg-bg-sunk px-2 py-0.5 font-mono text-[11px] text-muted">
+                {e.stack.map((s, si) => (
+                  <span key={`${s}-${si}`} className="rounded-full bg-bg-sunk px-2 py-0.5 font-mono text-[11px] text-muted">
                     {s}
                   </span>
                 ))}
