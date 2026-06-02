@@ -19,7 +19,7 @@ export default function AboutPage() {
 
   return (
     <div className="mx-auto max-w-[640px] space-y-10">
-      <header className="space-y-3">
+      <div className="space-y-3">
         {data.photo && (
           <Image
             src={data.photo}
@@ -33,7 +33,7 @@ export default function AboutPage() {
           <h1 className="text-2xl font-semibold tracking-[-0.01em] text-fg">{data.name}</h1>
           <p className="mt-1 text-[15px] text-muted">{data.tagline}</p>
         </div>
-      </header>
+      </div>
 
       <BioProse content={body} />
 
@@ -42,8 +42,8 @@ export default function AboutPage() {
       <SkillGroups skills={data.skills} />
 
       {data.achievements.length > 0 && (
-        <section>
-          <h2 className="mb-4 font-mono text-[10.5px] uppercase tracking-[0.10em] text-muted-2">Achievements</h2>
+        <section aria-labelledby="achievements-heading">
+          <h2 id="achievements-heading" className="mb-4 font-mono text-[10.5px] uppercase tracking-[0.10em] text-muted-2">Achievements</h2>
           <ul className="space-y-2">
             {data.achievements.map((a) => (
               <li key={a} className="flex gap-2 text-[14px] text-fg-soft">
@@ -55,10 +55,11 @@ export default function AboutPage() {
         </section>
       )}
 
-      <section className="rounded-[12px] border border-border bg-bg-elev p-5">
+      <section aria-label="Contact and résumé" className="rounded-[12px] border border-border bg-bg-elev p-5">
         <div className="flex flex-wrap items-center gap-3">
           <a
             href={data.resumeUrl}
+            download
             className="inline-flex items-center rounded-[10px] bg-accent px-4 py-2 text-[14px] font-medium text-white hover:opacity-90 transition-opacity"
           >
             Download résumé (PDF)
