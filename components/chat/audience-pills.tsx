@@ -27,7 +27,7 @@ export function AudiencePills({ audience, onChange }: AudiencePillsProps) {
     <div
       role="radiogroup"
       aria-label="Choose audience"
-      className="inline-flex flex-wrap items-center gap-1.5 rounded-pill border border-border bg-bg-elev p-1"
+      className="inline-flex flex-wrap items-center gap-0.5 rounded-pill border border-border bg-bg-elev p-1"
     >
       {OPTIONS.map((opt) => {
         const active = opt.value === audience;

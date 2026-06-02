@@ -194,7 +194,7 @@ export function EvidenceConstellation() {
         >
           {n.center ? (
             <>
-              <span className="cnode-q">?</span>
+              <span className="cnode-q">#</span>
               <span className="cnode-clabel">ask my work</span>
             </>
           ) : (
