@@ -6,6 +6,8 @@ import { ProjectsSection } from "@/components/projects/projects-section";
 import { NowStrip } from "@/components/now/now-strip";
 import { Footer } from "@/components/footer";
 
+export const revalidate = 21600; // 6h — ISR for the embedded GitLab activity graph
+
 interface LandingFront {
   headline: string;
   subheadline: string;

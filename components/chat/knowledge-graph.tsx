@@ -13,12 +13,22 @@ function layout(): Map<string, THREE.Vector3> {
     const a = (i / repos.length) * Math.PI * 2;
     pos.set(r.id, new THREE.Vector3(Math.cos(a) * 2.2, Math.sin(a) * 2.2, (i % 2 === 0 ? 1 : -1) * 0.8));
   });
+  const siblingIndex = new Map<string, number>();
   GRAPH.nodes
     .filter((n) => n.group === "leaf")
     .forEach((leaf) => {
       const parent = GRAPH.edges.find((e) => e.to === leaf.id)?.from ?? "me";
       const base = pos.get(parent) ?? new THREE.Vector3();
-      pos.set(leaf.id, base.clone().multiplyScalar(1.5).add(new THREE.Vector3(0.4, -0.5, 0.6)));
+      const i = siblingIndex.get(parent) ?? 0;
+      siblingIndex.set(parent, i + 1);
+      const angle = (i * Math.PI * 2) / 3;
+      pos.set(
+        leaf.id,
+        base
+          .clone()
+          .multiplyScalar(1.5)
+          .add(new THREE.Vector3(Math.cos(angle) * 0.6, Math.sin(angle) * 0.5, 0.4 * (i % 2 === 0 ? 1 : -1))),
+      );
     });
   return pos;
 }
