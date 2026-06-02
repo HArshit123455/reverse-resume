@@ -25,6 +25,7 @@ describe("lib/gitlab-calendar", () => {
     });
     expect(lookupFromRaw(null)).toBeNull();
     expect(lookupFromRaw("nope")).toBeNull();
+    expect(lookupFromRaw([])).toBeNull();
   });
 
   it("totalCommits sums every cell", () => {
@@ -32,7 +33,10 @@ describe("lib/gitlab-calendar", () => {
     expect(totalCommits(weeks)).toBe(15);
   });
 
-  it("deterministicSeed is stable for a given date", () => {
-    expect(deterministicSeed(TODAY)).toEqual(deterministicSeed(TODAY));
+  it("deterministicSeed is stable and non-trivial for a given date", () => {
+    const seed = deterministicSeed(TODAY);
+    expect(seed).toEqual(deterministicSeed(TODAY));
+    expect(Object.keys(seed).length).toBeGreaterThan(50);
+    expect(Object.values(seed).every((v) => v > 0)).toBe(true);
   });
 });

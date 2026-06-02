@@ -66,7 +66,7 @@ export function deterministicSeed(today: Date): Record<string, number> {
 }
 
 export function lookupFromRaw(data: unknown): Record<string, number> | null {
-  if (typeof data !== "object" || data === null) return null;
+  if (typeof data !== "object" || data === null || Array.isArray(data)) return null;
   const out: Record<string, number> = {};
   for (const [k, v] of Object.entries(data as Record<string, unknown>)) {
     const n = typeof v === "number" ? v : Number(v);
