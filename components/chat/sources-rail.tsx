@@ -3,7 +3,6 @@
 import { useEffect, useRef, useState } from "react";
 import { ShikiCode } from "../shiki-code";
 import { useCitations, type CitationCard } from "../citations-context";
-import { KnowledgeGraphLazy } from "./knowledge-graph-lazy";
 
 // Tag mapping: an explicit chunk.metadata.tag wins (allows per-MDX override);
 // otherwise we fall back to a stable mapping from sourceType.
@@ -106,7 +105,7 @@ export function SourcesRail() {
       <aside className="hidden md:block sticky top-20 max-h-[calc(100vh-6rem)] overflow-y-auto pb-4" data-sources-rail>
         {header}
         <div className="space-y-3">
-          {citations.length === 0 ? <KnowledgeGraphLazy /> : citations.map((c) => <SourceCard key={c.n} card={c} />)}
+          {citations.length === 0 ? empty : citations.map((c) => <SourceCard key={c.n} card={c} />)}
         </div>
       </aside>
 

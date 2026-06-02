@@ -139,3 +139,107 @@ body {
 }
 [data-egg-sparkle] { animation: rrSparkle 1200ms var(--ease) both; }
 [data-egg-heart]   { animation: rrHeartRise var(--rr-dur, 5000ms) linear var(--rr-delay, 0ms) both; }
+
+/* ============================================================
+   Evidence Constellation (hero 3D element) — components/hero/evidence-constellation.tsx
+   Built entirely on the page's theme custom properties, so it adapts to
+   dark mode and love-mode for free. The JS writes transform/opacity and SVG
+   line coordinates every frame; these rules cover the static styling.
+   ============================================================ */
+.constellation {
+  position: relative;
+  width: 100%;
+  height: 472px;
+  perspective: 780px;
+  pointer-events: none; /* stage is click-through; cards re-enable pointer-events */
+  /* radial mask so cards dissolve into the page at the edges instead of a hard box */
+  -webkit-mask-image: radial-gradient(115% 105% at 55% 50%, #000 58%, transparent 100%);
+          mask-image: radial-gradient(115% 105% at 55% 50%, #000 58%, transparent 100%);
+}
+@media (max-width: 900px) {
+  .constellation { height: 340px; opacity: 0.92; }
+}
+@media (max-width: 560px) {
+  .constellation { display: none; }
+}
+
+.constellation-lines {
+  position: absolute;
+  inset: 0;
+  overflow: visible;
+  pointer-events: none;
+}
+.c-line {
+  stroke: var(--accent);
+  stroke-width: 1;
+  opacity: 0.14; /* JS overrides per-frame by depth */
+  transition: stroke 320ms var(--ease);
+}
+.c-line-spoke { stroke-dasharray: 2.5 4.5; }
+
+.cnode {
+  position: absolute;
+  top: 0;
+  left: 0;
+  pointer-events: auto;
+  will-change: transform, opacity;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 7px 12px;
+  background: var(--bg-elev); /* MUST be opaque */
+  border: 1px solid var(--border-strong);
+  border-radius: 11px;
+  box-shadow: 0 1px 1px rgba(20, 23, 26, 0.04), 0 10px 22px -16px rgba(20, 23, 26, 0.22);
+  white-space: nowrap;
+  transition: border-color 200ms var(--ease), box-shadow 200ms var(--ease);
+}
+.cnode:hover { border-color: var(--accent); }
+.cnode-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--accent);
+  flex-shrink: 0;
+  box-shadow: 0 0 0 3px var(--accent-soft);
+}
+.cnode-label {
+  font-family: var(--mono);
+  font-size: 11.5px;
+  color: var(--fg);
+  letter-spacing: -0.01em;
+}
+.cnode-tag {
+  font-family: var(--mono);
+  font-size: 9.5px;
+  color: var(--muted);
+  text-transform: lowercase;
+  padding-left: 9px;
+  margin-left: 1px;
+  border-left: 1px solid var(--border);
+}
+
+.cnode-center {
+  flex-direction: column;
+  gap: 3px;
+  padding: 13px 18px;
+  background: var(--accent);
+  border-color: var(--accent);
+  border-radius: 15px;
+  box-shadow: 0 16px 44px -12px color-mix(in oklab, var(--accent) 62%, transparent);
+}
+.cnode-q {
+  font-family: var(--serif);
+  font-style: italic;
+  font-size: 28px;
+  line-height: 1;
+  color: var(--accent-ink);
+}
+.cnode-clabel {
+  font-family: var(--mono);
+  font-size: 8.5px;
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+  color: var(--accent-ink);
+  opacity: 0.82;
+}

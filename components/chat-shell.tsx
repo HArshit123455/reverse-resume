@@ -3,6 +3,7 @@
 import { useEffect, useRef, useState } from "react";
 import { CitationsProvider, useCitations } from "./citations-context";
 import { Hero } from "./hero";
+import { EvidenceConstellation } from "./hero/evidence-constellation";
 import { SourcesRail } from "./chat/sources-rail";
 import { SuggestionChips } from "./chat/suggestion-chips";
 import { ChatInput } from "./chat/chat-input";
@@ -149,48 +150,66 @@ function Body({ subheadline, suggestionChips }: ChatShellProps) {
   const promptsForAudience = suggestionChips[audience] ?? [];
   const empty = turns.length === 0;
 
+  const bannerEl = statusBanner ? (
+    <div className="mt-4 flex items-center justify-between rounded-[12px] border border-amber-200 bg-amber-50 px-4 py-2.5 text-[13px] text-amber-900 dark:border-amber-500/30 dark:bg-amber-500/10 dark:text-amber-200">
+      <span>{statusBanner}</span>
+      <button
+        type="button"
+        onClick={() => setStatusBanner(null)}
+        aria-label="Dismiss"
+        className="ml-3 text-amber-900/60 hover:text-amber-900 dark:text-amber-200/60 dark:hover:text-amber-200"
+      >
+        ×
+      </button>
+    </div>
+  ) : null;
+
   return (
     <div className="space-y-10">
-      <Hero
-        subheadline={subheadline}
-        audience={audience}
-        onAudienceChange={setAudience}
-      />
-      <div className="grid grid-cols-1 gap-8 md:grid-cols-[1fr_320px]">
-        <div>
-          {empty ? (
+      {empty ? (
+        // Landing: two-column hero — copy + entry on the left, the Evidence
+        // Constellation on the right (beside the headline). data-hero lets the
+        // constellation track the cursor across the whole hero, not just its stage.
+        <div
+          data-hero
+          className="grid grid-cols-1 items-center gap-7 min-[901px]:grid-cols-[minmax(0,1.04fr)_minmax(0,0.96fr)]"
+        >
+          <div className="space-y-7">
+            <Hero
+              subheadline={subheadline}
+              audience={audience}
+              onAudienceChange={setAudience}
+            />
             <div className="space-y-6">
               <SuggestionChips prompts={promptsForAudience} onPick={send} disabled={busy} />
               <ChatInput onSubmit={send} disabled={busy} autoFocus />
             </div>
-          ) : (
-            <div className="space-y-8 pb-32 sm:pb-0">
-              {turns.map((t) => (
-                <Turn key={t.id} turn={t} />
-              ))}
-            </div>
-          )}
-
-          {statusBanner && (
-            <div className="mt-4 flex items-center justify-between rounded-[12px] border border-amber-200 bg-amber-50 px-4 py-2.5 text-[13px] text-amber-900 dark:border-amber-500/30 dark:bg-amber-500/10 dark:text-amber-200">
-              <span>{statusBanner}</span>
-              <button
-                type="button"
-                onClick={() => setStatusBanner(null)}
-                aria-label="Dismiss"
-                className="ml-3 text-amber-900/60 hover:text-amber-900 dark:text-amber-200/60 dark:hover:text-amber-200"
-              >
-                ×
-              </button>
-            </div>
-          )}
-
-          {!empty && (
-            <StickyFollowup onSubmit={send} onClear={clearThread} disabled={busy} />
-          )}
+            {bannerEl}
+          </div>
+          <EvidenceConstellation />
         </div>
-        <SourcesRail />
-      </div>
+      ) : (
+        // Conversation: headline above, then the turns + sources rail.
+        <>
+          <Hero
+            subheadline={subheadline}
+            audience={audience}
+            onAudienceChange={setAudience}
+          />
+          <div className="grid grid-cols-1 gap-8 md:grid-cols-[1fr_320px]">
+            <div>
+              <div className="space-y-8 pb-32 sm:pb-0">
+                {turns.map((t) => (
+                  <Turn key={t.id} turn={t} />
+                ))}
+              </div>
+              {bannerEl}
+              <StickyFollowup onSubmit={send} onClear={clearThread} disabled={busy} />
+            </div>
+            <SourcesRail />
+          </div>
+        </>
+      )}
     </div>
   );
 }
