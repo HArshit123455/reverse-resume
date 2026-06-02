@@ -19,7 +19,7 @@ export const CONSTELLATION_NODES: ConstellationNode[] = [
   { label: "sla-engine", tag: "production" },
   { label: "outbox-dispatcher", tag: "queues" },
   { label: "pro-shop", tag: "mern" },
-  { label: "Zykrr", tag: "~2 yrs" },
+  { label: "Zykrr CX", tag: "~2 yrs" },
   { label: "pgvector", tag: "semantic" },
   { label: "token-bucket", tag: "rate-limit" },
   { label: "Anthropic SDK", tag: "agents" },

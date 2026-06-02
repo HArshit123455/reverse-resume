@@ -12,6 +12,9 @@ export async function getGitlabCalendar(): Promise<CalendarSnapshot> {
     const res = await fetch(GITLAB_URL, {
       headers: { "User-Agent": "reverse-resume/1.0" },
       next: { revalidate: REVALIDATE_SECONDS },
+      // Cap latency so a slow/hung GitLab can't stall an ISR render — fall
+      // through to the committed snapshot instead of waiting on the socket.
+      signal: AbortSignal.timeout(5000),
     });
     if (res.ok) {
       const lookup = lookupFromRaw(await res.json());

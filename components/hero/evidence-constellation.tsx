@@ -162,8 +162,17 @@ export function EvidenceConstellation() {
     };
     raf = requestAnimationFrame(frame);
 
+    // Pause the loop while the tab is hidden — no point burning CPU/battery
+    // animating a constellation nobody can see.
+    const onVisibility = () => {
+      cancelAnimationFrame(raf);
+      if (!document.hidden) raf = requestAnimationFrame(frame);
+    };
+    document.addEventListener("visibilitychange", onVisibility);
+
     return () => {
       cancelAnimationFrame(raf);
+      document.removeEventListener("visibilitychange", onVisibility);
       host.removeEventListener("mousemove", onMove);
       host.removeEventListener("mouseleave", onLeave);
     };
