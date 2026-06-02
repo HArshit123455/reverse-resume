@@ -4,7 +4,7 @@ export function WorkTimeline({ items }: { items: ExperienceFrontmatterT[] }) {
   return (
     <section>
       <h2 className="mb-4 font-mono text-[10.5px] uppercase tracking-[0.10em] text-muted-2">
-        Where I've worked
+        Where I&apos;ve worked
       </h2>
       <ol className="space-y-3 border-l border-border pl-5">
         {items.map((e, i) => (
