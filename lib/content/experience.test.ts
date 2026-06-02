@@ -44,4 +44,11 @@ describe("lib/content/experience", () => {
     });
     expect(r.success).toBe(true);
   });
+
+  it("breaks same-year ties by order ascending", () => {
+    write("b.mdx", `title: "B"\nrole: "Dev"\nemployer: "B Co"\ndates: "2024"\nlocation: "X"\nstack: []\norder: 2`);
+    write("a.mdx", `title: "A"\nrole: "Dev"\nemployer: "A Co"\ndates: "2024"\nlocation: "X"\nstack: []\norder: 1`);
+    const exp = _loadExperienceFrom(dir);
+    expect(exp.map((e) => e.employer)).toEqual(["A Co", "B Co"]);
+  });
 });
