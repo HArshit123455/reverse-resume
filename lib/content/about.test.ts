@@ -18,5 +18,13 @@ describe("lib/content/about", () => {
       links: [{ label: "GitHub", href: "https://github.com/x" }],
     });
     expect(r.success).toBe(true);
+
+    const bad = AboutFrontmatter.safeParse({
+      name: "X", tagline: "t", resumeUrl: "/resume.pdf",
+      skills: [{ group: "Backend", items: ["Node.js"] }],
+      achievements: [],
+      links: [{ label: "Bad", href: "github.com/x" }],
+    });
+    expect(bad.success).toBe(false);
   });
 });

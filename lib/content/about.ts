@@ -10,7 +10,11 @@ export const SkillGroup = z.object({
 
 export const AboutLink = z.object({
   label: z.string().min(1).max(40),
-  href: z.string().min(1).max(200),
+  href: z
+    .string()
+    .min(1)
+    .max(200)
+    .regex(/^(https?:\/\/|mailto:)/, "href must start with http://, https://, or mailto:"),
 });
 
 export const AboutFrontmatter = z.object({
