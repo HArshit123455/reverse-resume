@@ -243,3 +243,85 @@ body {
   color: var(--accent-ink);
   opacity: 0.82;
 }
+
+/* ============================================================
+   About page — components/about/*
+   Tailwind handles most styling; these rules cover the bits that
+   are awkward as utilities (timeline connector, current-role
+   highlight, stat dividers, scroll-reveal start-state).
+   ============================================================ */
+
+/* Scroll-reveal: hidden start-state only when motion is allowed, so
+   print / no-JS / reduced-motion always show content. */
+@media (prefers-reduced-motion: no-preference) {
+  [data-reveal][data-revealed="false"] {
+    opacity: 0;
+    transform: translateY(16px);
+  }
+  [data-reveal] {
+    transition: opacity 620ms var(--ease), transform 620ms var(--ease);
+  }
+}
+
+/* Pulsing accent dots (eyebrow / availability / current-role). */
+.about-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--accent);
+  box-shadow: 0 0 0 4px var(--accent-soft);
+  flex-shrink: 0;
+}
+/* Smaller, ring-less variant for inside pills / badges. */
+.about-dot-sm {
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  background: var(--accent);
+  flex-shrink: 0;
+}
+@media (prefers-reduced-motion: no-preference) {
+  .about-dot,
+  .about-dot-sm { animation: pulse-dot 2.6s var(--ease) infinite; }
+}
+
+/* Timeline connector: vertical hairline from each rail to the next. */
+.tl-rail { position: relative; }
+.tl-rail::after {
+  content: "";
+  position: absolute;
+  left: 31px;
+  top: 72px;
+  bottom: -34px;
+  width: 1px;
+  background: linear-gradient(var(--border-strong), transparent);
+}
+.tl-item:last-child .tl-rail::after { display: none; }
+@media (max-width: 560px) {
+  .tl-rail::after { left: 23px; top: 56px; }
+}
+
+/* Current-role highlight: accent wash + left edge pulled into the gutter. */
+.tl-item--now {
+  background: linear-gradient(90deg, var(--accent-soft), transparent 62%);
+  border-left: 2px solid var(--accent);
+  border-radius: 0 16px 16px 0;
+  margin-left: -22px;
+  padding-left: 22px;
+}
+
+/* Stat strip dividers: hairline before every cell except the first. */
+.stat + .stat { position: relative; }
+.stat + .stat::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  top: 18px;
+  bottom: 18px;
+  width: 1px;
+  background: var(--border);
+}
+@media (max-width: 560px) {
+  /* 2-up: only the left-column cells (odd index) keep a divider */
+  .stat:nth-child(odd) + .stat::before { display: none; }
+}
