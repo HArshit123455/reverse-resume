@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { MarkdownMessage } from "../markdown-message";
 import { ShikiCode } from "../shiki-code";
+import { ThinkingIndicator } from "./thinking-indicator";
 import type { TurnData } from "./turn";
 
 type TabKey = "tldr" | "impact" | "code" | "story";
@@ -155,7 +156,7 @@ export function AnswerCard({ turn }: AnswerCardProps) {
         {turn.a ? (
           <MarkdownMessage content={turn.a} />
         ) : turn.status === "streaming" ? (
-          <span className="text-muted" aria-live="polite">…</span>
+          <ThinkingIndicator phase={turn.chunkIds.length === 0 ? "retrieving" : "generating"} />
         ) : null}
       </div>
 

@@ -327,3 +327,27 @@ body {
      would otherwise draw a stray divider down the middle of row 2. */
   .stat:nth-child(odd)::before { display: none; }
 }
+
+/* ============================================================
+   Chat thinking indicator — components/chat/thinking-indicator.tsx
+   Pulsing accent dot + a verb that fades in as it rotates. Both
+   animations are gated behind no-preference so reduced-motion (and
+   the global killswitch) leave the verb static.
+   ============================================================ */
+.thinking-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--accent);
+  box-shadow: 0 0 0 4px var(--accent-soft);
+  flex-shrink: 0;
+}
+.thinking-verb { display: inline-block; }
+@media (prefers-reduced-motion: no-preference) {
+  .thinking-dot { animation: pulse-dot 1.4s var(--ease) infinite; }
+  .thinking-verb { animation: thinkingIn 320ms var(--ease) both; }
+}
+@keyframes thinkingIn {
+  from { opacity: 0; transform: translateY(2px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
