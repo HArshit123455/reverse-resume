@@ -27,6 +27,9 @@ export const COMMAND_CATALOG: Command[] = [
   { id: "nav.work", label: "Jump to Work", kbd: "W", section: "Navigate", keywords: ["projects"] },
   { id: "nav.now", label: "Jump to Now", kbd: "N", section: "Navigate" },
   { id: "nav.footer", label: "Jump to Footer", kbd: "↓", section: "Navigate", keywords: ["contact"] },
+  { id: "nav.experience", label: "Jump to Experience", section: "Navigate", keywords: ["about", "work", "timeline"] },
+  { id: "nav.skills", label: "Jump to Skills", section: "Navigate", keywords: ["about", "stack"] },
+  { id: "nav.achievements", label: "Jump to Achievements", section: "Navigate", keywords: ["about", "awards"] },
 
   { id: "audience.curious", label: "Switch view → Curious", kbd: "1", section: "Audience" },
   { id: "audience.recruiter", label: "Switch view → Recruiter", kbd: "2", section: "Audience" },

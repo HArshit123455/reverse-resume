@@ -104,6 +104,18 @@ function ChromeInner({ children }: { children: ReactNode }) {
       case "nav.footer":
         document.getElementById("footer")?.scrollIntoView({ behavior: "smooth" });
         return;
+      case "nav.experience":
+      case "nav.skills":
+      case "nav.achievements": {
+        const sectionId = id.split(".")[1]; // "experience" | "skills" | "achievements"
+        const el = document.getElementById(sectionId);
+        if (el) {
+          el.scrollIntoView({ behavior: "smooth" });
+        } else {
+          window.location.href = `/about#${sectionId}`;
+        }
+        return;
+      }
       case "audience.curious":
       case "audience.recruiter":
       case "audience.engineer": {
