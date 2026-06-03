@@ -2,9 +2,45 @@ import { describe, it, expect, beforeEach, afterEach } from "vitest";
 import { mkdtempSync, rmSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
-import { _loadExperienceFrom, ExperienceFrontmatter } from "./experience";
+import { _loadExperienceFrom, ExperienceFrontmatter, isCurrent } from "@/lib/content/experience";
 
-describe("lib/content/experience", () => {
+describe("ExperienceFrontmatter", () => {
+  const base = { title: "T", role: "R", employer: "E", dates: "2024 to present" };
+
+  it("accepts the new display fields", () => {
+    const parsed = ExperienceFrontmatter.parse({
+      ...base,
+      kind: "Full-time",
+      summary: "Did things.",
+      logo: "/logos/zykrr.svg",
+      stack: ["TypeScript"],
+    });
+    expect(parsed.kind).toBe("Full-time");
+    expect(parsed.summary).toBe("Did things.");
+    expect(parsed.logo).toBe("/logos/zykrr.svg");
+  });
+
+  it("rejects an invalid kind", () => {
+    expect(() => ExperienceFrontmatter.parse({ ...base, kind: "Contractor" })).toThrow();
+  });
+
+  it("leaves the new fields optional", () => {
+    expect(() => ExperienceFrontmatter.parse(base)).not.toThrow();
+  });
+});
+
+describe("isCurrent", () => {
+  it("is true when dates mention present (any case)", () => {
+    expect(isCurrent("2024 to present")).toBe(true);
+    expect(isCurrent("2024 — Present")).toBe(true);
+  });
+  it("is false for finished ranges", () => {
+    expect(isCurrent("2020-2024")).toBe(false);
+    expect(isCurrent(undefined)).toBe(false);
+  });
+});
+
+describe("lib/content/experience (_loadExperienceFrom)", () => {
   let dir: string;
   beforeEach(() => { dir = mkdtempSync(join(tmpdir(), "rr-exp-")); });
   afterEach(() => { rmSync(dir, { recursive: true, force: true }); });

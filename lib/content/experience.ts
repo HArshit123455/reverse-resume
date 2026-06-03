@@ -11,9 +11,16 @@ export const ExperienceFrontmatter = z.object({
   location: z.string().min(1).max(80).optional(),
   stack: z.array(z.string().min(1).max(40)).max(20).default([]),
   order: z.number().int().optional(),
+  kind: z.enum(["Full-time", "Internship", "Education"]).optional(),
+  summary: z.string().min(1).max(400).optional(),
+  logo: z.string().min(1).max(200).optional(),
 });
 
 export type ExperienceFrontmatterT = z.infer<typeof ExperienceFrontmatter>;
+
+export function isCurrent(dates?: string): boolean {
+  return !!dates && /present/i.test(dates);
+}
 
 function startYear(dates: string): number {
   // Expects the start year first: "2022", "2020-2024", "2024 to present"
