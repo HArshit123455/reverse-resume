@@ -322,6 +322,8 @@ body {
   background: var(--border);
 }
 @media (max-width: 560px) {
-  /* 2-up: only the left-column cells (odd index) keep a divider */
-  .stat:nth-child(odd) + .stat::before { display: none; }
+  /* 2-up grid: keep dividers only in the column gap (before right-column
+     cells 2 & 4). Hide the divider on left-column cells (odd index) — cell 3
+     would otherwise draw a stray divider down the middle of row 2. */
+  .stat:nth-child(odd)::before { display: none; }
 }
