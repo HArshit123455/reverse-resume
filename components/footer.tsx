@@ -1,3 +1,4 @@
+import Link from "next/link";
 import { FooterCmdKTrigger } from "./palette/footer-cmd-k-trigger";
 
 export function Footer() {
@@ -11,6 +12,12 @@ export function Footer() {
         <FooterCmdKTrigger /> for the good stuff
       </div>
       <div className="flex flex-wrap gap-2">
+        <Link
+          href="/about"
+          className="inline-flex items-center gap-2 rounded-pill border border-border px-3.5 py-2 text-[13px] text-fg-soft transition-colors hover:border-border-strong hover:text-fg"
+        >
+          About
+        </Link>
         <a
           href="mailto:harshitsindhu10@gmail.com"
           className="inline-flex items-center gap-2 rounded-pill border border-border px-3.5 py-2 text-[13px] text-fg-soft transition-colors hover:border-border-strong hover:text-fg"
