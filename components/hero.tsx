@@ -18,7 +18,7 @@ export function Hero({ subheadline, audience, onAudienceChange }: HeroProps) {
           aria-hidden
           className="relative inline-block h-1.5 w-1.5 rounded-full bg-accent ring-4 ring-accent-soft animate-[pulse-dot_2.6s_ease-in-out_infinite]"
         />
-        Open to senior/mid full-stack roles · Delhi / Remote
+        New Delhi · Delhi NCR
       </div>
       <h1 className="font-serif text-[clamp(48px,8vw,96px)] font-medium leading-[0.94] tracking-[-0.03em] text-fg">
         Ask my work <em className="font-medium italic text-accent">anything</em>.
