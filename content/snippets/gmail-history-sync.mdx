@@ -10,39 +10,6 @@ tags: ["gmail", "cursor", "sync", "idempotency", "email"]
 
 Gmail's push only says "something changed". To find out what, the worker calls `users.history.list` from the mailbox's stored `historyId`. Two traps: history ids are larger than `Number.MAX_SAFE_INTEGER`, and Gmail keeps only about a week of history, answering 404 for anything older. An idle mailbox's cursor would quietly age out and the mailbox would stop syncing.
 
-```ts
-// Gmail historyIds exceed Number.MAX_SAFE_INTEGER, so they stay strings end to end.
-type GmailCursor = { historyId: string }
-
-async *changesSince(cursor: GmailCursor, mailbox: Mailbox): AsyncIterable<SyncPage> {
-  let pageToken: string | undefined
-  for (;;) {
-    const page = await this.get<HistoryPage>(this.historyUrl(cursor.historyId, pageToken), mailbox)
-    const records = page.history ?? []
-    // One message can appear in several records (added, then labelled): fetch it once.
-    const ids = [...new Set(records.flatMap((r) => (r.messagesAdded ?? [])
-      .filter(({ message }) => this.isInboundInboxMessage(message.labelIds))
-      .map(({ message }) => message.id)))]
-    const messages = await this.hydrate(ids, mailbox)
-    // Mid-drain pages resume from the last record; the final page jumps to the mailbox's
-    // current historyId. Empty pages still advance, so an idle cursor never ages out.
-    const last = records.at(-1)?.id
-    yield { messages, nextCursor: page.nextPageToken && last ? { historyId: last } : { historyId: page.historyId } }
-    if (!page.nextPageToken) return
-    pageToken = page.nextPageToken
-  }
-}
-// Gmail answers 404 when startHistoryId predates its retention window.
-isCursorInvalid = (e: unknown) => (e as AxiosError)?.response?.status === 404
-
-// processor: a stale cursor re-seeds instead of failing the job forever
-try { count = await this.drain(adapter, cursor, mailbox) }
-catch (error) {
-  if (!adapter.syncClient.isCursorInvalid(error)) throw error
-  await this.seed(adapter, mailbox) // fresh cursor at "now", nothing projected
-}
-```
-
 ## What this proves
 
 - Advancing the cursor even on empty pages keeps quiet mailboxes inside Gmail's retention window, and the 404 path turns "cursor too old" into a re-seed instead of a mailbox that is stuck forever.

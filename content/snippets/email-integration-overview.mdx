@@ -14,15 +14,6 @@ I started the Microsoft 365 side as my own proof of concept (MSAL auth, delta sy
 
 Both providers follow one pattern I call notify-then-fetch. A push from the provider (a Graph change notification, or a Gmail Pub/Sub message) is only a wake-up call. The source of truth is a cursor stored per mailbox (a Graph `deltaLink`, a Gmail `historyId`), and one shared fetch worker drains everything newer than it. I pulled the provider-specific parts behind a small adapter seam (a sync client with `seed`, `changesSince` and `isCursorInvalid`, a normalizer and an OAuth service), so the Gmail integration reused the whole pipeline the Microsoft one already ran on.
 
-```ts
-// Each notify-then-fetch provider plugs in three things; the fetch loop is shared.
-interface MailSyncClient<Cursor> {
-  seed(mailbox: Mailbox): Promise<Cursor>                 // start from "now", no backfill
-  changesSince(cursor: Cursor, mailbox: Mailbox): AsyncIterable<SyncPage<Cursor>>
-  isCursorInvalid(error: unknown): boolean                // provider says the cursor aged out
-}
-```
-
 Every provider's messages are normalized into one canonical email, then go through a single projection step: a dedup ledger, workflow routing, a policy chain (virus, loop, spam, sender rules, subject filter, size), thread resolution, and finally the same channel-agnostic ingest pipeline that WhatsApp uses.
 
 ## What this proves

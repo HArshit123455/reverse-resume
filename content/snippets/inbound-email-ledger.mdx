@@ -10,35 +10,6 @@ tags: ["idempotency", "postgres", "dedup", "concurrency", "email"]
 
 The same email can arrive three ways: a push-triggered drain, the 15-minute reconcile sweep, and the watchdog re-driving something that got stuck. They can run at the same time. Deduplication has to hold under that concurrency, and a crash halfway through projecting an email must not lose it or create a second ticket.
 
-```ts
-// Dedup key: UNIQUE (mailbox_id, message_id). The database decides, not the application.
-async recordReceived(email: CanonicalEmail) {
-  const key = { mailboxId: email.mailboxId, messageId: email.messageId }
-  let row = await this.ledger.findOne({ where: key })
-  let duplicate = !!row
-  if (!row) {
-    try {
-      row = await this.ledger.save(this.ledger.create({ ...key, canonical: email, status: LedgerStatus.RECEIVED }))
-    } catch (error) {
-      if ((error as { code?: string }).code !== '23505') throw error // unique_violation only
-      duplicate = true // a concurrent ingest won the insert race: adopt its row
-      row = await this.ledger.findOneOrFail({ where: key })
-    }
-  }
-  return { eventId: row.id, duplicate, status: row.status }
-}
-
-// projection: terminal duplicate → done; still RECEIVED → a crashed run, keep going
-const { eventId, duplicate, status } = await this.ledger.recordReceived(email)
-if (duplicate && status !== LedgerStatus.RECEIVED) return 'duplicates'
-
-// drain loop: swallow a failure only if something can still recover it
-} catch (error) {
-  if (messageId && (await this.ledger.exists(mailbox.id, messageId))) continue // watchdog re-drives it
-  throw error // no ledger row: fail the job so this page (and its cursor) is retried
-}
-```
-
 ## What this proves
 
 - A unique constraint plus adopting the winning row after Postgres error `23505` gives exactly-once projection without locks or advisory locks.

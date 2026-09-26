@@ -10,37 +10,6 @@ tags: ["react-hook-form", "zod", "validation", "typescript", "forms"]
 
 A multi-field form needs three things kept in sync: TS types, runtime validation, and per-field error messages. Wiring them by hand drifts the moment a field is renamed. The `react-hook-form` + `zod` + `zodResolver` combo collapses all three into one source — `z.object({...})` is the schema, `z.infer<typeof schema>` is the type, and field errors auto-populate `FormMessage` via the resolver. The shadcn-style `Form` + `FormField` primitives wrap `Controller` so each field gets `aria-invalid`/`aria-describedby` for free.
 
-```tsx
-import { useForm } from 'react-hook-form'
-import { zodResolver } from '@hookform/resolvers/zod'
-import * as z from 'zod'
-import { Form, FormField, FormItem, FormLabel, FormControl, FormMessage } from '@/components/ui/form'
-
-const formSchema = z.object({
-  name: z.string().min(2, 'Name must be at least 2 characters.'),
-  price: z.string().refine((v) => !isNaN(parseFloat(v)), 'Price must be numeric.'),
-  description: z.string().min(10, 'Description must be at least 10 characters.'),
-})
-type FormValues = z.infer<typeof formSchema>
-
-export function ItemForm({ onSubmit }: { onSubmit: (v: FormValues) => void }) {
-  const form = useForm<FormValues>({ resolver: zodResolver(formSchema), defaultValues: { name: '', price: '', description: '' } })
-  return (
-    <Form {...form}>
-      <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
-        <FormField control={form.control} name="name" render={({ field }) => (
-          <FormItem>
-            <FormLabel>Name</FormLabel>
-            <FormControl><Input {...field} /></FormControl>
-            <FormMessage />
-          </FormItem>
-        )} />
-      </form>
-    </Form>
-  )
-}
-```
-
 ## What this proves
 
 - One schema, three guarantees: `z.infer` produces the TS type, `zodResolver` enforces it at runtime on submit and on blur, and `FormMessage` reads `formState.errors.<name>.message` so the user sees the exact `zod` string with no extra wiring.
