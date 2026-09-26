@@ -23,3 +23,6 @@ dist/
 .impeccable/mocks/
 .impeccable/build/
 .impeccable/config.local.json
+
+# /brag launch-video output (local renders)
+brag-output*/
