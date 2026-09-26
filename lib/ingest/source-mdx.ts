@@ -62,6 +62,40 @@ export async function ingestMdxDir(
     }
   }
 
+  const stored = await storeChunks(db, allChunks);
+  return { scanned, chunked, ...stored, ms: Date.now() - start };
+}
+
+/** Chunks from one markdown string (a single page rather than a folder). */
+export function docsFromMarkdown(
+  raw: string,
+  filePath: string,
+  sourceType: MdxSourceType
+): NewDocument[] {
+  return chunkMdx(raw, filePath).map((chunk) => ({
+    sourceType,
+    sourceProject: (chunk.metadata.source_project as string | undefined) ?? null,
+    sourceUrl: null,
+    filePath,
+    title:
+      (chunk.metadata.heading as string | undefined) ??
+      (chunk.metadata.title as string | undefined) ??
+      filePath,
+    content: chunk.content,
+    contentHash: chunk.contentHash,
+    metadata: chunk.metadata,
+    embedding: [],
+  }));
+}
+
+/**
+ * Embed only the chunks whose content hash is new, then upsert. Idempotent: a re-run
+ * over unchanged content makes no Voyage call and costs nothing.
+ */
+export async function storeChunks(
+  db: AnyDb,
+  allChunks: NewDocument[]
+): Promise<Omit<IngestMdxResult, "scanned" | "chunked" | "ms">> {
   // Pre-filter: skip chunks whose content_hash already exists. Idempotent re-runs cost ~zero.
   let preSkipped = 0;
   let newChunks = allChunks;
@@ -99,12 +133,9 @@ export async function ingestMdxDir(
   const upsertResult = await upsertDocuments(db, newChunks);
 
   return {
-    scanned,
-    chunked,
     inserted: upsertResult.inserted,
     updated: upsertResult.updated,
     skipped: upsertResult.skipped + preSkipped,
     costCents,
-    ms: Date.now() - start,
   };
 }

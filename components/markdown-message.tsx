@@ -1,9 +1,32 @@
 "use client";
 
-import ReactMarkdown from "react-markdown";
+import ReactMarkdown, { type Components } from "react-markdown";
 import remarkGfm from "remark-gfm";
 import { ShikiCode } from "./shiki-code";
 import { transformCitations } from "./transform-citations";
+
+// Defined once, outside render. An inline `components={{…}}` object gives React new
+// component types on every streamed token, so it tore down and rebuilt every paragraph
+// and code block per token: code blocks flashed back to plain text and the answer's
+// height jumped while it streamed.
+const REMARK_PLUGINS = [remarkGfm];
+const COMPONENTS: Components = {
+  p: ({ children }) => <p>{transformCitations(children)}</p>,
+  li: ({ children }) => <li>{transformCitations(children)}</li>,
+  // react-markdown v9 has no `inline` flag: fenced blocks arrive as <pre><code>,
+  // so the block renderer lives on `pre` and `code` stays inline.
+  pre: ({ children }) => {
+    const child = Array.isArray(children) ? children[0] : children;
+    const props = (child as { props?: { className?: string; children?: React.ReactNode } })?.props ?? {};
+    const lang = props.className?.replace("language-", "");
+    return <ShikiCode code={String(props.children ?? "").replace(/\n$/, "")} language={lang} />;
+  },
+  a: ({ href, children }) => (
+    <a href={href} target="_blank" rel="noreferrer">
+      {children}
+    </a>
+  ),
+};
 
 interface MarkdownMessageProps {
   content: string;
@@ -26,24 +49,8 @@ export function MarkdownMessage({ content }: MarkdownMessageProps) {
                  prose-code:before:content-none prose-code:after:content-none"
     >
       <ReactMarkdown
-        remarkPlugins={[remarkGfm]}
-        components={{
-          p: ({ children }) => <p>{transformCitations(children)}</p>,
-          li: ({ children }) => <li>{transformCitations(children)}</li>,
-          // react-markdown v9 has no `inline` flag: fenced blocks arrive as <pre><code>,
-          // so the block renderer lives on `pre` and `code` stays inline.
-          pre: ({ children }) => {
-            const child = Array.isArray(children) ? children[0] : children;
-            const props = (child as { props?: { className?: string; children?: React.ReactNode } })?.props ?? {};
-            const lang = props.className?.replace("language-", "");
-            return <ShikiCode code={String(props.children ?? "").replace(/\n$/, "")} language={lang} />;
-          },
-          a: ({ href, children }) => (
-            <a href={href} target="_blank" rel="noreferrer">
-              {children}
-            </a>
-          ),
-        }}
+        remarkPlugins={REMARK_PLUGINS}
+        components={COMPONENTS}
       >
         {content}
       </ReactMarkdown>

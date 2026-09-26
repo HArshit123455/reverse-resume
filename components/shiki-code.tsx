@@ -22,9 +22,16 @@ function useIsDark(): boolean {
   return isDark;
 }
 
+// Highlighted HTML by theme + language + code. While an answer streams, a code block's
+// text grows token by token; the cache means a re-render never drops back to the plain
+// fallback, and re-visited blocks paint highlighted immediately.
+const HIGHLIGHT_CACHE = new Map<string, string>();
+const cacheKey = (code: string, language: string | undefined, dark: boolean) =>
+  `${dark ? "d" : "l"}|${language ?? "text"}|${code}`;
+
 export function ShikiCode({ code, language }: ShikiCodeProps) {
   const isDark = useIsDark();
-  const [html, setHtml] = useState<string>("");
+  const [html, setHtml] = useState<string>(() => HIGHLIGHT_CACHE.get(cacheKey(code, language, isDark)) ?? "");
   const [copied, setCopied] = useState(false);
 
   useEffect(() => {
@@ -32,13 +39,21 @@ export function ShikiCode({ code, language }: ShikiCodeProps) {
     (async () => {
       try {
         const { codeToHtml } = await import("shiki");
-        const result = await codeToHtml(code, {
-          lang: language ?? "text",
-          theme: isDark ? "github-dark" : "github-light",
-        });
+        const key = cacheKey(code, language, isDark);
+        const cached = HIGHLIGHT_CACHE.get(key);
+        const result =
+          cached ??
+          (await codeToHtml(code, {
+            lang: language ?? "text",
+            theme: isDark ? "github-dark" : "github-light",
+          }));
+        if (!cached) {
+          if (HIGHLIGHT_CACHE.size > 200) HIGHLIGHT_CACHE.clear();
+          HIGHLIGHT_CACHE.set(key, result);
+        }
         if (!cancelled) setHtml(result);
       } catch {
-        if (!cancelled) setHtml("");
+        // unknown language etc.: keep whatever is on screen rather than flashing the fallback
       }
     })();
     return () => {

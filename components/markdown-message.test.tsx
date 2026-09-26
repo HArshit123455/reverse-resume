@@ -59,4 +59,12 @@ describe("MarkdownMessage", () => {
     expect(code?.textContent).toBe("ON CONFLICT");
     expect(container.querySelector("p pre")).toBeNull();
   });
+  it("keeps the same code block node while an answer streams in", () => {
+    const first = "Intro.\n\n```ts\nconst a = 1;\n```\n\nMore";
+    const { container, rerender } = render(<MarkdownMessage content={first} />);
+    const before = container.querySelector("[role=region]");
+    rerender(<MarkdownMessage content={first + " text arriving token by token"} />);
+    // a new node here means React rebuilt the block, which is what made answers flicker
+    expect(container.querySelector("[role=region]")).toBe(before);
+  });
 });
