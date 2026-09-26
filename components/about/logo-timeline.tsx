@@ -4,75 +4,55 @@ import { LogoTile } from "./logo-tile";
 
 function periodOf(dates?: string): string {
   if (!dates) return "";
-  return dates.replace(/\s*(to|-|–)\s*/i, " — ");
+  return dates.replace(/\s*(to|-|–)\s*/i, " – ").replace(/present/i, "Present");
 }
 
 export function LogoTimeline({ items }: { items: ExperienceFrontmatterT[] }) {
   return (
-    <div className="border-t border-border">
+    <ol className="border-b border-border">
       {items.map((e, i) => {
         const now = isCurrent(e.dates);
         return (
-          <div
+          <li
             key={`${e.employer}-${e.role}-${i}`}
-            className={`tl-item group grid grid-cols-[64px_minmax(0,1fr)] gap-[26px] border-b border-border py-8 max-[560px]:grid-cols-[48px_minmax(0,1fr)] max-[560px]:gap-[18px] max-[560px]:py-[26px] ${
-              now ? "tl-item--now" : ""
-            }`}
+            className="grid grid-cols-[56px_minmax(0,1fr)] gap-5 border-t border-border py-10 sm:grid-cols-[64px_minmax(0,1fr)] sm:gap-8 sm:py-12"
           >
-            <div className="tl-rail">
-              <div className="transition-transform duration-200 group-hover:-translate-y-0.5">
-                <LogoTile name={e.employer} logo={e.logo} />
-              </div>
-            </div>
-
-            <div>
-              <div className="mb-[9px] flex items-center gap-2.5">
-                {e.kind ? (
-                  <span className="rounded-[5px] bg-accent-soft px-[9px] py-1 font-mono text-[9.5px] uppercase tracking-[0.10em] text-accent">
-                    {e.kind}
-                  </span>
-                ) : null}
-                <span className="h-[3px] w-[3px] rounded-full bg-muted-2" aria-hidden />
-                <span className="font-mono text-[12px] text-muted">{periodOf(e.dates)}</span>
-                {now ? (
-                  <span className="ml-auto inline-flex items-center gap-1.5 font-mono text-[9.5px] uppercase tracking-[0.10em] text-accent">
-                    <span className="about-dot-sm" aria-hidden />
-                    Currently
-                  </span>
-                ) : null}
-              </div>
-
-              <h3 className="mb-1 font-serif text-[28px] font-medium leading-[1.1] tracking-[-0.018em] text-fg">
-                {e.role}
-              </h3>
-              <div className="mb-[13px] text-[15px] text-fg-soft">
-                <b className="font-semibold">{e.employer}</b>
-                {e.location ? <span className="mx-[7px] text-muted-2">·</span> : null}
-                {e.location ? <span className="text-muted">{e.location}</span> : null}
-              </div>
-
-              {e.summary ? (
-                <p className="mb-4 max-w-[58ch] text-pretty text-[14.5px] leading-[1.65] text-muted">
-                  {e.summary}
+            <LogoTile name={e.employer} logo={e.logo} />
+            <div className="grid gap-6 md:grid-cols-12">
+              <div className="md:col-span-5">
+                <h3 className="text-[clamp(24px,2.6vw,30px)] font-bold leading-[1.1] tracking-[-0.03em] text-fg">
+                  {e.role}
+                </h3>
+                <p className="mt-2 text-[17px] text-fg-soft">
+                  {e.employer}
+                  {e.location ? <span className="text-muted"> · {e.location}</span> : null}
                 </p>
-              ) : null}
-
-              {e.stack.length > 0 ? (
-                <div className="flex flex-wrap gap-1.5">
-                  {e.stack.map((s, si) => (
-                    <span
-                      key={`${s}-${si}`}
-                      className="rounded-[4px] bg-bg-sunk px-2 py-0.5 font-mono text-[11px] text-fg-soft"
-                    >
-                      {s}
+                <p className="mt-1 flex flex-wrap items-center gap-x-2.5 text-[15px] text-muted">
+                  <span className="tabular">{periodOf(e.dates)}</span>
+                  {e.kind ? <span>· {e.kind}</span> : null}
+                  {now ? (
+                    <span className="inline-flex items-center gap-2 font-medium text-fg">
+                      <span className="live-dot" aria-hidden />
+                      Currently
                     </span>
-                  ))}
-                </div>
-              ) : null}
+                  ) : null}
+                </p>
+              </div>
+              <div className="md:col-span-7">
+                {e.summary ? (
+                  <p className="max-w-[58ch] text-[17px] leading-[1.6] text-fg-soft">{e.summary}</p>
+                ) : null}
+                {e.stack.length > 0 ? (
+                  <p className="mt-4 font-mono text-[12.5px] leading-relaxed text-muted">
+                    <span className="sr-only">Stack: </span>
+                    {e.stack.join("  ·  ")}
+                  </p>
+                ) : null}
+              </div>
             </div>
-          </div>
+          </li>
         );
       })}
-    </div>
+    </ol>
   );
 }

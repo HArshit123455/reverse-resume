@@ -16,18 +16,17 @@ interface TurnProps {
   turn: TurnData;
 }
 
+/** One slide: the question is the title, the answer is the body. */
 export function Turn({ turn }: TurnProps) {
   return (
-    <div className="space-y-5" data-turn-id={turn.id}>
-      <div className="flex justify-end">
-        <div
-          className="max-w-[88%] whitespace-pre-wrap rounded-[18px_18px_6px_18px] border border-border bg-bg-sunk px-4 py-3 text-[14.5px] font-medium leading-[1.45] text-fg sm:max-w-[78%] sm:rounded-[20px_20px_6px_20px] sm:px-5 sm:text-[15px]"
-          data-audience={turn.audience}
-        >
-          {turn.q}
-        </div>
-      </div>
+    <article className="space-y-7" data-turn-id={turn.id}>
+      <h2
+        className="whitespace-pre-wrap text-[clamp(26px,3.4vw,38px)] font-bold leading-[1.1] tracking-[-0.03em] text-fg"
+        data-audience={turn.audience}
+      >
+        {turn.q}
+      </h2>
       <AnswerCard turn={turn} />
-    </div>
+    </article>
   );
 }

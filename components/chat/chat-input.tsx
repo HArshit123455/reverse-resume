@@ -2,6 +2,7 @@
 
 import { useState, type FormEvent, type KeyboardEvent } from "react";
 import { useInlineCommands } from "../eggs/use-inline-commands";
+import { Icon } from "../ui/icon";
 
 interface ChatInputProps {
   onSubmit: (text: string) => void;
@@ -33,8 +34,13 @@ export function ChatInput({ onSubmit, disabled, placeholder, autoFocus }: ChatIn
     }
   }
 
+  const canSend = !disabled && value.trim().length > 0;
+
   return (
-    <form onSubmit={onFormSubmit} className="flex items-start gap-2">
+    <form
+      onSubmit={onFormSubmit}
+      className="group relative flex items-center rounded-pill bg-bg-elev ring-1 ring-transparent transition-[box-shadow,background-color] duration-300 focus-within:bg-bg focus-within:ring-1 focus-within:ring-border-strong has-[textarea:focus-visible]:ring-2 has-[textarea:focus-visible]:ring-fg"
+    >
       <textarea
         value={value}
         onChange={(e) => setValue(e.target.value)}
@@ -42,17 +48,17 @@ export function ChatInput({ onSubmit, disabled, placeholder, autoFocus }: ChatIn
         disabled={disabled}
         rows={1}
         autoFocus={autoFocus}
-        placeholder={placeholder ?? "Ask anything about Harshit's work…"}
-        className="flex-1 resize-none rounded-[14px] border border-border bg-bg-elev px-4 py-3 text-[15px] leading-[1.5] text-fg placeholder:text-muted-2 transition-all focus:border-accent focus:outline-none focus:ring-4 focus:ring-accent-soft sm:rounded-[16px] sm:px-5 sm:py-[18px] sm:text-[15.5px]"
+        aria-label="Ask a question about Harshit's work"
+        placeholder={placeholder ?? "Ask about Harshit's work…"}
+        className="h-16 flex-1 resize-none bg-transparent py-[19px] pl-7 pr-2 text-[17px] leading-[26px] tracking-[-0.015em] text-fg placeholder:text-muted focus:outline-none"
       />
       <button
         type="submit"
-        disabled={disabled || !value.trim()}
+        disabled={!canSend}
         aria-label="Ask"
-        className="inline-flex items-center gap-2.5 rounded-[14px] bg-fg px-4 py-3 text-[14.5px] font-semibold text-bg transition-transform hover:-translate-y-px disabled:opacity-50 sm:rounded-[16px] sm:px-6 sm:py-[18px]"
+        className="mr-2 inline-flex h-12 w-12 flex-none items-center justify-center rounded-pill bg-fg text-bg transition-[transform,opacity,background-color] duration-300 ease-stage hover:scale-[1.04] disabled:scale-100 disabled:bg-bg-sunk disabled:text-muted-2"
       >
-        <span className="hidden sm:inline">Ask</span>
-        <span aria-hidden>→</span>
+        <Icon name="arrow-up" className="h-5 w-5" />
       </button>
     </form>
   );

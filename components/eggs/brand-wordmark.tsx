@@ -14,22 +14,14 @@ export function BrandWordmark() {
       onClick={(e) => {
         if (typeof window !== "undefined" && window.location.pathname === "/") {
           e.preventDefault();
+          window.scrollTo({ top: 0, behavior: "smooth" });
         }
         increment();
       }}
-      className="group inline-flex items-baseline gap-0 leading-none"
+      className="text-[15px] font-semibold tracking-[-0.02em] text-fg"
       aria-label="Harshit Sindhu — home"
     >
-      <span className="font-serif text-2xl font-medium italic tracking-tight text-fg">
-        harshit
-      </span>
-      <span
-        aria-hidden
-        className="ml-[3px] inline-block h-1.5 w-1.5 translate-y-0.5 rounded-full bg-accent"
-      />
-      <small className="ml-3.5 border-l border-border pl-3.5 font-sans text-xs font-normal not-italic text-muted">
-        Full-stack engineer
-      </small>
+      Harshit Sindhu
     </Link>
   );
 }

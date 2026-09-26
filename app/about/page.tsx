@@ -1,13 +1,13 @@
 import type { Metadata } from "next";
 import { loadAbout } from "@/lib/content/about";
 import { loadExperience } from "@/lib/content/experience";
-import { AboutHero } from "@/components/about/about-hero";
+import { AboutHero, AboutNumbers } from "@/components/about/about-hero";
 import { SectionHead } from "@/components/about/section-head";
 import { LogoTimeline } from "@/components/about/logo-timeline";
 import { SkillStack } from "@/components/about/skill-stack";
 import { Achievements } from "@/components/about/achievements";
 import { CtaCard } from "@/components/about/cta-card";
-import { Reveal } from "@/components/about/reveal";
+import { StageReveal } from "@/components/ui/stage-reveal";
 import { Footer } from "@/components/footer";
 
 export const metadata: Metadata = {
@@ -21,37 +21,50 @@ export default function AboutPage() {
   const experience = loadExperience();
 
   return (
-    <div className="mx-auto w-full max-w-[1040px]">
-      <AboutHero data={data} />
+    <>
+      <main>
+        <AboutHero data={data} />
 
-      <Reveal>
-        <section id="experience" className="scroll-mt-20 pt-[84px]">
-          <SectionHead num="01" title="Experience & education" />
-          <LogoTimeline items={experience} />
-        </section>
-      </Reveal>
+        <div className="mx-auto max-w-[1120px] space-y-28 px-5 pb-24 sm:space-y-40 sm:px-8 sm:pb-32">
+          <StageReveal>
+            <AboutNumbers stats={data.stats} />
+          </StageReveal>
 
-      <Reveal>
-        <section id="skills" className="scroll-mt-20 pt-[84px]">
-          <SectionHead num="02" title="What I work with" />
-          <SkillStack skills={data.skills} />
-        </section>
-      </Reveal>
-
-      {data.achievements.length > 0 ? (
-        <Reveal>
-          <section id="achievements" className="scroll-mt-20 pt-[84px]">
-            <SectionHead num="03" title="Achievements" />
-            <Achievements items={data.achievements} />
+          <section id="experience" className="scroll-mt-20">
+            <StageReveal>
+              <SectionHead title="Where I've worked." />
+            </StageReveal>
+            <StageReveal delay={80}>
+              <LogoTimeline items={experience} />
+            </StageReveal>
           </section>
-        </Reveal>
-      ) : null}
 
-      <Reveal>
-        <CtaCard data={data} />
-      </Reveal>
+          <section id="skills" className="scroll-mt-20">
+            <StageReveal>
+              <SectionHead title="What I work with." />
+            </StageReveal>
+            <StageReveal delay={80}>
+              <SkillStack skills={data.skills} />
+            </StageReveal>
+          </section>
 
+          {data.achievements.length > 0 ? (
+            <section id="achievements" className="scroll-mt-20">
+              <StageReveal>
+                <SectionHead title="Along the way." />
+              </StageReveal>
+              <StageReveal delay={80}>
+                <Achievements items={data.achievements} />
+              </StageReveal>
+            </section>
+          ) : null}
+
+          <StageReveal>
+            <CtaCard data={data} />
+          </StageReveal>
+        </div>
+      </main>
       <Footer />
-    </div>
+    </>
   );
 }

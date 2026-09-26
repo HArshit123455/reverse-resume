@@ -1,25 +1,20 @@
 import type { AboutFrontmatterT } from "@/lib/content/about";
 
+/** A spec sheet: the group on the left, the tools as one readable line on the right. */
 export function SkillStack({ skills }: { skills: AboutFrontmatterT["skills"] }) {
   return (
-    <div className="flex flex-col gap-3">
+    <dl className="border-b border-border">
       {skills.map((g) => (
-        <div key={g.group} className="rounded-[16px] border border-border bg-bg-elev px-6 pb-6 pt-[22px]">
-          <div className="mb-4 font-mono text-[10.5px] uppercase tracking-[0.10em] text-muted-2">
-            {g.group}
-          </div>
-          <div className="flex flex-wrap gap-2">
-            {g.items.map((it, i) => (
-              <span
-                key={`${it}-${i}`}
-                className="inline-flex rounded-pill border border-transparent bg-bg-sunk px-[15px] py-2 text-[14px] text-fg-soft transition-colors hover:border-border-strong hover:text-fg"
-              >
-                {it}
-              </span>
-            ))}
-          </div>
+        <div
+          key={g.group}
+          className="grid gap-2 border-t border-border py-6 sm:grid-cols-[14rem_minmax(0,1fr)] sm:gap-8 sm:py-7"
+        >
+          <dt className="text-[15px] text-muted sm:pt-1.5">{g.group}</dt>
+          <dd className="text-[clamp(20px,2.2vw,24px)] font-semibold leading-[1.35] tracking-[-0.022em] text-fg">
+            {g.items.join(", ")}
+          </dd>
         </div>
       ))}
-    </div>
+    </dl>
   );
 }

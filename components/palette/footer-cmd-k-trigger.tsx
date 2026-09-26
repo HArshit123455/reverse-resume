@@ -8,9 +8,9 @@ export function FooterCmdKTrigger() {
     <button
       type="button"
       onClick={open}
-      className="text-accent underline-offset-2 transition-opacity hover:opacity-80 focus-visible:underline"
+      className="text-fg-soft underline decoration-border-strong underline-offset-4 transition-colors hover:text-fg hover:decoration-fg"
     >
-      press ⌘K
+      Press ⌘K
     </button>
   );
 }

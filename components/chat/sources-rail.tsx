@@ -2,6 +2,7 @@
 
 import { useEffect, useRef, useState } from "react";
 import { ShikiCode } from "../shiki-code";
+import { Icon } from "../ui/icon";
 import { useCitations, type CitationCard } from "../citations-context";
 
 // Tag mapping: an explicit chunk.metadata.tag wins (allows per-MDX override);
@@ -18,6 +19,7 @@ function tagFor(card: CitationCard): string {
   return TAG_FROM_SOURCE_TYPE[card.chunk.sourceType];
 }
 
+/** One footnote. The focused one is drawn solid; the rest stay quiet. */
 function SourceCard({ card }: { card: CitationCard }) {
   const { registerCard, activeCardN } = useCitations();
   const elRef = useRef<HTMLDivElement | null>(null);
@@ -34,51 +36,61 @@ function SourceCard({ card }: { card: CitationCard }) {
     if (isActive && !open) setOpen(true);
   }, [isActive, open]);
 
+  const meta = [card.chunk.sourceProject, card.chunk.filePath].filter(Boolean).join(" · ");
+
   return (
     <div
       ref={elRef}
       data-cite-n={card.n}
       data-active={isActive ? "true" : undefined}
-      className={`rounded-[12px] border bg-bg-elev p-4 transition-all hover:border-border-strong ${
-        isActive ? "border-accent ring-2 ring-accent/15 shadow-md" : "border-border"
-      }`}
+      className={`rounded-[18px] bg-bg-elev p-5 ring-inset transition-[box-shadow] duration-500 ease-stage ${
+        isActive ? "ring-2 ring-accent" : "ring-0"
+      } ${open ? "sm:col-span-2" : ""}`}
     >
-      <div className="mb-2 flex items-center justify-between gap-2">
-        <span className="inline-flex h-5 min-w-[22px] items-center justify-center rounded font-mono bg-accent-soft px-1.5 text-[10.5px] font-medium text-accent">
+      <div className="grid grid-cols-[28px_minmax(0,1fr)] gap-x-3">
+        <span
+          className={`tabular mt-px font-mono text-[13px] font-medium ${isActive ? "text-accent" : "text-muted"}`}
+        >
           {card.n}
         </span>
-        <span className="font-mono text-[10px] uppercase tracking-[0.06em] text-muted">
-          {tagFor(card)}
-        </span>
+        <div className="min-w-0">
+          <div className="text-[15px] font-semibold leading-snug tracking-[-0.015em] text-fg">
+            {card.chunk.title ?? card.chunk.filePath ?? "source"}
+          </div>
+          <div className="mt-1 truncate text-[13px] text-muted">
+            <span>{tagFor(card)}</span>
+            {meta && <span> · {meta}</span>}
+          </div>
+          <div className="mt-3 flex flex-wrap items-center gap-x-5 gap-y-1 text-[13px]">
+            <button
+              type="button"
+              onClick={() => setOpen((v) => !v)}
+              aria-expanded={open}
+              aria-controls={`cite-body-${card.n}`}
+              className="inline-flex items-center gap-1 text-accent transition-opacity hover:opacity-75"
+            >
+              <Icon
+                name="chevron-right"
+                className={`h-3.5 w-3.5 transition-transform duration-300 ease-stage ${open ? "rotate-90" : ""}`}
+              />
+              <span>{open ? "Hide excerpt" : "Show excerpt"}</span>
+            </button>
+            {card.chunk.sourceUrl && (
+              <a
+                href={card.chunk.sourceUrl}
+                target="_blank"
+                rel="noreferrer"
+                className="inline-flex items-center gap-1 text-accent transition-opacity hover:opacity-75"
+              >
+                View on GitHub
+                <Icon name="arrow-up-right" className="h-3.5 w-3.5" />
+              </a>
+            )}
+          </div>
+        </div>
       </div>
-      <div className="text-[13.5px] font-semibold leading-snug tracking-[-0.005em] text-fg">
-        {card.chunk.title ?? card.chunk.filePath ?? "source"}
-      </div>
-      <div className="mt-1 flex flex-wrap items-center gap-x-2 font-mono text-[11px] text-muted">
-        {card.chunk.sourceProject && <span>{card.chunk.sourceProject}</span>}
-        {card.chunk.sourceProject && card.chunk.filePath && <span>·</span>}
-        {card.chunk.filePath && <span className="truncate">{card.chunk.filePath}</span>}
-        {card.chunk.sourceUrl && (
-          <>
-            <span>·</span>
-            <a href={card.chunk.sourceUrl} target="_blank" rel="noreferrer" className="text-accent hover:underline">
-              View on GitHub →
-            </a>
-          </>
-        )}
-      </div>
-      <button
-        type="button"
-        onClick={() => setOpen((v) => !v)}
-        aria-expanded={open}
-        aria-controls={`cite-body-${card.n}`}
-        className="mt-3 inline-flex items-center gap-1.5 text-[12px] text-muted hover:text-fg transition-colors"
-      >
-        <span aria-hidden className={`inline-block transition-transform ${open ? "rotate-90" : ""}`}>▸</span>
-        <span>{open ? "Hide excerpt" : "Show excerpt"}</span>
-      </button>
       {open && (
-        <div id={`cite-body-${card.n}`} className="mt-2">
+        <div id={`cite-body-${card.n}`} className="mt-4">
           <ShikiCode code={card.chunk.content} language={lang} />
         </div>
       )}
@@ -86,36 +98,42 @@ function SourceCard({ card }: { card: CitationCard }) {
   );
 }
 
+/** Footnotes for the latest answer: a grid on desktop, a disclosure on phones. */
 export function SourcesRail() {
   const { citations } = useCitations();
 
-  const header = (
-    <h2 className="mb-3 font-mono text-[10.5px] uppercase tracking-[0.10em] text-muted-2">
-      Sources
-    </h2>
-  );
-
   const empty = (
-    <p className="text-sm text-muted">Citations will appear here as the answer streams.</p>
+    <p className="text-[15px] text-muted">Sources appear here as the answer is written.</p>
   );
 
   return (
     <>
-      {/* Desktop: sticky right rail */}
-      <aside className="hidden md:block sticky top-20 max-h-[calc(100vh-6rem)] overflow-y-auto pb-4" data-sources-rail>
-        {header}
-        <div className="space-y-3">
-          {citations.length === 0 ? empty : citations.map((c) => <SourceCard key={c.n} card={c} />)}
-        </div>
-      </aside>
+      <section aria-labelledby="sources-heading" className="hidden md:block" data-sources-rail>
+        <h2 id="sources-heading" className="mb-5 text-[21px] font-semibold tracking-[-0.02em] text-fg">
+          Sources
+        </h2>
+        {citations.length === 0 ? (
+          empty
+        ) : (
+          <div className="grid grid-cols-2 gap-3">
+            {citations.map((c) => (
+              <SourceCard key={c.n} card={c} />
+            ))}
+          </div>
+        )}
+      </section>
 
-      {/* Mobile: collapsed details accordion */}
-      <details className="md:hidden mt-4 rounded-[12px] border border-border bg-bg-elev" data-sources-rail-mobile>
-        <summary className="cursor-pointer list-none p-3 text-sm font-medium text-fg">
-          <span className="mr-1.5 inline-block transition-transform [details[open]_&]:rotate-90" aria-hidden>▸</span>
-          Sources ({citations.length})
+      <details className="group md:hidden" data-sources-rail-mobile>
+        <summary className="flex cursor-pointer list-none items-center justify-between rounded-[18px] bg-bg-elev px-5 py-4 text-[16px] font-semibold tracking-[-0.015em] text-fg">
+          <span>
+            Sources <span className="tabular font-normal text-muted">({citations.length})</span>
+          </span>
+          <Icon
+            name="chevron-right"
+            className="h-4 w-4 text-muted transition-transform duration-300 group-open:rotate-90"
+          />
         </summary>
-        <div className="space-y-3 p-3 pt-0">
+        <div className="mt-3 space-y-3">
           {citations.length === 0 ? empty : citations.map((c) => <SourceCard key={c.n} card={c} />)}
         </div>
       </details>

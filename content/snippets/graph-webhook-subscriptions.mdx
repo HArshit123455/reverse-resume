@@ -1,0 +1,45 @@
+---
+title: "Microsoft Graph webhooks: handshake, clientState and renew-or-recreate"
+topic: "A public webhook that trusts nothing in the request, and subscriptions that survive being deleted upstream"
+source_project: "email-integrations"
+language: "typescript"
+tags: ["microsoft-graph", "webhooks", "subscriptions", "security", "email"]
+---
+
+## Context
+
+Microsoft Graph delivers change notifications to a public endpoint and cannot send an API key. It also validates a new subscription by calling the endpoint with a `validationToken` that must be echoed back exactly, and it expects a fast response. Subscriptions last at most about a week and can be deleted on Microsoft's side.
+
+```ts
+@Post('notifications')
+async notifications(@Query('validationToken') token: string | undefined, @Req() req, @Res() res) {
+  // Subscription handshake: echo the raw token as text/plain. JSON fails validation.
+  if (token) return void res.status(200).type('text/plain').send(token)
+  for (const n of (req.body?.value ?? []) as GraphNotification[]) {
+    const sub = n.subscriptionId && n.clientState ? await this.subs.findByExternalId(n.subscriptionId) : null
+    if (!sub || !safeEqual(n.clientState, sub.clientState)) continue // constant-time compare
+    // Tenant comes from our row, never the request. A trigger only: the fixed per-mailbox
+    // job id collapses a notification storm into one delta drain.
+    await this.fetchProducer.enqueueFetch({ mailboxId: sub.mailboxId, provider: 'msgraph', reason: 'trigger' })
+  }
+  res.status(202).send() // verify + enqueue only; all work happens in the worker
+}
+
+async renew(sub: Subscription): Promise<void> {
+  const expiresAt = new Date(Date.now() + LIFETIME_MS) // cap is 10,080 min; we ask for 6 days
+  try {
+    await this.graph.patch(`/subscriptions/${sub.externalId}`, { expirationDateTime: expiresAt.toISOString() })
+    await this.subs.update(sub.id, { expiresAt, lastRenewedAt: new Date() })
+  } catch (error) {
+    if ((error as AxiosError).response?.status !== 404) throw error
+    await this.subs.update(sub.id, { status: SubscriptionStatus.REMOVED }) // deleted upstream
+    await this.createForMailbox(await this.mailboxes.get(sub.mailboxId))
+  }
+}
+```
+
+## What this proves
+
+- Trust rests on a random per-subscription `clientState` compared in constant time, and the tenant is always resolved from the database, so a forged body can't choose where mail goes.
+- Answering 202 after only verifying and enqueuing keeps the endpoint inside Graph's response budget; the actual data comes from a delta query on the inbox (not `/messages`, which would also ingest Sent Items), hydrated with `$batch` 20 at a time.
+- A subscription Microsoft removed is recreated instead of failing every six hours, and lifecycle events (`reauthorizationRequired`, `subscriptionRemoved`, `missed`) map to renew, recreate and reconcile.

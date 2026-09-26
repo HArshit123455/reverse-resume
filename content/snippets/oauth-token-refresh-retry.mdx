@@ -1,0 +1,50 @@
+---
+title: "OAuth token refresh that can't lose the refresh token, with bounded retry"
+topic: "Merging Google's refresh responses, turning dead grants into a re-auth state, and retrying provider calls without blocking workers"
+source_project: "email-integrations"
+language: "typescript"
+tags: ["oauth", "gmail", "tokens", "retry", "resilience"]
+---
+
+## Context
+
+Google leaves `refresh_token` out of refresh responses. If the stored credentials are replaced with the refresh response, the first refresh throws away the only thing that can mint the next token, and the mailbox dies an hour later. Google also only issues a refresh token on first consent, which is why the connect flow asks with `prompt: consent` and refuses to create a mailbox without one.
+
+```ts
+async acquireToken(mailbox: Mailbox): Promise<string> {
+  const stored = this.openSealed(mailbox) // AES-256-GCM, AAD = mailbox id
+  const client = this.newOAuthClient()
+  client.setCredentials(stored)
+  // Google omits refresh_token from refresh responses: merge, don't replace, or the
+  // first refresh seals away the only thing that can mint the next token.
+  let refreshed: Credentials | null = null
+  client.on('tokens', (t) => { refreshed = { ...stored, ...t, refresh_token: t.refresh_token ?? stored.refresh_token } })
+  try {
+    const { token } = await client.getAccessToken()
+    if (refreshed) await this.persistSealed(mailbox, refreshed)
+    return token!
+  } catch (error) {
+    if (isInvalidGrant(error)) await this.mailboxes.markNeedsReauth(mailbox.id) // revoked or expired grant
+    throw error
+  }
+}
+
+private async request<T>(config: AxiosRequestConfig, mailbox: Mailbox): Promise<T> {
+  for (let attempt = 0; ; attempt++) {
+    const token = await this.auth.acquireToken(mailbox) // fresh token each attempt
+    try {
+      return (await axios.request<T>({ ...config, headers: { Authorization: `Bearer ${token}` }, timeout: 30_000 })).data
+    } catch (e) {
+      const status = (e as AxiosError).response?.status ?? 0
+      if (![429, 500, 503, 504].includes(status) || attempt >= MAX_RETRIES) throw e // queue job retries next
+      await sleep((Number((e as AxiosError).response?.headers?.['retry-after']) || 2 ** attempt * 2) * 1000)
+    }
+  }
+}
+```
+
+## What this proves
+
+- The merge fixes a real provider quirk that would otherwise break every mailbox within an hour of its first refresh.
+- A dead grant becomes a `NEEDS_REAUTH` status the product can show and act on, instead of an endless retry loop.
+- Retries honour `Retry-After`, are bounded (three retries at 2, 4 and 8 seconds, 30-second timeout), and then hand over to the queue's own retry and dead-letter queue rather than holding a worker.

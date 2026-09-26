@@ -16,3 +16,10 @@ dist/
 *.tsbuildinfo
 
 .superpowers/
+
+# impeccable: local research and review captures (may hold private work details)
+.impeccable/review/
+.impeccable/*dossier*.md
+.impeccable/mocks/
+.impeccable/build/
+.impeccable/config.local.json

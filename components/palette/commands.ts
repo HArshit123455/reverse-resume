@@ -25,7 +25,7 @@ export const SECTION_ORDER: CommandSection[] = [
 export const COMMAND_CATALOG: Command[] = [
   { id: "nav.ask", label: "Ask…", kbd: "↩", section: "Navigate" },
   { id: "nav.work", label: "Jump to Work", kbd: "W", section: "Navigate", keywords: ["projects"] },
-  { id: "nav.now", label: "Jump to Now", kbd: "N", section: "Navigate" },
+  { id: "nav.chrysa", label: "Read the Chrysa story", kbd: "C", section: "Navigate", keywords: ["app", "case study", "blog"] },
   { id: "nav.footer", label: "Jump to Footer", kbd: "↓", section: "Navigate", keywords: ["contact"] },
   { id: "nav.experience", label: "Jump to Experience", section: "Navigate", keywords: ["about", "work", "timeline"] },
   { id: "nav.skills", label: "Jump to Skills", section: "Navigate", keywords: ["about", "stack"] },

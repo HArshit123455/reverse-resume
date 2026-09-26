@@ -1,0 +1,48 @@
+---
+title: "Gmail watch renewal that also arms unwatched mailboxes"
+topic: "Keeping Gmail Pub/Sub push alive when watches expire silently after seven days"
+source_project: "email-integrations"
+language: "typescript"
+tags: ["gmail", "pubsub", "push", "scheduling", "email"]
+---
+
+## Context
+
+A Gmail `users.watch` expires after seven days, sends no warning, and has no PATCH: re-arming is the same call again. Microsoft Graph at least emits lifecycle events; Gmail just goes silent. So a scheduled job is the only thing between a mailbox and a week-long push outage. Push also sits behind a feature flag, and mailboxes connected while it was off needed a way to join without reconnecting.
+
+```ts
+// Watches expire after 7 days and Gmail sends no warning. Renewal runs every 6h and
+// renews anything inside this window, so one missed tick is never fatal.
+const RENEW_WHEN_EXPIRING_WITHIN_MS = 24 * 60 * 60_000
+
+async renewDueWatches(): Promise<number> {
+  if (!this.isPushEnabled()) return 0
+  return (await this.renewExpiring()) + (await this.armUnwatched())
+}
+
+// Makes the push flag a switch: mailboxes connected while push was off get armed
+// on the next tick instead of polling forever.
+private async armUnwatched(): Promise<number> {
+  let armed = 0
+  for (const mailbox of await this.mailboxes.findActive()) {
+    const existing = await this.watches.findOne({
+      where: { mailboxId: mailbox.id, resource: WATCH_RESOURCE, status: WatchStatus.ACTIVE }
+    })
+    if (existing) continue
+    try { await this.register(mailbox); armed += 1 } catch { /* one mailbox can't stall the sweep */ }
+  }
+  return armed
+}
+
+// Create and renew are the same users.watch call, so the row is keyed on an id we mint,
+// stable across renewals; register() updates it in place and can't duplicate.
+private externalIdFor(mailboxId: string): string {
+  return `gmail:${mailboxId}`
+}
+```
+
+## What this proves
+
+- Renewing a full day early on a six-hourly tick gives four chances before any watch lapses.
+- The second pass turns a feature flag into a real switch: operators can enable push without asking any customer to reconnect.
+- The push endpoint trusts only Pub/Sub's OIDC token (valid Google signature, the expected service account, verified email) and deliberately ignores the notification's `historyId`, so a replayed or reordered push can never rewind the cursor.

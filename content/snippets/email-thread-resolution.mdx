@@ -1,0 +1,46 @@
+---
+title: "Inbound email threading: which ticket does this reply belong to?"
+topic: "Resolving a reply to its ticket using provider thread ids, RFC headers and a subject token, in order of confidence"
+source_project: "email-integrations"
+language: "typescript"
+tags: ["email", "threading", "typeorm", "rfc5322", "tickets"]
+---
+
+## Context
+
+When a customer replies to an email, the reply should land on the existing ticket, not open a new one. No single signal is reliable: provider thread ids are strong but provider-specific, `References` and `In-Reply-To` work across clients but some strip them, and a ticket number in the subject survives forwarding but depends on the user leaving it alone.
+
+```ts
+// Ordered rules, first match wins; no match starts a new thread keyed on the email's own Message-ID.
+async resolve(mailbox: Mailbox, email: CanonicalEmail): Promise<{ key: string; matchedBy: MatchedBy | null }> {
+  const byThread = await this.matchProviderThread(mailbox, email) // Graph conversationId / Gmail threadId
+  if (byThread) return { key: byThread, matchedBy: 'conversation_id' }
+  const byRefs = await this.matchReferences(mailbox, email)       // References / In-Reply-To headers
+  if (byRefs) return { key: byRefs, matchedBy: 'references' }
+  const bySubject = await this.matchSubjectToken(mailbox, email)  // e.g. "[TKT-1234]" in the subject
+  if (bySubject) return { key: bySubject, matchedBy: 'subject_token' }
+  return { key: email.messageId, matchedBy: null }
+}
+
+private async matchReferences(mailbox: Mailbox, email: CanonicalEmail): Promise<string | null> {
+  const referenced = [...(email.references ?? []), email.inReplyTo].filter((id): id is string => !!id)
+  if (referenced.length === 0) return null
+  // getRawOne, not getOne: the select projects only the joined conversation's key,
+  // so entity hydration returns null even on a real match.
+  const raw = await this.messages.createQueryBuilder('m')
+    .innerJoin('m.conversation', 'c')
+    .select('c.conversationKey', 'conversationKey')
+    .where('c.mailboxId = :mailboxId', { mailboxId: mailbox.id })
+    .andWhere('m.direction = :dir', { dir: 'inbound' })
+    .andWhere('m.providerMessageId IN (:...ids)', { ids: referenced })
+    .orderBy('m.sentAt', 'ASC')
+    .getRawOne<{ conversationKey: string }>()
+  return raw?.conversationKey ?? null
+}
+```
+
+## What this proves
+
+- Checking signals in order of confidence makes threading robust across Gmail, Outlook and forwarded mail.
+- Recording which rule matched on the ledger makes every threading decision debuggable after the fact.
+- The `getRawOne` comment documents a real TypeORM trap: with a projected select, `getOne` hydrates nothing and silently returns null, which had broken reply threading until it was found and fixed.

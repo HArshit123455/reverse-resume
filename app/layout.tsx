@@ -1,40 +1,34 @@
-import type { Metadata } from "next";
-import { Cormorant_Garamond, Geist, JetBrains_Mono, Inter } from "next/font/google";
+import type { Metadata, Viewport } from "next";
+import { Mona_Sans, Geist_Mono } from "next/font/google";
 import { Header } from "@/components/header";
 import { Chrome } from "@/components/chrome";
 import "./globals.css";
 
-const cormorant = Cormorant_Garamond({
+const mona = Mona_Sans({
   subsets: ["latin"],
-  weight: ["400", "500", "600"],
-  style: ["normal", "italic"],
+  weight: "variable",
+  axes: ["wdth"],
   display: "swap",
-  variable: "--font-cormorant",
+  variable: "--font-mona",
 });
 
-const geist = Geist({
-  subsets: ["latin"],
-  weight: ["300", "400", "500", "600", "700"],
-  display: "swap",
-  variable: "--font-geist",
-});
-
-const jetbrains = JetBrains_Mono({
+const geistMono = Geist_Mono({
   subsets: ["latin"],
   weight: ["400", "500"],
   display: "swap",
-  variable: "--font-jetbrains",
-});
-
-const inter = Inter({
-  subsets: ["latin"],
-  display: "swap",
-  variable: "--font-inter",
+  variable: "--font-geist-mono",
 });
 
 export const metadata: Metadata = {
   title: "Harshit Sindhu — Reverse Resume",
   description: "Ask my work anything. Every claim cites real code.",
+};
+
+export const viewport: Viewport = {
+  themeColor: [
+    { media: "(prefers-color-scheme: light)", color: "#ffffff" },
+    { media: "(prefers-color-scheme: dark)", color: "#000000" },
+  ],
 };
 
 const NO_FLASH_SCRIPT = `(function () {
@@ -47,16 +41,15 @@ const NO_FLASH_SCRIPT = `(function () {
 })();`;
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
-  const fontClasses = `${cormorant.variable} ${geist.variable} ${jetbrains.variable} ${inter.variable}`;
   return (
-    <html lang="en" className={fontClasses} suppressHydrationWarning>
+    <html lang="en" className={`${mona.variable} ${geistMono.variable}`} suppressHydrationWarning>
       <head>
         <script dangerouslySetInnerHTML={{ __html: NO_FLASH_SCRIPT }} />
       </head>
       <body className="bg-bg text-fg">
         <Chrome>
           <Header />
-          <div className="mx-auto max-w-5xl px-6 py-10">{children}</div>
+          {children}
         </Chrome>
       </body>
     </html>

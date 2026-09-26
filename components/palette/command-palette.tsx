@@ -42,6 +42,20 @@ export function CommandPalette({ open, onClose, onFire }: CommandPaletteProps) {
     lastFocusedRef.current?.focus?.();
   }, [open]);
 
+  // Escape closes the palette wherever focus is (clicking the dimmed page
+  // moves focus to <body>, where the dialog's own key handler never hears it).
+  useEffect(() => {
+    if (!open) return;
+    function onKey(e: KeyboardEvent) {
+      if (e.key === "Escape") {
+        e.preventDefault();
+        onClose();
+      }
+    }
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, [open, onClose]);
+
   if (!open) return null;
 
   function move(delta: number) {
@@ -74,20 +88,18 @@ export function CommandPalette({ open, onClose, onFire }: CommandPaletteProps) {
     <div
       role="presentation"
       className="fixed inset-0 z-[100] flex items-start justify-center px-4 pt-[12vh]"
-      onClick={(e) => {
-        if (e.target === e.currentTarget) onClose();
-      }}
     >
-      <div className="absolute inset-0 bg-fg/30 backdrop-blur-sm" aria-hidden />
+      {/* The scrim covers the wrapper, so it owns the outside click. */}
+      <div className="absolute inset-0 bg-black/40 backdrop-blur-md" aria-hidden onClick={onClose} />
       <div
         ref={dialogRef}
         role="dialog"
         aria-modal="true"
         aria-label="Command palette"
         onKeyDown={onKeyDown}
-        className="relative w-full max-w-[560px] overflow-hidden rounded-[16px] border border-border bg-bg-elev shadow-md"
+        className="relative w-full max-w-[600px] overflow-hidden rounded-[22px] bg-bg ring-1 ring-border-strong"
       >
-        <div className="flex items-center gap-3 border-b border-border px-4 py-3">
+        <div className="flex items-center gap-3 border-b border-border px-5 py-4">
           <span aria-hidden className="font-mono text-[12px] text-muted">⌘K</span>
           <input
             ref={inputRef}
@@ -96,7 +108,7 @@ export function CommandPalette({ open, onClose, onFire }: CommandPaletteProps) {
             onChange={(e) => setQuery(e.target.value)}
             placeholder="Type a command, or search…"
             aria-label="Search commands"
-            className="flex-1 bg-transparent text-[14px] text-fg placeholder:text-muted-2 focus:outline-none"
+            className="flex-1 bg-transparent text-[17px] tracking-[-0.015em] text-fg placeholder:text-muted focus:outline-none"
           />
         </div>
         <CommandList

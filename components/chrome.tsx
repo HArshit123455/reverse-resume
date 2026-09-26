@@ -95,11 +95,14 @@ function ChromeInner({ children }: { children: ReactNode }) {
         input?.scrollIntoView?.({ behavior: "smooth", block: "center" });
         return;
       }
-      case "nav.work":
-        document.getElementById("work")?.scrollIntoView({ behavior: "smooth" });
+      case "nav.work": {
+        const work = document.getElementById("work");
+        if (work) work.scrollIntoView({ behavior: "smooth" });
+        else window.location.href = "/#work";
         return;
-      case "nav.now":
-        document.getElementById("now")?.scrollIntoView({ behavior: "smooth" });
+      }
+      case "nav.chrysa":
+        window.location.href = "/chrysa";
         return;
       case "nav.footer":
         document.getElementById("footer")?.scrollIntoView({ behavior: "smooth" });

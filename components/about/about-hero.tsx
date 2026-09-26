@@ -1,12 +1,12 @@
 import type { AboutFrontmatterT } from "@/lib/content/about";
-import { Icon } from "./icons";
 
+/** Keynote emphasis: the sentence sits in grey, the *marked* words step forward in full ink. */
 function renderLede(lede: string) {
   return lede.split("*").map((seg, i) =>
     i % 2 === 1 ? (
-      <em key={i} className="font-medium not-italic text-accent">
+      <span key={i} className="text-fg">
         {seg}
-      </em>
+      </span>
     ) : (
       <span key={i}>{seg}</span>
     )
@@ -15,65 +15,61 @@ function renderLede(lede: string) {
 
 export function AboutHero({ data }: { data: AboutFrontmatterT }) {
   return (
-    <section className="pb-[18px] pt-[64px] sm:pt-[92px]">
-      {/* eyebrow + availability */}
-      <div className="flex flex-wrap items-center gap-3">
-        <span className="inline-flex items-center gap-2 font-mono text-[11.5px] uppercase tracking-[0.06em] text-muted">
-          <span className="about-dot" aria-hidden />
-          About
-        </span>
+    <section className="px-5 pb-16 pt-20 sm:px-8 sm:pb-24 sm:pt-28">
+      <div className="mx-auto max-w-[1120px]">
+        <h1 className="stage-in text-[clamp(56px,11vw,96px)] font-bold leading-[0.95] tracking-[-0.045em] text-fg [font-stretch:104%]">
+          {data.name}
+        </h1>
+        <p
+          className="stage-in mt-5 flex flex-wrap items-center gap-x-3 gap-y-1 text-[17px] text-muted"
+          style={{ ["--reveal-delay" as string]: "100ms" }}
+        >
+          <span>{data.tagline}</span>
+        </p>
         {data.availability ? (
-          <span className="inline-flex items-center gap-2 rounded-pill border border-[color-mix(in_oklab,var(--accent)_22%,transparent)] bg-accent-soft px-[9px] py-1 pr-[11px] font-mono text-[10.5px] text-accent">
-            <span className="about-dot-sm" aria-hidden />
-            {data.availability}
-          </span>
+          <p
+            className="stage-in mt-3 inline-flex items-center gap-2.5 text-[15px] font-medium text-fg"
+            style={{ ["--reveal-delay" as string]: "160ms" }}
+          >
+            <span className="live-dot" aria-hidden />
+            {data.availability} · {data.location}
+          </p>
         ) : null}
-      </div>
 
-      {/* name */}
-      <h1 className="mb-9 mt-4 font-serif text-[clamp(56px,9vw,104px)] font-medium leading-[0.94] tracking-[-0.032em] text-fg">
-        {data.name}
-      </h1>
-
-      {/* two-column lede / aside */}
-      <div className="grid items-end gap-14 max-[760px]:grid-cols-1 max-[760px]:items-start max-[760px]:gap-7 min-[761px]:grid-cols-[1.05fr_0.95fr]">
-        <p className="text-balance font-serif text-[clamp(28px,3.4vw,42px)] font-medium leading-[1.16] tracking-[-0.016em] text-fg">
+        <p
+          className="stage-in mt-14 max-w-[28ch] text-[clamp(28px,3.8vw,44px)] font-semibold leading-[1.14] tracking-[-0.03em] text-muted sm:mt-20"
+          style={{ ["--reveal-delay" as string]: "240ms" }}
+        >
           {renderLede(data.lede)}
         </p>
-        <div className="flex flex-col gap-5 pb-1.5">
-          <div className="flex flex-wrap gap-x-2.5 gap-y-2">
-            <MetaChip icon="pin" label={data.location} />
-            <MetaChip icon="briefcase" label="Software Developer @ Zykrr" />
-            <MetaChip icon="code" label="TypeScript, end-to-end" />
-          </div>
-          <p className="text-pretty text-[16px] leading-[1.65] text-muted">{data.support}</p>
-        </div>
-      </div>
-
-      {/* stat strip */}
-      <div className="mt-[34px] flex flex-wrap border-y border-border">
-        {data.stats.map((s) => (
-          <div
-            key={s.cap}
-            className="stat min-w-[130px] flex-1 py-5 pr-6 [&:not(:first-child)]:pl-6 max-[560px]:basis-1/2"
-          >
-            <div className="font-serif text-[42px] font-medium leading-none tracking-[-0.02em] text-fg">
-              {s.num}
-              {s.unit ? <span className="ml-1 align-baseline text-[18px] text-accent">{s.unit}</span> : null}
-            </div>
-            <div className="mt-[9px] max-w-[18ch] text-[12.5px] leading-[1.4] text-muted">{s.cap}</div>
-          </div>
-        ))}
+        <p
+          className="stage-in mt-8 max-w-[62ch] text-[19px] leading-[1.6] tracking-[-0.012em] text-fg-soft"
+          style={{ ["--reveal-delay" as string]: "320ms" }}
+        >
+          {data.support}
+        </p>
       </div>
     </section>
   );
 }
 
-function MetaChip({ icon, label }: { icon: "pin" | "briefcase" | "code"; label: string }) {
+/** The numbers as statements: each figure reads as the start of a sentence. */
+export function AboutNumbers({ stats }: { stats: AboutFrontmatterT["stats"] }) {
+  if (stats.length === 0) return null;
   return (
-    <span className="inline-flex items-center gap-[7px] whitespace-nowrap rounded-pill border border-border bg-bg-elev px-[13px] py-[7px] text-[13px] text-fg-soft">
-      <Icon name={icon} className="h-[15px] w-[15px] text-accent" />
-      {label}
-    </span>
+    <ul className="border-b border-border">
+      {stats.map((s) => (
+        <li
+          key={s.cap}
+          className="border-t border-border py-6 text-[clamp(24px,3.2vw,36px)] font-semibold leading-[1.15] tracking-[-0.03em] text-muted sm:py-8"
+        >
+          <span className="text-fg">
+            {s.num}
+            {s.unit ? (s.unit === "★" ? "-star" : ` ${s.unit}`) : ""}
+          </span>{" "}
+          {s.cap}
+        </li>
+      ))}
+    </ul>
   );
 }

@@ -69,15 +69,15 @@ function ToastSurface({ toast }: { toast: ToastState | null }) {
     <div
       aria-live="polite"
       aria-atomic="true"
-      className="pointer-events-none fixed inset-x-0 bottom-8 z-[200] flex justify-center px-4"
+      className="pointer-events-none fixed inset-x-0 bottom-[max(2rem,calc(env(safe-area-inset-bottom)+5.5rem))] z-[200] flex justify-center px-4 sm:bottom-10"
     >
       {toast ? (
         <div
           role="status"
           className={
             toast.variant === "love"
-              ? "pointer-events-auto max-w-[480px] whitespace-pre-wrap rounded-[14px] border border-border bg-bg-elev px-5 py-3 font-serif text-[15.5px] italic text-accent shadow-md"
-              : "pointer-events-auto max-w-[480px] whitespace-pre-wrap rounded-[14px] border border-border bg-bg-elev px-5 py-3 font-mono text-[12.5px] text-fg-soft shadow-md"
+              ? "pointer-events-auto max-w-[min(520px,100%)] whitespace-pre-wrap rounded-[22px] bg-accent px-6 py-4 text-center text-[clamp(18px,2.2vw,22px)] font-semibold leading-snug tracking-[-0.02em] text-accent-ink"
+              : "pointer-events-auto max-w-[480px] whitespace-pre-wrap rounded-pill bg-fg px-5 py-3 text-[15px] tracking-[-0.012em] text-bg"
           }
         >
           {toast.message}

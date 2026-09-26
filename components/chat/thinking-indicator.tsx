@@ -56,7 +56,7 @@ export function ThinkingIndicator({ phase }: { phase: Phase }) {
     <span
       role="status"
       aria-live="polite"
-      className="inline-flex items-center gap-2 text-[14px] text-muted"
+      className="inline-flex items-center gap-2.5 text-[17px] tracking-[-0.01em] text-muted"
     >
       <span className="sr-only">Working on your answer…</span>
       <span className="thinking-dot" aria-hidden />

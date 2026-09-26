@@ -1,0 +1,152 @@
+---
+title: "Chrysa"
+dek: "A calm companion for the life you actually want. Not a habit tracker."
+summary: "How I designed, built and shipped a privacy-first life companion for Android and iPhone in three weeks, and everything that broke along the way."
+updated: "2026-09-26"
+icon: "/chrysa/icon.png"
+facts:
+  - { label: "What", value: "A life companion for Android and iPhone" }
+  - { label: "Built by", value: "Me, alone, with Expo and React Native" }
+  - { label: "Started", value: "6 September 2026" }
+  - { label: "First commit to 1.0.0", value: "15 days" }
+  - { label: "Over-the-air betas", value: "110" }
+  - { label: "Closed test", value: "13 testers, 14 days, on Google Play" }
+  - { label: "Data", value: "Stays on the phone. No accounts, no backend, no LLM." }
+  - { label: "Status", value: "Google Play production access under review (26 Sep 2026)" }
+timeline:
+  - { date: "6 Sep", event: "First commit. V1 ships the same day with 123 tests. Named Chrysa. Beta 1 and the first Android APK." }
+  - { date: "8 Sep", event: "The Window: the first redesign. Android screen time, sleep, steps and the pause before an app." }
+  - { date: "9 Sep", event: "Store package, privacy site and the first Play bundle." }
+  - { date: "10 Sep", event: "A designer friend reviews Home. Home is rebuilt, and the screen-time undercount is found and fixed." }
+  - { date: "11 Sep", event: "The Google Play closed test opens with 13 testers." }
+  - { date: "12 Sep", event: "The View: each kind of day draws something in a landscape." }
+  - { date: "13 Sep", event: "The town, sound and tilt. The decision to stay 2D." }
+  - { date: "14 Sep", event: "Skia rendering. Two crashes found and fixed the same day. The turn to “infer by default”." }
+  - { date: "15 Sep", event: "The Bigger Window: the scene takes the whole screen, and onboarding becomes one question per screen." }
+  - { date: "16 Sep", event: "Clock wheel, glass panes, a new typeface and the Ledger. The out-of-memory crash is fixed." }
+  - { date: "21 Sep", event: "1.0.0 on the closed track." }
+  - { date: "22–23 Sep", event: "A motion pass across the app." }
+  - { date: "25 Sep", event: "Applied for production access on Google Play." }
+  - { date: "26 Sep", event: "Beta 110. Production review pending." }
+links:
+  - { label: "Privacy policy", href: "https://harshit123455.github.io/chrysa-site/privacy.html" }
+  - { label: "Public site repo", href: "https://github.com/HArshit123455/chrysa-site" }
+---
+
+## What Chrysa is
+
+Chrysa is a small app with one sentence behind it: **help people build a life they don’t need to escape from.**
+
+It asks who you want to become, then quietly notices how your days actually go: how you slept, whether you walked, how long you spent on your phone, what’s on your calendar and anything you tell it in plain words. It doesn’t hand that back as a dashboard. It draws it as a small town outside a window, under a sky that follows the real time of day where you are.
+
+It’s easier to say what it isn’t. It isn’t a habit tracker (“nothing to keep up, nothing to break”). It isn’t a screen-time blocker, and it isn’t a scoreboard. There’s no single score, no streaks and no calories. Rest counts, and so does entertainment. Everything stays on the phone.
+
+The name comes from *chrysalism*: the calm of being indoors during a thunderstorm. That’s the feeling I wanted the app to have.
+
+## Why I built it
+
+Chrysa is for people in their twenties and thirties who reach for Instagram, YouTube or reels to escape, and who want to become a particular kind of person: healthier, closer to the people they love, more creative, calmer, more present. They open it one-handed, often for less than a minute.
+
+The apps nearby mostly help you optimise yourself. Screen-time tools like Opal and one sec intervene at the same moment Chrysa does, but they police. Meditation apps like Headspace and Calm ask for a session. Planners like Structured ask for a plan. I wanted the opposite posture: help you build a life you actually want to live, then get out of the way.
+
+> The best outcome is the person closing the app and going to live.
+
+That line settled a lot of arguments. It is why the app has states for “lightening” and “graduated” built into its engine: it is designed to become less necessary over time.
+
+## A tour of the app
+
+![Chrysa’s Home screen: “Good afternoon, Harshit” over a sunset valley with trees, two houses, a walking figure, a dog and a balloon; below, sills for sleep, steps and screen, and one thing to do](/chrysa/screens/home.jpg "Home at sunset, on iPhone") ![The Progress tab on the View setting: this month’s landscape, with a share button](/chrysa/screens/progress.jpg "Progress, the View") ![The log sheet titled “What did you do?”, with a plain-words field, quick picks such as “Walked 20 minutes”, and a time choice](/chrysa/screens/log.jpg "Logging, in plain words") ![The You tab: who you want to become, your rhythm, notifications and what Chrysa may look at](/chrysa/screens/you.jpg "You, where the person sets the terms")
+
+**Home is a window.** The whole screen is a scene. The sky shows the real hour, with the sun or moon on its arc, drifting clouds and a little film grain. Over it sit a greeting, the date and weather, three sills for sleep, movement and screen, one thing worth doing, and a kind line.
+
+**The town is your month.** Each kind of day draws something. A walk grows a tree. Time with people lights a window in a house. Reading adds a bird, work on a goal lays a stretch of path, and fun raises a balloon. Five houses open a square, and twelve open a lane. The residents, a figure that’s you and a dog keep a scripted day on the real clock, and you can tap anything to hear its story. Nothing outside the window is a count, nothing decays, and nothing dies.
+
+**Day is a ledger.** The phone writes your day in pale ink, with where each line came from. One strike removes a line. A Plan tab holds what kind of day it is (working, from home, half day, day off, out) and when you’re busy until.
+
+**Progress has two views.** The View shows this month or last month as the landscape. Numbers compares each measure with *your usual*, not with a target. A section called “What Chrysa noticed” holds observations drawn from the last 28 days.
+
+**Closing the day takes one tap.** In the evening Chrysa offers a few rows: *Walked*, *With people*, *Read*, *Worked on a goal*, *Rested*, and asks “How was work?”. You can answer from the notification.
+
+There’s more around the edges. The Android version has a gentle pause before you open an app, with two-minute alternatives and an “Open anyway” that carries no guilt. Onboarding is ten one-question screens. Food is logged without calories. There’s a Sunday reflection and some ambient sound. And there’s an opt-in switch for places and weather, which can suggest one real nearby place when an unplanned hour opens up, if it fits the travel time, the rain and the sunset.
+
+## How the idea changed
+
+The first version, on 6 September, was a rule engine with a friendly face: a greeting, some stats, one suggestion and five life dimensions shown as dots. You logged everything by hand. Over the next ten days the thinking moved in a few clear steps.
+
+**The light should follow the day** (8 September). I wanted mornings to feel bright, afternoons sunny, evenings like sunset and nights dark. It became a sky with six lights, blended over forty minutes, from the real sunrise and sunset times.
+
+**The land should be the month** (12 September). Two people told me that nothing pulled them back. So the landscape became a picture of the month’s days. The figures in it are what you did, never a mascot or a pet.
+
+**Infer by default, ask one tap when only you know, speak when it’s true** (14 September). This was the biggest turn. Manual logging became drafts the phone writes for you. Sleep counts only after a quiet stretch of at least four hours. A walk counts only after eight minutes and 600 steps. It shows at most three drafts a day. If you remove a kind of draft twice, the bar for it goes up, and a third time it stops. Permission requests moved out of onboarding, to the moment they’re needed.
+
+**Understanding, not changing** (16 September). This is the thesis I ended up with: *Chrysa’s primary value is understanding a life, not changing it, and not the daily suggestion.* The loop is simple. You live your day, Chrysa notices, it tells you one true thing, and your street changes.
+
+I also said no to things. One proposal was “life weather”: the sky would turn overcast when your week was out of balance. It would have made the window lie about the real weather, and it was a score with the numbers filed off. On 21 September I stopped assuming Delhi everywhere. The default places, currency and sunrise now work for anyone, anywhere.
+
+## Designing it
+
+I designed Chrysa in rounds, and almost every round started with someone telling me the truth.
+
+> “The UI looks very AI generated.”
+
+That was me, on 8 September, looking at the first build. The redesign that followed, **The Window**, gave the app its sky.
+
+On 10 September a designer friend said Home was content-heavy, that it was unclear what to look at or do, and that everything blended together. Home became one sill, one panel and a list of rows. On 12 September two more people said the look wasn’t there yet, and I chose **The View** from a board of directions.
+
+On 13 September I wanted to push further. I looked at Alto’s Adventure and wondered about 3D. A quick prototype lab settled it: stay 2D, but add layers, real rendering, sound and tilt. When the town felt “still random, hard-coded, not a story”, I made it replay the person’s own day.
+
+**The Bigger Window** came on 15 September. The designer found the scene too small and onboarding “a form”. I had been studying the rhythm of Fabulous: one question per screen, big targets and a world behind the question. Home became the whole window, and onboarding became one question at a time.
+
+The details came next. There were no chips for choosing any more. One clock wheel works on every phone, and choices became rows with ticks. The panes changed from “clay by day” to glass in every light, with live blur underneath, because the night glass looked immature. The buttons “Do it / Not today” and the header font felt childish to me, so I changed the typeface to Instrument Sans. Finally, “the app misses animations” became a motion pass: everything moves in 180 to 320 milliseconds, and nothing pulses or rewards.
+
+## How it’s built
+
+Chrysa is Expo SDK 57 with React Native 0.86 and React 19, written in strict TypeScript. It uses Expo Router for navigation, SQLite with Drizzle for storage, NativeWind for styling, Reanimated for motion and Skia for the scene. I chose the stack partly because of my machine: no Xcode and no Android SDK, so everything had to run in Expo Go and build in the cloud. I also chose it for privacy. There’s no backend, no accounts, no LLM and no paid API.
+
+**A pure engine.** The heart of the app is a TypeScript engine that imports nothing from React, the UI or the database, and a lint rule enforces that. One bridge turns the database into a snapshot, the engine’s rules propose candidates, and a swappable ranker scores them. A separate pattern engine reads 28 days to find observations worth saying.
+
+**Copy that can’t shame.** A test scans every string in the app for sixteen words, including *fail*, *streak*, *should*, *must*, *lazy*, *wasted*, *missed*, *guilty* and *behind*. It also rejects more than one exclamation mark per screen. Decline buttons say “Not today”.
+
+**Private by construction.** Everything lives in SQLite on the phone. There is exactly one exception, off by default: the places and weather switch. It sends a location rounded to about a kilometre to Open-Meteo, and to about 110 metres to OpenStreetMap, because a kilometre is the difference between your neighbourhood and your city.
+
+**Passive signals.** On Android, a small Kotlin module of my own reads screen time through usage access, estimates sleep from when the phone goes quiet, counts steps and detects walks, reads the calendar (read-only) and watches for the pause. On iPhone, walks come from the pedometer. iOS screen time is off-limits by platform design, so there it’s manual, with a Shortcut.
+
+**The scene.** One Skia canvas draws the sky, the land and the rain. Figures are posed on the UI thread, and where people stand comes from the real clock. If the canvas crashes twice, a breaker falls back to the older vector drawing.
+
+V1 shipped with 123 tests. Typecheck, lint and the whole suite run before every commit.
+
+## What broke, and what it taught me
+
+**Creating Skia objects on the UI thread** (14 September). Betas 56 to 58 crashed Expo Go on iPhone as soon as it opened. I had been creating Skia paths inside code that runs on the UI thread. I switched Skia off over the air within the hour, then rebuilt it the library’s way, behind a crash-loop breaker. *Never create Skia objects inside worklets.*
+
+**A missing one-word marker** (14 September). The next crash, a SIGABRT at first open, came from a helper called on the UI thread without its `'worklet'` directive. My first theory was wrong, and betas 61 to 67 all crashed. Beta 68 fixed it and wrapped the drawing code so a mistake can’t take the app down. *On the UI thread, one thrown error kills everything.*
+
+**Silence that ate memory** (16 September). The only crash Google Play reported was an out-of-memory error inside the audio player. The ambience kept eight looping players open at volume zero, plus one for each short sound: about a dozen on a low-RAM phone. Now only sounds you can actually hear stay open, usually two or three. *Never hold a player open for silence.*
+
+**Two renderers, one missing figure** (16 September). On Android, nobody walked to the house during onboarding. Play builds draw with Skia, but the figure and its labels existed only in the vector renderer that the iPhone in Expo Go was using. It looked perfect on my phone. *Anything drawn over the window goes in both renderers.*
+
+**Screen time that undercounted** (10 September). The Kotlin reader stopped counting when you moved between screens inside the same app. It now tracks what is in front for each app, and the page shows when it last read the numbers.
+
+**Publishes that deleted each other** (14 September). Two over-the-air exports running at once write to the same folder, and the second deletes the first’s files. That is how beta 53’s production update was lost. Publishes now run one after another.
+
+**People running in place** (14 September). In a screen recording, the figures’ legs cycled while they barely moved. Their stride now follows real distance at a fixed walking speed.
+
+**Losing people quietly.** Four testers uninstalled in a single day, and with no telemetry I couldn’t ask why. So I removed the ways the app could lose someone. I added an error boundary around the whole app so one bad render can’t leave a dead screen, and I made the first day pay off with data the phone already had.
+
+## Shipping it
+
+The first beta went out on 6 September, the same day as the first commit, through Expo’s over-the-air updates. I don’t have an Apple developer account yet, so iPhone testers use Expo Go. Every change goes to two branches, one for iPhone and one for the Play build.
+
+On Android I started with sideloaded APKs and moved to a Play bundle on 9 September. Google Play requires a new personal account to run a closed test with at least twelve testers opted in for fourteen straight days. Mine ran from 11 to 25 September with thirteen. During the test the app received 93 over-the-air updates and 7 new builds. Version 1.0.0 went live on the closed track on 21 September. It was only a version bump, so the binary Google reviews is the one the testers had already been running.
+
+I applied for production access on 25 September. As of 26 September it is under review, which Google says takes three to seven working days. When it’s approved, 1.0.0 goes to production, followed by 1.1 with a home-screen widget.
+
+## What I’d tell myself on day one
+
+Say what the product *is not* before you design what it is. “No score, no streaks, rest counts” made hundreds of later decisions for me.
+
+Ship to real phones on the first day. Nearly every hard bug in this story only existed on a device I wasn’t holding.
+
+Let people be blunt, and write down what they said, word for word. Each redesign here started with one honest sentence.
+
+Keep the core pure. Because the engine never touched the UI, I could rebuild the entire look five times without breaking what the app believed.

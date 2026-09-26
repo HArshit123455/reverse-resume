@@ -1,0 +1,33 @@
+---
+title: "Gmail and Microsoft 365 inbound email: architecture"
+topic: "Connecting customer mailboxes over OAuth and turning inbound mail into tickets, with push as a latency layer and a cursor as the source of truth"
+source_project: "email-integrations"
+language: "typescript"
+tags: ["email", "gmail", "microsoft-graph", "oauth", "nestjs", "bullmq", "postgres", "webhooks"]
+---
+
+## Context
+
+At work I built the inbound email channel for a B2B customer-experience platform (NestJS, TypeORM, Postgres, BullMQ). A customer connects a Gmail or Microsoft 365 mailbox over OAuth, and every email that lands in its inbox becomes a ticket, or a reply on an existing ticket, in the right workflow. It is inbound only: both providers are connected with read-only scopes (`gmail.readonly`, `Mail.Read`), and outbound email lives in a separate module that I didn't write.
+
+I started the Microsoft 365 side as my own proof of concept (MSAL auth, delta sync, subscriptions, an encrypted token vault), then ported it into the production multi-tenant model and built the rest of the channel around it. Gmail came second, on the same pipeline; it is built and tested, and rolling out.
+
+Both providers follow one pattern I call notify-then-fetch. A push from the provider (a Graph change notification, or a Gmail Pub/Sub message) is only a wake-up call. The source of truth is a cursor stored per mailbox (a Graph `deltaLink`, a Gmail `historyId`), and one shared fetch worker drains everything newer than it. I pulled the provider-specific parts behind a small adapter seam (a sync client with `seed`, `changesSince` and `isCursorInvalid`, a normalizer and an OAuth service), so the Gmail integration reused the whole pipeline the Microsoft one already ran on.
+
+```ts
+// Each notify-then-fetch provider plugs in three things; the fetch loop is shared.
+interface MailSyncClient<Cursor> {
+  seed(mailbox: Mailbox): Promise<Cursor>                 // start from "now", no backfill
+  changesSince(cursor: Cursor, mailbox: Mailbox): AsyncIterable<SyncPage<Cursor>>
+  isCursorInvalid(error: unknown): boolean                // provider says the cursor aged out
+}
+```
+
+Every provider's messages are normalized into one canonical email, then go through a single projection step: a dedup ledger, workflow routing, a policy chain (virus, loop, spam, sender rules, subject filter, size), thread resolution, and finally the same channel-agnostic ingest pipeline that WhatsApp uses.
+
+## What this proves
+
+- Push is the latency layer, not the correctness layer. Neither provider guarantees delivery, so a reconcile sweep drains every active mailbox every 15 minutes, a renewal job keeps Graph subscriptions and Gmail watches alive every 6 hours, and a watchdog re-drives any email stuck mid-projection.
+- Idempotency at three levels: one fixed queue job id per mailbox collapses a notification storm into one drain, a unique (mailbox, Message-ID) ledger dedupes messages, and the shared pipeline dedupes again.
+- OAuth done carefully: the `state` parameter is HMAC-signed with a 15-minute TTL so a forged callback can't route a mailbox into another tenant, and tokens are sealed with AES-256-GCM using the mailbox id as additional authenticated data, so a sealed blob copied onto another row fails to open.
+- Operable: each provider has a 4-check verify (the only run that changes status) and a read-only 5-check diagnostic that support can run without touching the mailbox.

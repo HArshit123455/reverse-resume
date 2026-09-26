@@ -8,15 +8,13 @@ export function monogramFor(name: string): string {
   return words.slice(0, 3).map((w) => w.charAt(0).toUpperCase()).join("");
 }
 
+/** Logos are drawn for white paper, so the tile stays white in both themes. */
 export function LogoTile({ name, logo }: { name: string; logo?: string }) {
   const [failed, setFailed] = useState(false);
   const showImg = logo && !failed;
 
   return (
-    <div
-      className="grid h-16 w-16 place-items-center overflow-hidden rounded-[15px] border border-border shadow-sm transition-transform duration-200 max-[560px]:h-12 max-[560px]:w-12"
-      style={{ background: "#f6f4ee" }}
-    >
+    <div className="grid h-14 w-14 place-items-center overflow-hidden rounded-[16px] bg-white ring-1 ring-inset ring-black/5 sm:h-16 sm:w-16 sm:rounded-[18px]">
       {showImg ? (
         // eslint-disable-next-line @next/next/no-img-element
         <img
@@ -24,13 +22,11 @@ export function LogoTile({ name, logo }: { name: string; logo?: string }) {
           alt={`${name} logo`}
           width={44}
           height={44}
-          className="h-11 w-11 object-contain max-[560px]:h-8 max-[560px]:w-8"
+          className="h-9 w-9 object-contain sm:h-11 sm:w-11"
           onError={() => setFailed(true)}
         />
       ) : (
-        <span className="font-serif text-[18px] font-medium tracking-[-0.01em] text-[#15171a]">
-          {monogramFor(name)}
-        </span>
+        <span className="text-[17px] font-bold tracking-[-0.02em] text-[#1d1d1f]">{monogramFor(name)}</span>
       )}
     </div>
   );

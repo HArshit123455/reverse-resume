@@ -58,7 +58,7 @@ export function ShikiCode({ code, language }: ShikiCodeProps) {
 
   return (
     <div
-      className="group relative my-3 overflow-hidden rounded-lg border border-border bg-bg-sunk"
+      className="group relative my-3 overflow-hidden rounded-[14px] bg-bg-elev"
       role="region"
       aria-label={`Code excerpt${language ? `, ${language}` : ""}`}
     >
@@ -66,17 +66,17 @@ export function ShikiCode({ code, language }: ShikiCodeProps) {
         type="button"
         onClick={onCopy}
         aria-label={copied ? "Copied" : "Copy code"}
-        className="absolute right-2 top-2 z-10 inline-flex items-center gap-1 rounded-md border border-border bg-bg-elev px-2 py-1 text-[11px] text-fg-soft opacity-0 transition-opacity hover:text-fg group-hover:opacity-100 focus-visible:opacity-100"
+        className="absolute right-2.5 top-2.5 z-10 inline-flex items-center gap-1 rounded-pill bg-bg px-2.5 py-1 text-[12px] text-fg-soft opacity-0 ring-1 ring-border transition-opacity hover:text-fg group-hover:opacity-100 focus-visible:opacity-100"
       >
         {copied ? "Copied" : "Copy"}
       </button>
       {html ? (
         <div
-          className="overflow-x-auto p-4 text-[13px] leading-relaxed [&_pre]:!bg-transparent"
+          className="overflow-x-auto p-5 font-mono text-[13px] leading-relaxed [&_code]:font-mono [&_pre]:!bg-transparent"
           dangerouslySetInnerHTML={{ __html: html }}
         />
       ) : (
-        <pre className="overflow-x-auto p-4 text-[13px] leading-relaxed">
+        <pre className="overflow-x-auto p-5 font-mono text-[13px] leading-relaxed">
           <code>{code}</code>
         </pre>
       )}

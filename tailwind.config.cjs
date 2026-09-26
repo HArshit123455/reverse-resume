@@ -5,7 +5,6 @@ module.exports = {
   theme: {
     extend: {
       colors: {
-        // New tokens
         bg: "var(--bg)",
         "bg-elev": "var(--bg-elev)",
         "bg-sunk": "var(--bg-sunk)",
@@ -18,18 +17,23 @@ module.exports = {
         accent: "var(--accent)",
         "accent-soft": "var(--accent-soft)",
         "accent-ink": "var(--accent-ink)",
+        nav: "var(--nav)",
       },
       fontFamily: {
-        serif: ['var(--serif)', '"Charter"', '"Source Serif 4"', "Georgia", "serif"],
-        sans: ['var(--sans)', "ui-sans-serif", "system-ui", "sans-serif"],
-        mono: ['var(--mono)', "ui-monospace", "SFMono-Regular", "Consolas", "monospace"],
+        sans: ["var(--sans)"],
+        serif: ["var(--sans)"],
+        mono: ["var(--mono)"],
       },
       borderRadius: {
         pill: "var(--radius-pill)",
+        tile: "var(--radius-lg)",
       },
       boxShadow: {
-        sm: "var(--shadow-sm)",
-        md: "var(--shadow-md)",
+        sm: "none",
+        md: "none",
+      },
+      transitionTimingFunction: {
+        stage: "cubic-bezier(0.22, 1, 0.36, 1)",
       },
     },
   },

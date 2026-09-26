@@ -25,17 +25,17 @@ export function CommandList({ commands, activeId, onActivate, onFire }: CommandL
 
   if (grouped.length === 0) {
     return (
-      <div className="px-4 py-8 text-center font-mono text-[12px] text-muted">
+      <div className="px-5 py-10 text-center text-[15px] text-muted">
         No matches.
       </div>
     );
   }
 
   return (
-    <div role="listbox" aria-label="Commands" className="max-h-[420px] overflow-y-auto py-2">
+    <div role="listbox" aria-label="Commands" className="max-h-[440px] overflow-y-auto px-2 py-2">
       {grouped.map((group) => (
         <div key={group.section}>
-          <div className="px-4 pb-1 pt-3 font-mono text-[10.5px] uppercase tracking-[0.10em] text-muted">
+          <div className="px-3 pb-1.5 pt-3 text-[12px] font-semibold text-muted">
             {group.section}
           </div>
           <ul>
@@ -51,13 +51,13 @@ export function CommandList({ commands, activeId, onActivate, onFire }: CommandL
                     data-command-id={cmd.id}
                     onMouseMove={() => onActivate(cmd.id)}
                     onClick={() => onFire(cmd.id)}
-                    className={`flex w-full items-center justify-between gap-3 px-4 py-2 text-left text-[14px] transition-colors ${
-                      active ? "bg-accent-soft text-accent" : "text-fg-soft hover:bg-bg-sunk"
+                    className={`flex w-full items-center justify-between gap-3 rounded-[12px] px-3 py-2.5 text-left text-[15px] tracking-[-0.012em] transition-colors ${
+                      active ? "bg-bg-elev text-fg" : "text-fg"
                     }`}
                   >
                     <span>{cmd.label}</span>
                     {cmd.kbd ? (
-                      <kbd className="rounded-[6px] border border-border bg-bg px-1.5 py-0.5 font-mono text-[11px] text-muted">
+                      <kbd className={`font-mono text-[12px] ${"text-muted"}`}>
                         {cmd.kbd}
                       </kbd>
                     ) : null}

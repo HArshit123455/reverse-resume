@@ -120,7 +120,7 @@ export function AnswerCard({ turn }: AnswerCardProps) {
       <div
         role="tablist"
         aria-label="Answer views"
-        className="mb-3 inline-flex items-center gap-1 rounded-pill border border-border bg-bg-elev p-1 text-[12.5px]"
+        className="mb-6 inline-flex items-center gap-0.5 rounded-pill bg-bg-elev p-[3px] text-[13px] font-medium tracking-[-0.01em]"
       >
         {(["tldr", "impact", "code", "story"] as const).map((k) => {
           const isActive = active === k;
@@ -135,10 +135,10 @@ export function AnswerCard({ turn }: AnswerCardProps) {
               id={`tab-${turn.id}-${k}`}
               disabled={disabled}
               onClick={() => onTabClick(k)}
-              className={`rounded-pill px-3 py-1 transition-colors ${
+              className={`rounded-pill px-3.5 py-[5px] transition-colors duration-300 ${
                 isActive
-                  ? "bg-fg text-bg"
-                  : "text-fg-soft hover:bg-bg-sunk hover:text-fg disabled:opacity-50 disabled:hover:bg-transparent disabled:hover:text-fg-soft"
+                  ? "bg-bg text-fg ring-1 ring-border dark:bg-bg-sunk"
+                  : "text-muted hover:text-fg disabled:opacity-40 disabled:hover:text-muted"
               }`}
             >
               {k === "tldr" ? "TL;DR" : k[0].toUpperCase() + k.slice(1)}
@@ -166,24 +166,24 @@ export function AnswerCard({ turn }: AnswerCardProps) {
         aria-labelledby={`tab-${turn.id}-impact`}
         hidden={active !== "impact"}
       >
-        {impact.status === "loading" && <span className="text-muted">Extracting numbers…</span>}
+        {impact.status === "loading" && <span className="text-[16px] text-muted">Extracting numbers…</span>}
         {impact.status === "error" && (
-          <span className="text-muted">Couldn&apos;t extract numbers — see TL;DR.</span>
+          <span className="text-[16px] text-muted">Couldn&apos;t extract numbers — see TL;DR.</span>
         )}
         {impact.status === "ready" && impact.items.length === 0 && (
-          <span className="text-muted">No quantified outcomes in the cited sources.</span>
+          <span className="text-[16px] text-muted">No quantified outcomes in the cited sources.</span>
         )}
         {impact.status === "ready" && impact.items.length > 0 && (
           <ul className="grid grid-cols-1 gap-3 sm:grid-cols-2">
             {impact.items.map((it, i) => (
-              <li key={i} className="rounded-[12px] border border-border bg-bg-elev p-4">
-                <div className="font-serif text-[32px] font-medium leading-none tracking-[-0.02em] text-fg">
+              <li key={i} className="rounded-[18px] bg-bg-elev p-6">
+                <div className="text-[44px] font-bold leading-none tracking-[-0.04em] text-fg">
                   {it.num}
                   {it.unit && (
-                    <span className="ml-1 font-mono text-[14px] text-muted">{it.unit}</span>
+                    <span className="ml-1.5 text-[17px] font-semibold tracking-[-0.01em] text-muted">{it.unit}</span>
                   )}
                 </div>
-                <div className="mt-2 text-[13px] text-fg-soft">{it.label}</div>
+                <div className="mt-3 text-[15px] leading-snug text-fg-soft">{it.label}</div>
               </li>
             ))}
           </ul>
@@ -196,16 +196,16 @@ export function AnswerCard({ turn }: AnswerCardProps) {
         aria-labelledby={`tab-${turn.id}-code`}
         hidden={active !== "code"}
       >
-        {code.status === "loading" && <span className="text-muted">Finding the code…</span>}
+        {code.status === "loading" && <span className="text-[16px] text-muted">Finding the code…</span>}
         {code.status === "error" && (
-          <span className="text-muted">Couldn&apos;t load the code excerpt.</span>
+          <span className="text-[16px] text-muted">Couldn&apos;t load the code excerpt.</span>
         )}
         {code.status === "ready" && !code.chunk && (
-          <span className="text-muted">No code excerpt in the cited sources.</span>
+          <span className="text-[16px] text-muted">No code excerpt in the cited sources.</span>
         )}
         {code.status === "ready" && code.chunk && (
           <div>
-            <div className="mb-2 font-mono text-[11.5px] text-muted">
+            <div className="mb-3 font-mono text-[12px] text-muted">
               {code.chunk.sourceProject && <span>{code.chunk.sourceProject}</span>}
               {code.chunk.sourceProject && code.chunk.file && <span> · </span>}
               {code.chunk.file && <span>{code.chunk.file}</span>}
@@ -218,13 +218,13 @@ export function AnswerCard({ turn }: AnswerCardProps) {
                     rel="noreferrer"
                     className="text-accent hover:underline"
                   >
-                    View on GitHub →
+                    View on GitHub
                   </a>
                 </>
               )}
             </div>
             {code.chunk.kind === "prose" ? (
-              <div className="prose-preview rounded-lg border border-border bg-bg-elev px-5 py-4">
+              <div className="prose-preview rounded-[18px] bg-bg-elev px-6 py-5">
                 <MarkdownMessage content={code.chunk.code} />
               </div>
             ) : (
@@ -240,9 +240,9 @@ export function AnswerCard({ turn }: AnswerCardProps) {
         aria-labelledby={`tab-${turn.id}-story`}
         hidden={active !== "story"}
       >
-        {story.status === "loading" && <span className="text-muted">Setting the scene…</span>}
+        {story.status === "loading" && <span className="text-[16px] text-muted">Setting the scene…</span>}
         {story.status === "error" && story.text.length === 0 && (
-          <span className="text-muted">Couldn&apos;t generate the story.</span>
+          <span className="text-[16px] text-muted">Couldn&apos;t generate the story.</span>
         )}
         {(story.status === "streaming" ||
           story.status === "ready" ||

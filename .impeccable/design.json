@@ -1,0 +1,657 @@
+{
+  "schemaVersion": 2,
+  "generatedAt": "2026-09-26T08:15:52.851290+00:00",
+  "title": "Design System: Reverse Resume",
+  "extensions": {
+    "colorMeta": {
+      "stage": {
+        "role": "neutral",
+        "displayName": "Product White",
+        "canonical": "#ffffff",
+        "tonalRamp": [
+          "#000000",
+          "#161617",
+          "#1d1d1f",
+          "#424245",
+          "#6e6e73",
+          "#a1a1a6",
+          "#d2d2d7",
+          "#f5f5f7"
+        ]
+      },
+      "tile": {
+        "role": "neutral",
+        "displayName": "Keynote Tile",
+        "canonical": "#f5f5f7",
+        "tonalRamp": [
+          "#000000",
+          "#161617",
+          "#1d1d1f",
+          "#424245",
+          "#6e6e73",
+          "#a1a1a6",
+          "#d2d2d7",
+          "#f5f5f7"
+        ]
+      },
+      "sunk": {
+        "role": "neutral",
+        "displayName": "Recessed Grey",
+        "canonical": "#ebebf0",
+        "tonalRamp": [
+          "#000000",
+          "#161617",
+          "#1d1d1f",
+          "#424245",
+          "#6e6e73",
+          "#a1a1a6",
+          "#d2d2d7",
+          "#f5f5f7"
+        ]
+      },
+      "ink": {
+        "role": "neutral",
+        "displayName": "Keynote Ink",
+        "canonical": "#1d1d1f",
+        "tonalRamp": [
+          "#000000",
+          "#161617",
+          "#1d1d1f",
+          "#424245",
+          "#6e6e73",
+          "#a1a1a6",
+          "#d2d2d7",
+          "#f5f5f7"
+        ]
+      },
+      "ink-soft": {
+        "role": "neutral",
+        "displayName": "Soft Ink",
+        "canonical": "#424245",
+        "tonalRamp": [
+          "#000000",
+          "#161617",
+          "#1d1d1f",
+          "#424245",
+          "#6e6e73",
+          "#a1a1a6",
+          "#d2d2d7",
+          "#f5f5f7"
+        ]
+      },
+      "muted": {
+        "role": "neutral",
+        "displayName": "Caption Grey",
+        "canonical": "#6e6e73",
+        "tonalRamp": [
+          "#000000",
+          "#161617",
+          "#1d1d1f",
+          "#424245",
+          "#6e6e73",
+          "#a1a1a6",
+          "#d2d2d7",
+          "#f5f5f7"
+        ]
+      },
+      "muted-2": {
+        "role": "neutral",
+        "displayName": "Faint Grey",
+        "canonical": "#86868b",
+        "tonalRamp": [
+          "#000000",
+          "#161617",
+          "#1d1d1f",
+          "#424245",
+          "#6e6e73",
+          "#a1a1a6",
+          "#d2d2d7",
+          "#f5f5f7"
+        ]
+      },
+      "hairline": {
+        "role": "neutral",
+        "displayName": "Hairline",
+        "canonical": "rgba(0, 0, 0, 0.08)",
+        "tonalRamp": [
+          "#000000",
+          "#161617",
+          "#1d1d1f",
+          "#424245",
+          "#6e6e73",
+          "#a1a1a6",
+          "#d2d2d7",
+          "#f5f5f7"
+        ]
+      },
+      "hairline-strong": {
+        "role": "neutral",
+        "displayName": "Strong Hairline",
+        "canonical": "rgba(0, 0, 0, 0.16)",
+        "tonalRamp": [
+          "#000000",
+          "#161617",
+          "#1d1d1f",
+          "#424245",
+          "#6e6e73",
+          "#a1a1a6",
+          "#d2d2d7",
+          "#f5f5f7"
+        ]
+      },
+      "nav-glass": {
+        "role": "neutral",
+        "displayName": "Nav Glass",
+        "canonical": "rgba(255, 255, 255, 0.84)",
+        "tonalRamp": [
+          "#000000",
+          "#161617",
+          "#1d1d1f",
+          "#424245",
+          "#6e6e73",
+          "#a1a1a6",
+          "#d2d2d7",
+          "#f5f5f7"
+        ]
+      },
+      "indigo": {
+        "role": "primary",
+        "displayName": "Evidence Indigo",
+        "canonical": "#3d3af2",
+        "tonalRamp": [
+          "#141360",
+          "#1f1d9a",
+          "#2d2ad0",
+          "#3d3af2",
+          "#6664f5",
+          "#8b8cff",
+          "#b9b9ff",
+          "#e4e4fd"
+        ]
+      },
+      "indigo-wash": {
+        "role": "primary",
+        "displayName": "Indigo Wash",
+        "canonical": "rgba(61, 58, 242, 0.09)",
+        "tonalRamp": [
+          "#141360",
+          "#1f1d9a",
+          "#2d2ad0",
+          "#3d3af2",
+          "#6664f5",
+          "#8b8cff",
+          "#b9b9ff",
+          "#e4e4fd"
+        ]
+      },
+      "indigo-ink": {
+        "role": "primary",
+        "displayName": "On-Indigo",
+        "canonical": "#ffffff",
+        "tonalRamp": [
+          "#000000",
+          "#161617",
+          "#1d1d1f",
+          "#424245",
+          "#6e6e73",
+          "#a1a1a6",
+          "#d2d2d7",
+          "#f5f5f7"
+        ]
+      },
+      "stage-dark": {
+        "role": "neutral",
+        "displayName": "Keynote Black",
+        "canonical": "#000000",
+        "tonalRamp": [
+          "#000000",
+          "#161617",
+          "#1d1d1f",
+          "#424245",
+          "#6e6e73",
+          "#a1a1a6",
+          "#d2d2d7",
+          "#f5f5f7"
+        ]
+      },
+      "tile-dark": {
+        "role": "neutral",
+        "displayName": "Stage Tile (dark)",
+        "canonical": "#161617",
+        "tonalRamp": [
+          "#000000",
+          "#161617",
+          "#1d1d1f",
+          "#424245",
+          "#6e6e73",
+          "#a1a1a6",
+          "#d2d2d7",
+          "#f5f5f7"
+        ]
+      },
+      "sunk-dark": {
+        "role": "neutral",
+        "displayName": "Recessed (dark)",
+        "canonical": "#1d1d1f",
+        "tonalRamp": [
+          "#000000",
+          "#161617",
+          "#1d1d1f",
+          "#424245",
+          "#6e6e73",
+          "#a1a1a6",
+          "#d2d2d7",
+          "#f5f5f7"
+        ]
+      },
+      "ink-dark": {
+        "role": "neutral",
+        "displayName": "Stage Light Ink",
+        "canonical": "#f5f5f7",
+        "tonalRamp": [
+          "#000000",
+          "#161617",
+          "#1d1d1f",
+          "#424245",
+          "#6e6e73",
+          "#a1a1a6",
+          "#d2d2d7",
+          "#f5f5f7"
+        ]
+      },
+      "ink-soft-dark": {
+        "role": "neutral",
+        "displayName": "Soft Ink (dark)",
+        "canonical": "#d2d2d7",
+        "tonalRamp": [
+          "#000000",
+          "#161617",
+          "#1d1d1f",
+          "#424245",
+          "#6e6e73",
+          "#a1a1a6",
+          "#d2d2d7",
+          "#f5f5f7"
+        ]
+      },
+      "muted-dark": {
+        "role": "neutral",
+        "displayName": "Caption Grey (dark)",
+        "canonical": "#a1a1a6",
+        "tonalRamp": [
+          "#000000",
+          "#161617",
+          "#1d1d1f",
+          "#424245",
+          "#6e6e73",
+          "#a1a1a6",
+          "#d2d2d7",
+          "#f5f5f7"
+        ]
+      },
+      "hairline-dark": {
+        "role": "neutral",
+        "displayName": "Hairline (dark)",
+        "canonical": "rgba(255, 255, 255, 0.1)",
+        "tonalRamp": [
+          "#000000",
+          "#161617",
+          "#1d1d1f",
+          "#424245",
+          "#6e6e73",
+          "#a1a1a6",
+          "#d2d2d7",
+          "#f5f5f7"
+        ]
+      },
+      "hairline-strong-dark": {
+        "role": "neutral",
+        "displayName": "Strong Hairline (dark)",
+        "canonical": "rgba(255, 255, 255, 0.2)",
+        "tonalRamp": [
+          "#000000",
+          "#161617",
+          "#1d1d1f",
+          "#424245",
+          "#6e6e73",
+          "#a1a1a6",
+          "#d2d2d7",
+          "#f5f5f7"
+        ]
+      },
+      "nav-glass-dark": {
+        "role": "neutral",
+        "displayName": "Nav Glass (dark)",
+        "canonical": "rgba(0, 0, 0, 0.8)",
+        "tonalRamp": [
+          "#000000",
+          "#161617",
+          "#1d1d1f",
+          "#424245",
+          "#6e6e73",
+          "#a1a1a6",
+          "#d2d2d7",
+          "#f5f5f7"
+        ]
+      },
+      "indigo-dark": {
+        "role": "primary",
+        "displayName": "Evidence Indigo (dark)",
+        "canonical": "#8b8cff",
+        "tonalRamp": [
+          "#141360",
+          "#1f1d9a",
+          "#2d2ad0",
+          "#3d3af2",
+          "#6664f5",
+          "#8b8cff",
+          "#b9b9ff",
+          "#e4e4fd"
+        ]
+      },
+      "indigo-wash-dark": {
+        "role": "primary",
+        "displayName": "Indigo Wash (dark)",
+        "canonical": "rgba(139, 140, 255, 0.14)",
+        "tonalRamp": [
+          "#141360",
+          "#1f1d9a",
+          "#2d2ad0",
+          "#3d3af2",
+          "#6664f5",
+          "#8b8cff",
+          "#b9b9ff",
+          "#e4e4fd"
+        ]
+      },
+      "indigo-ink-dark": {
+        "role": "primary",
+        "displayName": "On-Indigo (dark)",
+        "canonical": "#000000",
+        "tonalRamp": [
+          "#000000",
+          "#161617",
+          "#1d1d1f",
+          "#424245",
+          "#6e6e73",
+          "#a1a1a6",
+          "#d2d2d7",
+          "#f5f5f7"
+        ]
+      },
+      "love": {
+        "role": "secondary",
+        "displayName": "Love Pink (easter egg)",
+        "canonical": "#e0306e",
+        "tonalRamp": [
+          "#4a0c22",
+          "#8a1640",
+          "#c0245b",
+          "#e0306e",
+          "#ec5a8c",
+          "#ff7fab",
+          "#ffb3cc",
+          "#ffe6ef"
+        ]
+      },
+      "love-dark": {
+        "role": "secondary",
+        "displayName": "Love Pink (dark)",
+        "canonical": "#ff7fab",
+        "tonalRamp": [
+          "#4a0c22",
+          "#8a1640",
+          "#c0245b",
+          "#e0306e",
+          "#ec5a8c",
+          "#ff7fab",
+          "#ffb3cc",
+          "#ffe6ef"
+        ]
+      }
+    },
+    "typographyMeta": {
+      "display": {
+        "displayName": "Display",
+        "purpose": "One per page: hero statement, About name, Chrysa title."
+      },
+      "headline": {
+        "displayName": "Headline",
+        "purpose": "Home stage statements, featured project, commit graph."
+      },
+      "headline-sm": {
+        "displayName": "Headline Small",
+        "purpose": "About section heads and CTA statements."
+      },
+      "title": {
+        "displayName": "Title",
+        "purpose": "Project rows, timeline entries, chat question."
+      },
+      "lede": {
+        "displayName": "Lede",
+        "purpose": "Muted supporting line under a statement."
+      },
+      "body-reading": {
+        "displayName": "Body Reading",
+        "purpose": "Chrysa story prose, project descriptions, achievements."
+      },
+      "body": {
+        "displayName": "Body",
+        "purpose": "Base text."
+      },
+      "label": {
+        "displayName": "Label",
+        "purpose": "Meta lines below titles, nav, captions, footer."
+      },
+      "mono": {
+        "displayName": "Mono",
+        "purpose": "Code, tech tags, keyboard hints, footnote numbers only."
+      }
+    },
+    "shadows": [
+      {
+        "name": "none",
+        "value": "none",
+        "purpose": "--shadow-sm and --shadow-md resolve to none; the system is flat. Depth is tonal (tile on stage)."
+      },
+      {
+        "name": "nav-glass",
+        "value": "backdrop-filter: blur(24px) saturate(1.8)",
+        "purpose": "Frosted material for the sticky nav and follow-up bar; not a shadow."
+      },
+      {
+        "name": "palette-scrim",
+        "value": "background: rgba(0,0,0,0.4); backdrop-filter: blur(12px)",
+        "purpose": "Dims the page behind the command palette."
+      }
+    ],
+    "motion": [
+      {
+        "name": "ease-stage",
+        "value": "cubic-bezier(0.22, 1, 0.36, 1)",
+        "purpose": "Ease-out-quint; every transition and entrance."
+      },
+      {
+        "name": "stage-reveal",
+        "value": "opacity 900ms, transform 1100ms (translateY 28px), filter 900ms (blur 10px); stagger 80-320ms",
+        "purpose": "The one authored entrance, once per stage; first stage plays from CSS on load."
+      },
+      {
+        "name": "slide-in",
+        "value": "700ms, translateY 18px, scale 0.985",
+        "purpose": "A new chat answer lands like the next slide."
+      },
+      {
+        "name": "state",
+        "value": "300ms",
+        "purpose": "Colour, scale (1.02 buttons, 1.04 send) and ring transitions."
+      },
+      {
+        "name": "segment-slide",
+        "value": "500ms",
+        "purpose": "Segmented thumb and active-footnote ring."
+      },
+      {
+        "name": "theme",
+        "value": "420ms",
+        "purpose": "Background and colour cross-fade on theme switch."
+      },
+      {
+        "name": "live-pulse",
+        "value": "scale 1 to 0.6, 2.6s infinite (thinking dot 1.4s)",
+        "purpose": "Live dot and thinking dot."
+      }
+    ],
+    "breakpoints": [
+      {
+        "name": "sm",
+        "value": "640px"
+      },
+      {
+        "name": "md",
+        "value": "768px"
+      },
+      {
+        "name": "lg",
+        "value": "1024px"
+      }
+    ]
+  },
+  "components": [
+    {
+      "name": "Primary Button",
+      "kind": "button",
+      "refersTo": "button-primary",
+      "description": "Ink pill that inverts the stage; one per stage.",
+      "html": "<button class=\"ds-btn-primary\">Email me <svg width=\"16\" height=\"16\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.7\" stroke-linecap=\"round\" stroke-linejoin=\"round\"><path d=\"M5 12h14M13 6l6 6-6 6\"/></svg></button>",
+      "css": ":host{--bg:#fff;--bg-elev:#f5f5f7;--bg-sunk:#ebebf0;--fg:#1d1d1f;--fg-soft:#424245;--muted:#6e6e73;--muted-2:#86868b;--border:rgba(0,0,0,.08);--border-strong:rgba(0,0,0,.16);--accent:#3d3af2;--accent-soft:rgba(61,58,242,.09);--accent-ink:#fff;--nav:rgba(255,255,255,.84);--ease:cubic-bezier(0.22,1,0.36,1);--sans:'Mona Sans',ui-sans-serif,system-ui,sans-serif;--mono:'Geist Mono',ui-monospace,monospace}.ds-btn-primary{display:inline-flex;align-items:center;gap:8px;height:48px;padding:0 24px;border:0;border-radius:999px;background:var(--fg);color:var(--bg);font:500 16px/1 var(--sans);transition:transform 300ms var(--ease);cursor:pointer}.ds-btn-primary:hover{transform:scale(1.02)}.ds-btn-primary:focus-visible{outline:2px solid var(--accent);outline-offset:3px;}"
+    },
+    {
+      "name": "Outline Button",
+      "kind": "button",
+      "refersTo": "button-outline",
+      "description": "Secondary action beside the primary; hairline ring goes to ink on hover.",
+      "html": "<button class=\"ds-btn-outline\">Ask my work anything <svg width=\"16\" height=\"16\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.7\" stroke-linecap=\"round\" stroke-linejoin=\"round\"><path d=\"M5 12h14M13 6l6 6-6 6\"/></svg></button>",
+      "css": ":host{--bg:#fff;--bg-elev:#f5f5f7;--bg-sunk:#ebebf0;--fg:#1d1d1f;--fg-soft:#424245;--muted:#6e6e73;--muted-2:#86868b;--border:rgba(0,0,0,.08);--border-strong:rgba(0,0,0,.16);--accent:#3d3af2;--accent-soft:rgba(61,58,242,.09);--accent-ink:#fff;--nav:rgba(255,255,255,.84);--ease:cubic-bezier(0.22,1,0.36,1);--sans:'Mona Sans',ui-sans-serif,system-ui,sans-serif;--mono:'Geist Mono',ui-monospace,monospace}.ds-btn-outline{display:inline-flex;align-items:center;gap:8px;height:48px;padding:0 24px;border:0;border-radius:999px;background:transparent;color:var(--fg);box-shadow:inset 0 0 0 1px var(--border-strong);font:500 16px/1 var(--sans);transition:box-shadow 150ms;cursor:pointer}.ds-btn-outline:hover{box-shadow:inset 0 0 0 1px var(--fg)}.ds-btn-outline:focus-visible{outline:2px solid var(--accent);outline-offset:3px;}"
+    },
+    {
+      "name": "Ask Field",
+      "kind": "input",
+      "refersTo": "ask-field",
+      "description": "The 64px pill the whole site hangs from, with a nested ink send button.",
+      "html": "<form class=\"ds-ask\"><input class=\"ds-ask-input\" placeholder=\"Ask about Harshit's work…\" aria-label=\"Ask\"><button type=\"button\" class=\"ds-ask-send\" aria-label=\"Ask\"><svg width=\"20\" height=\"20\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.7\" stroke-linecap=\"round\" stroke-linejoin=\"round\"><path d=\"M12 19V5M6 11l6-6 6 6\"/></svg></button></form>",
+      "css": ":host{--bg:#fff;--bg-elev:#f5f5f7;--bg-sunk:#ebebf0;--fg:#1d1d1f;--fg-soft:#424245;--muted:#6e6e73;--muted-2:#86868b;--border:rgba(0,0,0,.08);--border-strong:rgba(0,0,0,.16);--accent:#3d3af2;--accent-soft:rgba(61,58,242,.09);--accent-ink:#fff;--nav:rgba(255,255,255,.84);--ease:cubic-bezier(0.22,1,0.36,1);--sans:'Mona Sans',ui-sans-serif,system-ui,sans-serif;--mono:'Geist Mono',ui-monospace,monospace}.ds-ask{display:flex;align-items:center;width:560px;max-width:100%;height:64px;border-radius:999px;background:var(--bg-elev);box-shadow:0 0 0 1px transparent;transition:background-color 300ms,box-shadow 300ms}.ds-ask:focus-within{background:var(--bg);box-shadow:0 0 0 1px var(--border-strong)}.ds-ask-input{flex:1;border:0;background:transparent;padding:0 8px 0 28px;font:400 17px/26px var(--sans);letter-spacing:-0.015em;color:var(--fg);outline:none}.ds-ask-input::placeholder{color:var(--muted)}.ds-ask-send{display:inline-flex;align-items:center;justify-content:center;width:48px;height:48px;margin-right:8px;border:0;border-radius:999px;background:var(--fg);color:var(--bg);transition:transform 300ms var(--ease);cursor:pointer}.ds-ask-send:hover{transform:scale(1.04)}.ds-ask-send:focus-visible{outline:2px solid var(--accent);outline-offset:3px;}"
+    },
+    {
+      "name": "Segmented Control",
+      "kind": "chip",
+      "refersTo": "segmented-control",
+      "description": "One sliding thumb, three voices for the answer.",
+      "html": "<div class=\"ds-seg\" role=\"radiogroup\"><span class=\"ds-seg-thumb\"></span><button class=\"ds-seg-opt is-active\">Curious</button><button class=\"ds-seg-opt\">Recruiter</button><button class=\"ds-seg-opt\">Engineer</button></div>",
+      "css": ":host{--bg:#fff;--bg-elev:#f5f5f7;--bg-sunk:#ebebf0;--fg:#1d1d1f;--fg-soft:#424245;--muted:#6e6e73;--muted-2:#86868b;--border:rgba(0,0,0,.08);--border-strong:rgba(0,0,0,.16);--accent:#3d3af2;--accent-soft:rgba(61,58,242,.09);--accent-ink:#fff;--nav:rgba(255,255,255,.84);--ease:cubic-bezier(0.22,1,0.36,1);--sans:'Mona Sans',ui-sans-serif,system-ui,sans-serif;--mono:'Geist Mono',ui-monospace,monospace}.ds-seg{position:relative;display:inline-grid;grid-template-columns:repeat(3,1fr);padding:3px;border-radius:999px;background:var(--bg-elev)}.ds-seg-thumb{position:absolute;top:3px;bottom:3px;left:3px;width:calc((100% - 6px)/3);border-radius:999px;background:var(--bg);box-shadow:0 0 0 1px var(--border);transition:transform 500ms var(--ease)}.ds-seg-opt{position:relative;z-index:1;min-width:112px;padding:7px 16px;border:0;border-radius:999px;background:transparent;font:500 14px/1.2 var(--sans);letter-spacing:-0.01em;color:var(--muted);cursor:pointer;transition:color 300ms}.ds-seg-opt:hover,.ds-seg-opt.is-active{color:var(--fg)}.ds-seg-opt:focus-visible{outline:2px solid var(--accent);outline-offset:3px;}"
+    },
+    {
+      "name": "Frosted Nav",
+      "kind": "nav",
+      "refersTo": "nav-bar",
+      "description": "48px sticky glass bar; ink-soft links, mono ⌘K pill.",
+      "html": "<header class=\"ds-nav\"><span class=\"ds-nav-brand\">Harshit Sindhu</span><nav class=\"ds-nav-links\"><a href=\"#\">Work</a><a href=\"#\">About</a><a href=\"#\">Chrysa</a><span class=\"ds-nav-sep\"></span><kbd class=\"ds-nav-k\">⌘K</kbd></nav></header>",
+      "css": ":host{--bg:#fff;--bg-elev:#f5f5f7;--bg-sunk:#ebebf0;--fg:#1d1d1f;--fg-soft:#424245;--muted:#6e6e73;--muted-2:#86868b;--border:rgba(0,0,0,.08);--border-strong:rgba(0,0,0,.16);--accent:#3d3af2;--accent-soft:rgba(61,58,242,.09);--accent-ink:#fff;--nav:rgba(255,255,255,.84);--ease:cubic-bezier(0.22,1,0.36,1);--sans:'Mona Sans',ui-sans-serif,system-ui,sans-serif;--mono:'Geist Mono',ui-monospace,monospace}.ds-nav{display:flex;align-items:center;justify-content:space-between;height:48px;padding:0 32px;background:var(--nav);backdrop-filter:blur(24px) saturate(1.8);border-bottom:1px solid var(--border);font-family:var(--sans)}.ds-nav-brand{font:600 14px/1 var(--sans);color:var(--fg)}.ds-nav-links{display:flex;align-items:center;gap:8px}.ds-nav-links a{padding:4px 12px;border-radius:999px;font-size:13px;color:var(--fg-soft);text-decoration:none;transition:color 300ms}.ds-nav-links a:hover{color:var(--fg)}.ds-nav-links a:focus-visible{outline:2px solid var(--accent);outline-offset:3px;}.ds-nav-sep{width:1px;height:16px;background:var(--border);margin:0 4px}.ds-nav-k{display:inline-flex;align-items:center;height:28px;padding:0 10px;border:1px solid var(--border);border-radius:999px;font:400 11px/1 var(--mono);color:var(--muted)}"
+    },
+    {
+      "name": "Citation Marker",
+      "kind": "custom",
+      "refersTo": "citation-marker",
+      "description": "Inline numbered footnote; indigo wash at rest, solid indigo on hover.",
+      "html": "<p class=\"ds-cite-p\">The limiter runs on Postgres alone<sup><button class=\"ds-cite\">1</button></sup> and caps daily spend<sup><button class=\"ds-cite\">2</button></sup>.</p>",
+      "css": ":host{--bg:#fff;--bg-elev:#f5f5f7;--bg-sunk:#ebebf0;--fg:#1d1d1f;--fg-soft:#424245;--muted:#6e6e73;--muted-2:#86868b;--border:rgba(0,0,0,.08);--border-strong:rgba(0,0,0,.16);--accent:#3d3af2;--accent-soft:rgba(61,58,242,.09);--accent-ink:#fff;--nav:rgba(255,255,255,.84);--ease:cubic-bezier(0.22,1,0.36,1);--sans:'Mona Sans',ui-sans-serif,system-ui,sans-serif;--mono:'Geist Mono',ui-monospace,monospace}.ds-cite-p{font:400 18px/1.6 var(--sans);color:var(--fg-soft)}.ds-cite{display:inline-flex;align-items:center;justify-content:center;height:18px;min-width:18px;margin-left:2px;padding:0 6px;border:0;border-radius:999px;background:var(--accent-soft);color:var(--accent);font:500 10.5px/1 var(--mono);font-variant-numeric:tabular-nums;cursor:pointer;transition:background-color 300ms,color 300ms}.ds-cite:hover{background:var(--accent);color:var(--accent-ink)}.ds-cite:focus-visible{outline:2px solid var(--accent);outline-offset:3px;}"
+    },
+    {
+      "name": "Source Card",
+      "kind": "card",
+      "refersTo": "source-card",
+      "description": "Footnote in the sources rail; the active one gets a 2px inset indigo ring.",
+      "html": "<div class=\"ds-src is-active\"><span class=\"ds-src-n\">1</span><div><div class=\"ds-src-t\">lib/rate-limit.ts</div><div class=\"ds-src-m\">code · reverse-resume</div><a class=\"ds-src-a\" href=\"#\">Show excerpt</a></div></div>",
+      "css": ":host{--bg:#fff;--bg-elev:#f5f5f7;--bg-sunk:#ebebf0;--fg:#1d1d1f;--fg-soft:#424245;--muted:#6e6e73;--muted-2:#86868b;--border:rgba(0,0,0,.08);--border-strong:rgba(0,0,0,.16);--accent:#3d3af2;--accent-soft:rgba(61,58,242,.09);--accent-ink:#fff;--nav:rgba(255,255,255,.84);--ease:cubic-bezier(0.22,1,0.36,1);--sans:'Mona Sans',ui-sans-serif,system-ui,sans-serif;--mono:'Geist Mono',ui-monospace,monospace}.ds-src{display:grid;grid-template-columns:28px minmax(0,1fr);column-gap:12px;width:320px;padding:20px;border-radius:18px;background:var(--bg-elev);font-family:var(--sans);transition:box-shadow 500ms var(--ease)}.ds-src.is-active{box-shadow:inset 0 0 0 2px var(--accent)}.ds-src-n{font:500 13px/1.4 var(--mono);font-variant-numeric:tabular-nums;color:var(--muted)}.ds-src.is-active .ds-src-n{color:var(--accent)}.ds-src-t{font-weight:600;font-size:15px;letter-spacing:-0.015em;color:var(--fg)}.ds-src-m{margin-top:4px;font-size:13px;color:var(--muted)}.ds-src-a{display:inline-block;margin-top:12px;font-size:13px;color:var(--accent);text-decoration:none;transition:opacity 150ms}.ds-src-a:hover{opacity:.75}.ds-src-a:focus-visible{outline:2px solid var(--accent);outline-offset:3px;}"
+    },
+    {
+      "name": "Stage Tile",
+      "kind": "card",
+      "refersTo": "stage-tile",
+      "description": "Flat 28px tile one tone off the stage, holding a headline statement.",
+      "html": "<section class=\"ds-tile\"><h2 class=\"ds-tile-h\">514 commits in the last year.</h2><p class=\"ds-tile-p\">Every contribution on GitLab, one square per day.</p></section>",
+      "css": ":host{--bg:#fff;--bg-elev:#f5f5f7;--bg-sunk:#ebebf0;--fg:#1d1d1f;--fg-soft:#424245;--muted:#6e6e73;--muted-2:#86868b;--border:rgba(0,0,0,.08);--border-strong:rgba(0,0,0,.16);--accent:#3d3af2;--accent-soft:rgba(61,58,242,.09);--accent-ink:#fff;--nav:rgba(255,255,255,.84);--ease:cubic-bezier(0.22,1,0.36,1);--sans:'Mona Sans',ui-sans-serif,system-ui,sans-serif;--mono:'Geist Mono',ui-monospace,monospace}.ds-tile{max-width:720px;padding:56px;border-radius:28px;background:var(--bg-elev);font-family:var(--sans)}.ds-tile-h{margin:0;max-width:16ch;font-weight:700;font-size:56px;line-height:1.02;letter-spacing:-0.04em;font-stretch:104%;color:var(--fg)}.ds-tile-p{margin:20px 0 0;font-weight:500;font-size:19px;letter-spacing:-0.015em;color:var(--muted)}"
+    },
+    {
+      "name": "Toast",
+      "kind": "custom",
+      "refersTo": "toast",
+      "description": "Inverted ink pill, bottom centre.",
+      "html": "<div class=\"ds-toast\" role=\"status\">Copied to clipboard</div>",
+      "css": ":host{--bg:#fff;--bg-elev:#f5f5f7;--bg-sunk:#ebebf0;--fg:#1d1d1f;--fg-soft:#424245;--muted:#6e6e73;--muted-2:#86868b;--border:rgba(0,0,0,.08);--border-strong:rgba(0,0,0,.16);--accent:#3d3af2;--accent-soft:rgba(61,58,242,.09);--accent-ink:#fff;--nav:rgba(255,255,255,.84);--ease:cubic-bezier(0.22,1,0.36,1);--sans:'Mona Sans',ui-sans-serif,system-ui,sans-serif;--mono:'Geist Mono',ui-monospace,monospace}.ds-toast{display:inline-block;max-width:480px;padding:12px 20px;border-radius:999px;background:var(--fg);color:var(--bg);font:400 15px/1.4 var(--sans);letter-spacing:-0.012em}"
+    }
+  ],
+  "narrative": {
+    "northStar": "The Keynote Stage",
+    "overview": "The site is a keynote. Each section is a stage that holds one statement at keynote scale, and a chat answer lands like the next slide, with numbered source footnotes. There are two stages: in light mode it is a white product page, and in dark mode it is a black keynote hall. Tiles sit one tone off the stage. Nothing casts a shadow and nothing uses a gradient. The only colour on the page is one electric indigo, and it is used for evidence: citations, the active footnote, the commit graph, focus and the live dot.\n\nDensity is low and confident. A stage gets 96 to 144px of vertical air, and a statement gets a 96px headline in a single sans at tight tracking. Grey carries the supporting line, and full ink is saved for the words that matter. Motion comes down to one authored gesture. A statement rises 28px and un-blurs as its stage arrives, and it does this once. Everything else is a quiet colour or transform transition on the same ease-out-quint curve.\n\nThe world refuses the cream-serif editorial card grid. There is no serif, no paper tint, no card-with-shadow grid and no decorative accent.",
+    "keyCharacteristics": [
+      "White or black stage, with #f5f5f7 or #161617 tiles one step off it",
+      "One face, Mona Sans, at 700 for statements and pulled wide (wdth 104) at display sizes, with Geist Mono only for code and data",
+      "One indigo, used only where there is evidence or state",
+      "Flat throughout: tonal steps and hairlines, never shadows",
+      "Pills for controls and 28px corners for stage tiles",
+      "One entrance, the stage reveal (rise 28px, un-blur 10px, once)"
+    ],
+    "rules": [
+      {
+        "name": "The Evidence Indigo Rule",
+        "body": "Indigo is used only for citations, the active footnote, the commit graph, focus and the live dot. Links and primary buttons are ink (fg), not indigo. If a surface has no evidence and no state, it carries no indigo.",
+        "section": "colors"
+      },
+      {
+        "name": "The One Accent Rule",
+        "body": "Love mode swaps the accent. It never adds one. The system never shows two accents at the same time.",
+        "section": "colors"
+      },
+      {
+        "name": "The Meta Below Rule",
+        "body": "Nothing sits above a heading. There is no eyebrow and no kicker. Meta lines (kind · year, dates, availability) go below the title in muted 15px.",
+        "section": "typography"
+      },
+      {
+        "name": "The Grey-then-Ink Rule",
+        "body": "A lede sits in muted grey, and the few words that carry the claim step forward in full ink. Emphasis comes from value, not from weight or colour.",
+        "section": "typography"
+      },
+      {
+        "name": "The Tabular Discipline Rule",
+        "body": "Tabular figures are used only in tables, dates and footnote numbers. Display numbers such as \"514 commits\" and the impact figures use proportional figures.",
+        "section": "typography"
+      },
+      {
+        "name": "The Flat Tile Rule",
+        "body": "Tiles are flat and have no shadows, in any state. Hover changes a scale or a ring, never elevation. Active state is a 2px indigo inset ring (the active footnote) or a solid fill.",
+        "section": "elevation"
+      }
+    ],
+    "dos": [
+      "Do give every stage one statement at headline scale (700, -0.04em) with a muted lede beneath, capped at about 36ch.",
+      "Do put meta lines (kind · year, dates, location) below the title in muted 15px.",
+      "Do make links and primary buttons ink (fg). Links are underlined with a `hairline-strong` decoration that goes to ink on hover.",
+      "Do reserve indigo for citations, the active footnote, the commit graph, focus and the live dot.",
+      "Do lift surfaces only by tone: `tile` on `stage`, with 28px corners for stage tiles.",
+      "Do use the stage ease (`cubic-bezier(0.22, 1, 0.36, 1)`) for every transition, and use the stage reveal as the only entrance.",
+      "Do keep Geist Mono to code, tech tags, keyboard hints and footnote numbers.",
+      "Do honour `prefers-reduced-motion` and keep content visible without JS."
+    ],
+    "donts": [
+      "Don't put an eyebrow, kicker or uppercase label above a heading.",
+      "Don't put stat or metric pairs on project rows.",
+      "Don't use tabular figures in display numbers. Use them only in tables, dates and footnote numbers.",
+      "Don't give tiles, cards or dialogs a shadow, and don't use gradients.",
+      "Don't colour links, buttons or decoration indigo.",
+      "Don't add a serif, a cream or paper tint, or a card-grid layout.",
+      "Don't add a second accent. Love mode replaces the indigo; it never joins it."
+    ]
+  }
+}

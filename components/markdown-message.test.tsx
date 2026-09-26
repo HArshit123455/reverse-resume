@@ -52,4 +52,11 @@ describe("MarkdownMessage", () => {
     // No CitationMarker button should be rendered when only citation appears in code
     expect(screen.queryByRole("button", { name: /citation 1/i })).toBeNull();
   });
+  it("keeps inline code inline instead of turning it into a code block", () => {
+    const { container } = render(<MarkdownMessage content={"Uses `ON CONFLICT` in one statement."} />);
+    expect(screen.queryByRole("region", { name: /code excerpt/i })).toBeNull();
+    const code = container.querySelector("p code");
+    expect(code?.textContent).toBe("ON CONFLICT");
+    expect(container.querySelector("p pre")).toBeNull();
+  });
 });

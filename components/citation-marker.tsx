@@ -47,7 +47,7 @@ export function CitationMarker({ n }: CitationMarkerProps) {
         onBlur={onLeave}
         aria-label={`Citation ${n}, view source ${sourceLabel}`}
         aria-describedby={hovered ? `cite-pop-${n}` : undefined}
-        className="ml-0.5 inline-flex h-[18px] min-w-[18px] items-center justify-center rounded-[4px] bg-accent-soft px-1.5 text-[10px] font-medium leading-none text-accent transition-colors hover:bg-accent hover:text-accent-ink"
+        className="tabular ml-0.5 inline-flex h-[18px] min-w-[18px] items-center justify-center rounded-pill bg-accent-soft px-1.5 font-mono text-[10.5px] font-medium leading-none text-accent transition-colors duration-300 hover:bg-accent hover:text-accent-ink"
       >
         {n}
       </button>
@@ -55,10 +55,10 @@ export function CitationMarker({ n }: CitationMarkerProps) {
         <span
           id={`cite-pop-${n}`}
           role="tooltip"
-          className="pointer-events-none absolute left-0 top-full z-20 mt-2 w-64 rounded-md bg-fg px-3 py-2 text-xs leading-relaxed text-bg shadow-md [@media(hover:none)]:hidden"
+          className="pointer-events-none absolute left-0 top-full z-20 mt-2 w-72 rounded-[14px] bg-fg px-4 py-3 text-[13px] font-normal leading-relaxed tracking-normal text-bg [@media(hover:none)]:hidden"
         >
           <span className="mb-1 block font-medium">{sourceLabel}</span>
-          {meta && <span className="mb-1.5 block text-[10px] text-muted">{meta}</span>}
+          {meta && <span className="mb-1.5 block text-[11px] opacity-60">{meta}</span>}
           <span className="block">{preview}{card.chunk.content.length > 140 ? "…" : ""}</span>
         </span>
       )}

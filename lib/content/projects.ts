@@ -12,22 +12,33 @@ export const ProjectFrontmatter = z.object({
   title: z.string().min(1).max(80),
   slug: z.string().min(1).max(80),
   year: z.string().regex(/^\d{4}$/),
-  kind: z.enum(["Side project", "OSS", "Bootstrapped", "Experiment"]),
+  kind: z.enum(["Side project", "OSS", "Bootstrapped", "Experiment", "Work"]),
   status: z.enum(["live", "archived"]),
   description: z.string().min(1).max(400),
   tags: z.array(z.string().min(1).max(40)).max(12),
   stats: z.array(ProjectStat).max(6).default([]),
-  url: z.string().url().optional(),
+  // absolute link to source, or a site path like "/chrysa" for an in-site story
+  url: z
+    .string()
+    .regex(/^(https?:\/\/|\/)/, "url must be absolute or a site path")
+    .optional(),
+  /** small square image shown beside the title (an app icon) */
+  icon: z.string().regex(/^\//).optional(),
+  /** label for the link; defaults to "View source" */
+  urlLabel: z.string().min(1).max(40).optional(),
   order: z.number().int().optional(),
+  /** false keeps the entry (and anything built on it) but leaves it out of Selected work */
+  selected: z.boolean().default(true),
 });
 
 export type ProjectFrontmatterT = z.infer<typeof ProjectFrontmatter>;
 
+// Hand-set order is the editorial choice and wins; year (newest first) breaks ties.
 function sortProjects(a: ProjectFrontmatterT, b: ProjectFrontmatterT): number {
-  if (a.year !== b.year) return b.year.localeCompare(a.year);
   const ao = a.order ?? Number.MAX_SAFE_INTEGER;
   const bo = b.order ?? Number.MAX_SAFE_INTEGER;
-  return ao - bo;
+  if (ao !== bo) return ao - bo;
+  return b.year.localeCompare(a.year);
 }
 
 export function _loadProjectsFrom(dir: string): ProjectFrontmatterT[] {
@@ -41,4 +52,9 @@ export function _loadProjectsFrom(dir: string): ProjectFrontmatterT[] {
 
 export function loadProjects(): ProjectFrontmatterT[] {
   return _loadProjectsFrom(join(process.cwd(), "content/projects"));
+}
+
+/** The projects shown under Selected work, in display order. */
+export function loadSelectedProjects(): ProjectFrontmatterT[] {
+  return loadProjects().filter((p) => p.selected);
 }

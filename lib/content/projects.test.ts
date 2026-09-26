@@ -41,12 +41,28 @@ order: 1`
     expect(projects[0].stats[0]).toEqual({ label: "Repos indexed", val: "4" });
   });
 
-  it("sorts by year desc, then order asc", () => {
+  it("sorts by order asc, then year desc", () => {
     write("a.mdx", `title: "A"\nslug: "a"\nyear: "2024"\nkind: "Side project"\nstatus: "live"\ndescription: "."\ntags: []\nstats: []\norder: 2`);
     write("b.mdx", `title: "B"\nslug: "b"\nyear: "2026"\nkind: "Side project"\nstatus: "live"\ndescription: "."\ntags: []\nstats: []\norder: 2`);
     write("c.mdx", `title: "C"\nslug: "c"\nyear: "2026"\nkind: "Side project"\nstatus: "live"\ndescription: "."\ntags: []\nstats: []\norder: 1`);
     const projects = _loadProjectsFrom(dir);
     expect(projects.map((p) => p.slug)).toEqual(["c", "b", "a"]);
+  });
+
+  it("puts a hand-ordered older entry ahead of a newer one", () => {
+    write("new.mdx", `title: "N"\nslug: "new"\nyear: "2026"\nkind: "Work"\nstatus: "live"\ndescription: "."\ntags: []\norder: 4`);
+    write("old.mdx", `title: "O"\nslug: "old"\nyear: "2025"\nkind: "OSS"\nstatus: "live"\ndescription: "."\ntags: []\norder: 3`);
+    expect(_loadProjectsFrom(dir).map((p) => p.slug)).toEqual(["old", "new"]);
+  });
+
+  it("accepts a site-path url and defaults selected to true", () => {
+    const r = ProjectFrontmatter.parse({
+      title: "T", slug: "t", year: "2026", kind: "Side project", status: "live",
+      description: "d", tags: [], url: "/chrysa",
+    });
+    expect(r.url).toBe("/chrysa");
+    expect(r.selected).toBe(true);
+    expect(ProjectFrontmatter.safeParse({ ...r, url: "javascript:alert(1)" }).success).toBe(false);
   });
 
   it("defaults order to MAX_SAFE_INTEGER so unordered entries land last within a year", () => {
