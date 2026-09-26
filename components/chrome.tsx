@@ -3,6 +3,7 @@
 import dynamic from "next/dynamic";
 import { useCallback, useEffect, useState, type ReactNode } from "react";
 import { CommandPalette } from "./palette/command-palette";
+import { saveTheme } from "./theme-toggle";
 import { ToastProvider, useToast } from "./toast";
 import { PaletteContext, EggsContext } from "./chrome-context";
 import { useKonami } from "./eggs/use-konami";
@@ -154,13 +155,7 @@ function ChromeInner({ children }: { children: ReactNode }) {
         return;
       case "settings.theme": {
         const cur = document.documentElement.getAttribute("data-theme");
-        const next = cur === "dark" ? "light" : "dark";
-        document.documentElement.setAttribute("data-theme", next);
-        try {
-          window.localStorage.setItem("theme", next);
-        } catch {
-          // ignore
-        }
+        saveTheme(cur === "dark" ? "light" : "dark");
         return;
       }
       case "settings.resume":

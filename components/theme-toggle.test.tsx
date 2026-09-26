@@ -17,10 +17,15 @@ describe("ThemeToggle", () => {
     render(<ThemeToggle />);
     fireEvent.click(screen.getByRole("button"));
     expect(document.documentElement.getAttribute("data-theme")).toBe("dark");
-    expect(localStorage.getItem("theme")).toBe("dark");
+    expect(localStorage.getItem("rr_theme")).toBe("dark");
     fireEvent.click(screen.getByRole("button"));
     expect(document.documentElement.getAttribute("data-theme")).toBe("light");
-    expect(localStorage.getItem("theme")).toBe("light");
+    expect(localStorage.getItem("rr_theme")).toBe("light");
+  });
+
+  it("does not store anything until the visitor chooses", () => {
+    render(<ThemeToggle />);
+    expect(localStorage.getItem("rr_theme")).toBeNull();
   });
 
   it("reads the initial theme from the data-theme attribute set by NO_FLASH_SCRIPT", () => {

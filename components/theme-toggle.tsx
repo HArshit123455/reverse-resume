@@ -3,23 +3,45 @@
 import { useEffect, useState } from "react";
 import { Icon } from "./ui/icon";
 
+/**
+ * Only an explicit choice is stored. The site opens in light mode, and a
+ * visitor who picks dark keeps it. (The old "theme" key was written on every
+ * load, so it can't tell a choice from a default and is ignored.)
+ */
+export const THEME_KEY = "rr_theme";
+
+export function saveTheme(theme: "light" | "dark") {
+  document.documentElement.setAttribute("data-theme", theme);
+  try {
+    window.localStorage.setItem(THEME_KEY, theme);
+  } catch {
+    // storage unavailable (private mode): the choice lasts for this page only
+  }
+}
+
 export function ThemeToggle() {
-  // Defer reading the actual theme to a mount-only effect. The NO_FLASH_SCRIPT
-  // in layout.tsx writes data-theme on <html> before hydration, so SSR and the
-  // first client render both see no icon, then the effect syncs to the real value.
+  // The NO_FLASH_SCRIPT in layout.tsx writes data-theme on <html> before
+  // hydration; the mount effect reads it so SSR and the first render agree.
   const [isDark, setIsDark] = useState<boolean>(false);
   const [mounted, setMounted] = useState<boolean>(false);
 
   useEffect(() => {
-    setIsDark(document.documentElement.getAttribute("data-theme") === "dark");
+    const root = document.documentElement;
+    const sync = () => setIsDark(root.getAttribute("data-theme") === "dark");
+    sync();
     setMounted(true);
+    // keep the icon honest when the ⌘K palette switches the theme
+    const observer = new MutationObserver(sync);
+    observer.observe(root, { attributes: true, attributeFilter: ["data-theme"] });
+    return () => observer.disconnect();
   }, []);
 
-  useEffect(() => {
-    if (!mounted) return;
-    document.documentElement.setAttribute("data-theme", isDark ? "dark" : "light");
-    window.localStorage.setItem("theme", isDark ? "dark" : "light");
-  }, [isDark, mounted]);
+  function toggle() {
+    // read the page, not local state: the ⌘K palette can switch the theme too
+    const next = document.documentElement.getAttribute("data-theme") !== "dark";
+    setIsDark(next);
+    saveTheme(next ? "dark" : "light");
+  }
 
   const label = mounted
     ? (isDark ? "Switch to light mode" : "Switch to dark mode")
@@ -28,7 +50,7 @@ export function ThemeToggle() {
   return (
     <button
       type="button"
-      onClick={() => setIsDark((v) => !v)}
+      onClick={toggle}
       aria-label={label}
       className="inline-flex h-8 w-8 items-center justify-center rounded-pill text-fg-soft transition-colors duration-300 hover:text-fg"
     >

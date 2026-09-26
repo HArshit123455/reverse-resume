@@ -25,17 +25,14 @@ export const metadata: Metadata = {
 };
 
 export const viewport: Viewport = {
-  themeColor: [
-    { media: "(prefers-color-scheme: light)", color: "#ffffff" },
-    { media: "(prefers-color-scheme: dark)", color: "#000000" },
-  ],
+  themeColor: "#ffffff",
 };
 
 const NO_FLASH_SCRIPT = `(function () {
   try {
-    var t = localStorage.getItem("theme");
-    var prefersDark = window.matchMedia && window.matchMedia("(prefers-color-scheme: dark)").matches;
-    var theme = t === "dark" || t === "light" ? t : (prefersDark ? "dark" : "light");
+    var t = localStorage.getItem("rr_theme");
+    // Light unless the visitor has chosen dark with the toggle.
+    var theme = t === "dark" ? "dark" : "light";
     document.documentElement.setAttribute("data-theme", theme);
   } catch (_) {}
 })();`;
