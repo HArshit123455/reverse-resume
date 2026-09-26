@@ -8,7 +8,7 @@ The readable record for Harshit and Claude, outside this repo: `Now.md` (where t
 ## Hard rules
 - **Ask before anything that spends money**: a chat question, `pnpm ingest`, `pnpm eval:retrieval`, the e2e tests. Say what runs and roughly what it costs.
 - **`.env.local` points at the production database.** Local chat use and ingests land in prod.
-- **Work code appears only as short sanitized excerpts** (30 lines at most, generic names, no org names, ids or secrets). Claim only what his commits show.
+- **No code from Harshit's employer, ever** (since 2026-09-27, after a complaint). Work may be described in prose (what was built, how, why), never with code excerpts, however sanitized. Claim only what his commits show.
 - **The Chrysa repo is private**: never link it or show Expo/EAS ids on the site; a test enforces this. No tester names or their data.
 - **Never commit research notes**: `.impeccable/*dossier*.md` and `.impeccable/review/` are git-ignored on purpose.
 
