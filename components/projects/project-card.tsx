@@ -107,6 +107,7 @@ export function ProjectCard({ project, featured }: ProjectCardProps) {
               <Icon name="arrow-up" className="h-4 w-4" />
             </a>
             {project.url && <SourceLink url={project.url} label={project.urlLabel} />}
+            {project.altUrl && <SourceLink url={project.altUrl} label={project.altUrlLabel} />}
           </div>
           <div className="mt-9">
             <Tags tags={project.tags} />
@@ -142,7 +143,12 @@ export function ProjectCard({ project, featured }: ProjectCardProps) {
             {project.description}
           </p>
           <Tags tags={project.tags} />
-          {project.url && <SourceLink url={project.url} label={project.urlLabel} />}
+          {(project.url || project.altUrl) && (
+            <div className="flex flex-wrap items-center gap-x-8 gap-y-3">
+              {project.url && <SourceLink url={project.url} label={project.urlLabel} />}
+              {project.altUrl && <SourceLink url={project.altUrl} label={project.altUrlLabel} />}
+            </div>
+          )}
         </div>
       </StageReveal>
     </article>

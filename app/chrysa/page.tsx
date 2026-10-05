@@ -112,6 +112,28 @@ export default function ChrysaPage() {
                 ))}
               </dl>
             </StageReveal>
+            <StageReveal delay={200}>
+              <div className="mt-10 flex flex-wrap items-center gap-x-8 gap-y-4 border-t border-border pt-8">
+                <a
+                  href="https://play.google.com/store/apps/details?id=com.chrysa.app"
+                  target="_blank"
+                  rel="noreferrer"
+                  className="inline-flex h-12 items-center gap-2 rounded-pill bg-fg px-6 text-[16px] font-medium text-bg transition-transform duration-300 ease-stage hover:scale-[1.02]"
+                >
+                  Get Chrysa on Google Play
+                  <Icon name="arrow-up-right" className="h-4 w-4" />
+                </a>
+                <a
+                  href="https://harshit123455.github.io/chrysa-site/"
+                  target="_blank"
+                  rel="noreferrer"
+                  className="inline-flex items-center gap-1 text-[16px] font-medium text-fg underline decoration-border-strong underline-offset-4 transition-colors hover:decoration-fg"
+                >
+                  chrysa site
+                  <Icon name="arrow-up-right" className="h-4 w-4" />
+                </a>
+              </div>
+            </StageReveal>
           </div>
         </section>
 

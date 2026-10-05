@@ -26,6 +26,13 @@ export const ProjectFrontmatter = z.object({
   icon: z.string().regex(/^\//).optional(),
   /** label for the link; defaults to "View source" */
   urlLabel: z.string().min(1).max(40).optional(),
+  /** a second link beside the first, for a project that both ships and has a story */
+  altUrl: z
+    .string()
+    .regex(/^(https?:\/\/|\/)/, "altUrl must be absolute or a site path")
+    .optional(),
+  /** label for altUrl; defaults the same way urlLabel does */
+  altUrlLabel: z.string().min(1).max(40).optional(),
   order: z.number().int().optional(),
   /** false keeps the entry (and anything built on it) but leaves it out of Selected work */
   selected: z.boolean().default(true),
