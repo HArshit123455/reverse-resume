@@ -1,18 +1,19 @@
 ---
 title: "Chrysa"
-dek: "A calm companion for the life you actually want. Not a habit tracker."
-summary: "How I designed, built and shipped a privacy-first life companion for Android and iPhone in three weeks, and everything that broke along the way."
-updated: "2026-09-26"
+dek: "A screen time app that never blocks anything. Live on Google Play."
+summary: "How I designed, built and shipped a privacy-first life companion to Google Play in a month, alone, and everything that broke along the way."
+updated: "2026-10-05"
 icon: "/chrysa/icon.png"
 facts:
-  - { label: "What", value: "A life companion for Android and iPhone" }
+  - { label: "What", value: "A screen time app for Android that never blocks anything" }
   - { label: "Built by", value: "Me, alone, with Expo and React Native" }
   - { label: "Started", value: "6 September 2026" }
   - { label: "First commit to 1.0.0", value: "15 days" }
-  - { label: "Over-the-air betas", value: "110" }
+  - { label: "First commit to live on Google Play", value: "29 days" }
+  - { label: "Over-the-air betas", value: "113" }
   - { label: "Closed test", value: "13 testers, 14 days, on Google Play" }
   - { label: "Data", value: "Stays on the phone. No accounts, no backend, no LLM." }
-  - { label: "Status", value: "Google Play production access under review (26 Sep 2026)" }
+  - { label: "Status", value: "Live on Google Play, 5 October 2026" }
 timeline:
   - { date: "6 Sep", event: "First commit. V1 ships the same day with 123 tests. Named Chrysa. Beta 1 and the first Android APK." }
   - { date: "8 Sep", event: "The Window: the first redesign. Android screen time, sleep, steps and the pause before an app." }
@@ -27,15 +28,20 @@ timeline:
   - { date: "21 Sep", event: "1.0.0 on the closed track." }
   - { date: "22–23 Sep", event: "A motion pass across the app." }
   - { date: "25 Sep", event: "Applied for production access on Google Play." }
-  - { date: "26 Sep", event: "Beta 110. Production review pending." }
+  - { date: "30 Sep", event: "Production access granted. A look pass lands in three betas: two typefaces, the app's own marks, the window's material in the room." }
+  - { date: "5 Oct", event: "1.0.0 live on Google Play, worldwide." }
 links:
+  - { label: "Get Chrysa on Google Play", href: "https://play.google.com/store/apps/details?id=com.chrysa.app" }
+  - { label: "chrysa site", href: "https://harshit123455.github.io/chrysa-site/" }
   - { label: "Privacy policy", href: "https://harshit123455.github.io/chrysa-site/privacy.html" }
   - { label: "Public site repo", href: "https://github.com/HArshit123455/chrysa-site" }
 ---
 
 ## What Chrysa is
 
-Chrysa is a small app with one sentence behind it: **help people build a life they don’t need to escape from.**
+Chrysa is a free, on-device screen time app for Android that never blocks anything — it offers something better to do than scrolling. It has been [live on Google Play](https://play.google.com/store/apps/details?id=com.chrysa.app) since 5 October 2026.
+
+That is the sentence on the store listing. The sentence behind the app is longer: **help people build a life they don’t need to escape from.**
 
 It asks who you want to become, then quietly notices how your days actually go: how you slept, whether you walked, how long you spent on your phone, what’s on your calendar and anything you tell it in plain words. It doesn’t hand that back as a dashboard. It draws it as a small town outside a window, under a sky that follows the real time of day where you are.
 
@@ -139,7 +145,9 @@ The first beta went out on 6 September, the same day as the first commit, throug
 
 On Android I started with sideloaded APKs and moved to a Play bundle on 9 September. Google Play requires a new personal account to run a closed test with at least twelve testers opted in for fourteen straight days. Mine ran from 11 to 25 September with thirteen. During the test the app received 93 over-the-air updates and 7 new builds. Version 1.0.0 went live on the closed track on 21 September. It was only a version bump, so the binary Google reviews is the one the testers had already been running.
 
-I applied for production access on 25 September. As of 26 September it is under review, which Google says takes three to seven working days. When it’s approved, 1.0.0 goes to production, followed by 1.1 with a home-screen widget.
+I applied for production access on 25 September and Google granted it on the 30th, five days later. The soaked 1.0.0 bundle was promoted straight from the closed track rather than rebuilt, so the binary that went to production is the same one thirteen people had already been running for nine days. It went live worldwide on 5 October, twenty-nine days after the first commit. Next is 1.1, with a home-screen widget.
+
+The five days between access and launch went on a look pass rather than on features: two typefaces instead of one (Literata for prose, Instrument Sans for controls), the app's own drawn marks in place of stock icons, and the window's grain and light carried into the screens behind it. All three shipped over the air, so none of them touched the bundle Google was reviewing — which is the practical argument for keeping the native layer thin.
 
 ## What I’d tell myself on day one
 
